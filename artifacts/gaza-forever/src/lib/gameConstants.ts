@@ -46,6 +46,16 @@ export const STAGE_DEFS = [
     bossType: "tank",
   },
   {
+    id: "nuseirat",
+    name: "NUSEIRAT",
+    subtitle: "Central Gaza — Refugee Camp",
+    color: "#a855f7",
+    desc: "Push through the heart of the camp — the most densely shelled ground",
+    waves: 3,
+    enemyTier: ["armored", "soldier", "sniper", "drone", "apc"],
+    bossType: "bulldozer",
+  },
+  {
     id: "khan-younis",
     name: "KHAN YOUNIS",
     subtitle: "Southern Gaza",
@@ -79,21 +89,51 @@ export const COLLECTIBLE_DEFS: Record<string, { label: string; desc: string; col
 export const STAGE_COLLECTIBLES: Record<number, string[]> = {
   0: ["medkit", "documents"],
   1: ["radio", "water"],
-  2: ["keys", "aidpkg"],
-  3: [],
+  2: ["medkit", "aidpkg"],
+  3: ["keys", "aidpkg"],
+  4: [],
 };
 
 export const STAGE_ARABIC: Record<number, string> = {
   0: "جباليا",
   1: "مدينة غزة",
-  2: "خان يونس",
-  3: "رفح",
+  2: "النصيرات",
+  3: "خان يونس",
+  4: "رفح",
+};
+
+export const STAGE_LANDMARKS: Record<number, { name: string; when: string; desc: string }> = {
+  0: {
+    name: "Al-Fakhoura UNRWA School",
+    when: "Struck October 19, 2023",
+    desc: "Hundreds of displaced families were sheltering inside when an airstrike hit the school. At least 20 people were killed. UNRWA had given Israel the school's coordinates to protect it.",
+  },
+  1: {
+    name: "Al-Shifa Hospital",
+    when: "Raided November 2023 & March 2024",
+    desc: "Gaza's largest hospital, with over 700 beds and 1,500 sheltering patients. Israeli forces surrounded and cut power and water for weeks, then conducted two large raids. Patients died without electricity for life-support machines.",
+  },
+  2: {
+    name: "Nuseirat Camp Massacre",
+    when: "June 8, 2024",
+    desc: "An Israeli military rescue operation in a crowded market killed at least 274 Palestinian civilians and wounded over 700 — one of the deadliest single incidents of the war. The Al-Huda mosque, serving the camp for generations, was also destroyed.",
+  },
+  3: {
+    name: "Nasser Hospital",
+    when: "Besieged February 2024",
+    desc: "The largest hospital in southern Gaza. During a two-week Israeli siege, fuel for generators ran out. Patients on ventilators and in intensive care died. Doctors performed surgeries without anaesthesia.",
+  },
+  4: {
+    name: "Rafah Border Crossing",
+    when: "Seized May 7, 2024",
+    desc: "The only crossing not controlled by Israel — the sole humanitarian lifeline into Gaza. Israeli forces seized the Palestinian side, halting all aid deliveries for weeks. Over one million displaced people were sheltering in Rafah at the time.",
+  },
 };
 
 export const STAGE_HISTORY: Record<number, { title: string; text: string; fact: string }> = {
   0: {
-    title: "Jabalia Refugee Camp",
-    text: "Founded in 1948 when 750,000 Palestinians were expelled during the Nakba. Today over 110,000 people live in just 1.4 km² — one of the most densely populated places on Earth. Since October 2023 it has been bombed repeatedly, reducing entire blocks to rubble.",
+    title: "Jabalia Refugee Camp — جباليا",
+    text: "Founded in 1948 when 750,000 Palestinians were expelled during the Nakba. Today over 116,000 people live in just 1.4 km² — one of the most densely populated places on Earth. Since October 2023 it has been bombed repeatedly, reducing entire blocks to rubble.",
     fact: "Established: 1948 · Population: 116,000 · Area: 1.4 km²",
   },
   1: {
@@ -102,13 +142,18 @@ export const STAGE_HISTORY: Record<number, { title: string; text: string; fact: 
     fact: "Founded: ~3,000 BCE · UNESCO heritage sites · Population: 590,000",
   },
   2: {
-    title: "Khan Younis — خان يونس",
-    text: "Founded in the 14th century by Mamluk emir Yunis Khan. Its caravanserai once hosted pilgrims traveling to Mecca. In 2024, Khan Younis became the site of operations that displaced hundreds of thousands from their homes.",
-    fact: "Founded: 14th century · Historic Ottoman fortress · Population: 340,000",
+    title: "Nuseirat Refugee Camp — النصيرات",
+    text: "Established in 1948 for refugees expelled from Lydda and Ramle. One of the eight refugee camps in central Gaza, home to over 85,000 people. The camp sits in the heart of the Gaza Strip and was one of the most intensively shelled areas in 2023–2024.",
+    fact: "Established: 1948 · Population: 85,000 · Central Gaza Strip",
   },
   3: {
+    title: "Khan Younis — خان يونس",
+    text: "Founded in the 14th century by Mamluk emir Yunis Khan. Its caravanserai once hosted pilgrims traveling to Mecca. In 2024, Khan Younis became the site of major ground operations that displaced hundreds of thousands from their homes.",
+    fact: "Founded: 14th century · Historic Mamluk fortress · Population: 340,000",
+  },
+  4: {
     title: "Rafah — رفح",
-    text: "The southernmost city of Gaza, split by the 1979 Egypt-Israel peace treaty. Its crossing is the only gateway to the outside world not controlled by Israel. In early 2024, over one million displaced Palestinians sheltered here.",
+    text: "The southernmost city of Gaza, split by the 1979 Egypt–Israel peace treaty. Its crossing is the only gateway to the outside world not controlled by Israel. In early 2024, over one million displaced Palestinians sheltered here, only to face a ground offensive.",
     fact: "Border crossing: Egypt–Gaza · Pop. 2024: 1.4 million displaced · Last exit",
   },
 };
@@ -119,27 +164,37 @@ export const STAGE_STORIES: Record<number, string[]> = {
     "Jabalia camp is burning behind them.",
     "He carries nothing — only his sister's name.",
     '"Nour is in Rafah. We will reach her."',
-    "The road south begins here. Stay together.",
+    "Behind them: the ruins of Al-Fakhoura school.",
+    "Families sheltered there. Now it is dust.",
     "STAGE 1 — ESCAPE JABALIA",
   ],
   1: [
     "Gaza City. Once a living, breathing heart.",
     "Now its streets are silence and dust.",
-    "Handala looks up at a collapsed building.",
-    'He sees a small drawing on the remaining wall: a key.',
+    "Al-Shifa hospital rises ahead — dark, powerless.",
+    "Patients died when the electricity was cut.",
     '"Every Palestinian child carries a key," Ahmed says.',
     "STAGE 2 — CROSS GAZA CITY",
   ],
   2: [
+    "Nuseirat camp. A city inside a camp.",
+    "85,000 people living in the heart of Gaza.",
+    "Handala recognises the smell of the market.",
+    "His father used to bring him here on Fridays.",
+    "The market is gone. The mosque is rubble.",
+    '"Keep moving," Mariam says. "Nour is waiting."',
+    "STAGE 3 — THROUGH NUSEIRAT",
+  ],
+  3: [
     "Khan Younis. Hundreds of thousands on the road.",
     "Handala walks between Mariam and Kareem.",
     "He is small but he does not slow them down.",
-    "A woman passes carrying a baby and a birdcage.",
+    "The ancient fortress crumbles. Nasser hospital is dark.",
     '"Even the birds must escape," Samir whispers.',
-    "One more district. Nour is close.",
-    "STAGE 3 — THROUGH KHAN YOUNIS",
+    "One more stop. Nour is close.",
+    "STAGE 4 — THROUGH KHAN YOUNIS",
   ],
-  3: [
+  4: [
     "Rafah. The border shimmers in the morning light.",
     "Over a million people have gathered here.",
     "Handala runs ahead, scanning every face.",
@@ -147,6 +202,6 @@ export const STAGE_STORIES: Record<number, string[]> = {
     '"Handala!"',
     "Nour is alive. But the crossing is blocked.",
     "Fight through. Together. Freedom is one step away.",
-    "STAGE 4 — REACH RAFAH",
+    "STAGE 5 — REACH RAFAH",
   ],
 };

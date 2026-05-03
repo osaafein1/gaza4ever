@@ -38,11 +38,12 @@ export function createBgData(type: string): BgData {
 
 export function drawBackground(ctx: CanvasRenderingContext2D, bg: BgData, frame: number) {
   switch (bg.type) {
-    case "jabalia":    drawJabalia(ctx, bg, frame); break;
-    case "gaza-city":  drawGazaCity(ctx, bg, frame); break;
+    case "jabalia":     drawJabalia(ctx, bg, frame);    break;
+    case "gaza-city":   drawGazaCity(ctx, bg, frame);   break;
+    case "nuseirat":    drawNuseirat(ctx, bg, frame);   break;
     case "khan-younis": drawKhanYounis(ctx, bg, frame); break;
-    case "rafah":      drawRafah(ctx, bg, frame); break;
-    default:           drawJabalia(ctx, bg, frame); break;
+    case "rafah":       drawRafah(ctx, bg, frame);      break;
+    default:            drawJabalia(ctx, bg, frame);    break;
   }
 
   const gGrad = ctx.createLinearGradient(0, FLOOR_Y, 0, CANVAS_H);
@@ -70,6 +71,459 @@ export function drawBackground(ctx: CanvasRenderingContext2D, bg: BgData, frame:
   ctx.stroke();
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+//  LANDMARK: Al-Fakhoura UNRWA School (Jabalia)
+//  Struck Oct 19 2023 — families sheltering inside
+// ─────────────────────────────────────────────────────────────────────────────
+function drawLandmark_School(ctx: CanvasRenderingContext2D, bg: BgData) {
+  const scroll = (bg.offset * 0.09) % (CANVAS_W + 500);
+  const x = 820 - scroll;
+  const base = FLOOR_Y;
+  ctx.save();
+
+  // Main 3-story body
+  ctx.globalAlpha = 0.55;
+  ctx.fillStyle = "#1a0f06";
+  ctx.fillRect(x, base - 250, 210, 250);
+
+  // Left wing (lower, partially intact)
+  ctx.fillRect(x - 120, base - 170, 120, 170);
+
+  // Jagged collapsed roof — main block
+  ctx.fillStyle = "#110a04";
+  ctx.beginPath();
+  ctx.moveTo(x, base - 250);
+  ctx.lineTo(x + 40, base - 272);
+  ctx.lineTo(x + 80, base - 252);
+  ctx.lineTo(x + 130, base - 268);
+  ctx.lineTo(x + 180, base - 248);
+  ctx.lineTo(x + 210, base - 258);
+  ctx.lineTo(x + 210, base - 240);
+  ctx.lineTo(x, base - 240);
+  ctx.fill();
+
+  // Jagged collapsed roof — left wing
+  ctx.beginPath();
+  ctx.moveTo(x - 120, base - 170);
+  ctx.lineTo(x - 90, base - 186);
+  ctx.lineTo(x - 50, base - 172);
+  ctx.lineTo(x - 20, base - 182);
+  ctx.lineTo(x, base - 170);
+  ctx.lineTo(x, base - 158);
+  ctx.lineTo(x - 120, base - 158);
+  ctx.fill();
+
+  // UNRWA blue horizontal stripe
+  ctx.globalAlpha = 0.38;
+  ctx.fillStyle = "#1e40af";
+  ctx.fillRect(x, base - 190, 210, 18);
+  ctx.fillRect(x, base - 100, 210, 18);
+
+  // Windows — dark hollow
+  ctx.globalAlpha = 0.6;
+  ctx.fillStyle = "#0a0604";
+  for (let row = 0; row < 3; row++) {
+    for (let col = 0; col < 5; col++) {
+      ctx.fillRect(x + 12 + col * 39, base - 238 + row * 74, 22, 34);
+    }
+  }
+  // Left wing windows
+  for (let row = 0; row < 2; row++) {
+    for (let col = 0; col < 2; col++) {
+      ctx.fillRect(x - 108 + col * 45, base - 155 + row * 62, 22, 30);
+    }
+  }
+
+  // Rubble mound at base
+  ctx.globalAlpha = 0.65;
+  ctx.fillStyle = "#2c1a0a";
+  ctx.beginPath();
+  ctx.moveTo(x - 120, base);
+  ctx.lineTo(x - 85, base - 40);
+  ctx.lineTo(x - 30, base - 22);
+  ctx.lineTo(x + 60, base - 45);
+  ctx.lineTo(x + 140, base - 18);
+  ctx.lineTo(x + 220, base - 35);
+  ctx.lineTo(x + 260, base);
+  ctx.fill();
+
+  // Label text
+  ctx.globalAlpha = 0.45;
+  ctx.fillStyle = "#93c5fd";
+  ctx.font = "bold 11px monospace";
+  ctx.fillText("AL-FAKHOURA SCHOOL", x + 4, base - 262);
+
+  ctx.restore();
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  LANDMARK: Al-Shifa Hospital (Gaza City)
+//  Raided Nov 2023 & Mar 2024 — patients died without power
+// ─────────────────────────────────────────────────────────────────────────────
+function drawLandmark_Shifa(ctx: CanvasRenderingContext2D, bg: BgData) {
+  const scroll = (bg.offset * 0.08) % (CANVAS_W + 600);
+  const x = 740 - scroll;
+  const base = FLOOR_Y;
+  ctx.save();
+
+  // Main large central block
+  ctx.globalAlpha = 0.5;
+  ctx.fillStyle = "#0d0a14";
+  ctx.fillRect(x, base - 290, 260, 290);
+
+  // Left wing
+  ctx.fillRect(x - 130, base - 200, 130, 200);
+
+  // Right wing (more damaged)
+  ctx.fillRect(x + 260, base - 160, 100, 160);
+
+  // Connecting skybridge
+  ctx.fillStyle = "#0a0810";
+  ctx.fillRect(x - 130, base - 210, 490, 18);
+
+  // Jagged roofline — central
+  ctx.fillStyle = "#07050e";
+  ctx.beginPath();
+  ctx.moveTo(x, base - 290);
+  ctx.lineTo(x + 50, base - 308);
+  ctx.lineTo(x + 100, base - 290);
+  ctx.lineTo(x + 150, base - 315);
+  ctx.lineTo(x + 210, base - 292);
+  ctx.lineTo(x + 260, base - 300);
+  ctx.lineTo(x + 260, base - 278);
+  ctx.lineTo(x, base - 278);
+  ctx.fill();
+
+  // Red medical cross (darkened, fire-lit)
+  ctx.globalAlpha = 0.4;
+  ctx.fillStyle = "#7f1d1d";
+  ctx.fillRect(x + 110, base - 260, 14, 46);
+  ctx.fillRect(x + 96, base - 247, 42, 14);
+
+  // Windows — dark shattered
+  ctx.globalAlpha = 0.55;
+  ctx.fillStyle = "#07050e";
+  for (let row = 0; row < 5; row++) {
+    for (let col = 0; col < 6; col++) {
+      if (Math.random() > 0.2) ctx.fillRect(x + 12 + col * 40, base - 278 + row * 52, 26, 32);
+    }
+  }
+
+  // Left wing windows
+  for (let row = 0; row < 3; row++) {
+    for (let col = 0; col < 3; col++) {
+      ctx.fillRect(x - 122 + col * 38, base - 185 + row * 56, 22, 30);
+    }
+  }
+
+  // Rubble
+  ctx.globalAlpha = 0.6;
+  ctx.fillStyle = "#1a1228";
+  ctx.beginPath();
+  ctx.moveTo(x - 130, base);
+  ctx.lineTo(x - 100, base - 50);
+  ctx.lineTo(x - 40, base - 28);
+  ctx.lineTo(x + 80, base - 55);
+  ctx.lineTo(x + 200, base - 30);
+  ctx.lineTo(x + 370, base - 48);
+  ctx.lineTo(x + 370, base);
+  ctx.fill();
+
+  // Label
+  ctx.globalAlpha = 0.4;
+  ctx.fillStyle = "#fca5a5";
+  ctx.font = "bold 11px monospace";
+  ctx.fillText("AL-SHIFA HOSPITAL", x + 4, base - 322);
+
+  ctx.restore();
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  LANDMARK: Al-Huda Mosque — Nuseirat Camp
+//  Mosque of generations, destroyed 2023–24
+// ─────────────────────────────────────────────────────────────────────────────
+function drawLandmark_NuseiratMosque(ctx: CanvasRenderingContext2D, bg: BgData) {
+  const scroll = (bg.offset * 0.09) % (CANVAS_W + 500);
+  const x = 860 - scroll;
+  const base = FLOOR_Y;
+  ctx.save();
+
+  // Main prayer hall body
+  ctx.globalAlpha = 0.55;
+  ctx.fillStyle = "#180f0a";
+  ctx.fillRect(x, base - 200, 220, 200);
+
+  // Partially collapsed dome
+  ctx.fillStyle = "#120c08";
+  ctx.beginPath();
+  ctx.arc(x + 110, base - 200, 80, Math.PI, 0);
+  ctx.fill();
+  // Dome crack / collapse on left side
+  ctx.fillStyle = "#1a0f0a";
+  ctx.beginPath();
+  ctx.moveTo(x + 30, base - 200);
+  ctx.lineTo(x + 30, base - 255);
+  ctx.lineTo(x + 80, base - 275);
+  ctx.lineTo(x + 110, base - 280);
+  ctx.lineTo(x + 140, base - 275);
+  ctx.lineTo(x + 190, base - 255);
+  ctx.lineTo(x + 190, base - 200);
+  ctx.fill();
+
+  // Dome crumble on left side (lighter cutout to show damage)
+  ctx.globalAlpha = 0.7;
+  ctx.fillStyle = "#2a1810";
+  ctx.beginPath();
+  ctx.moveTo(x + 30, base - 200);
+  ctx.lineTo(x + 30, base - 248);
+  ctx.lineTo(x + 60, base - 232);
+  ctx.lineTo(x + 40, base - 205);
+  ctx.fill();
+
+  // Tall minaret — partially standing
+  ctx.globalAlpha = 0.58;
+  ctx.fillStyle = "#1c1008";
+  ctx.fillRect(x + 180, base - 340, 28, 340);
+  // Minaret top broken off
+  ctx.fillStyle = "#120c08";
+  ctx.beginPath();
+  ctx.moveTo(x + 180, base - 340);
+  ctx.lineTo(x + 194, base - 358);
+  ctx.lineTo(x + 208, base - 340);
+  ctx.fill();
+  // Minaret broken mid-section
+  ctx.fillStyle = "#3d2010";
+  ctx.beginPath();
+  ctx.moveTo(x + 190, base - 310);
+  ctx.lineTo(x + 225, base - 295);
+  ctx.lineTo(x + 230, base - 300);
+  ctx.lineTo(x + 210, base - 310);
+  ctx.fill();
+
+  // Decorative arched windows
+  ctx.globalAlpha = 0.5;
+  ctx.fillStyle = "#0a0605";
+  for (let col = 0; col < 4; col++) {
+    const wx = x + 16 + col * 48;
+    const wy = base - 170;
+    ctx.fillRect(wx, wy, 28, 44);
+    ctx.beginPath();
+    ctx.arc(wx + 14, wy, 14, Math.PI, 0);
+    ctx.fill();
+  }
+
+  // Rubble
+  ctx.globalAlpha = 0.65;
+  ctx.fillStyle = "#2e1a0c";
+  ctx.beginPath();
+  ctx.moveTo(x - 10, base);
+  ctx.lineTo(x + 10, base - 38);
+  ctx.lineTo(x + 60, base - 22);
+  ctx.lineTo(x + 130, base - 42);
+  ctx.lineTo(x + 220, base - 18);
+  ctx.lineTo(x + 250, base);
+  ctx.fill();
+
+  // Label
+  ctx.globalAlpha = 0.42;
+  ctx.fillStyle = "#c4b5fd";
+  ctx.font = "bold 11px monospace";
+  ctx.fillText("AL-HUDA MOSQUE  ·  NUSEIRAT", x - 20, base - 372);
+
+  ctx.restore();
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  LANDMARK: Khan Younis Castle — Mamluk fortress, 14th century
+//  Heavily damaged in 2023–24 operations
+// ─────────────────────────────────────────────────────────────────────────────
+function drawLandmark_KhanYouniscastle(ctx: CanvasRenderingContext2D, bg: BgData) {
+  const scroll = (bg.offset * 0.08) % (CANVAS_W + 500);
+  const x = 780 - scroll;
+  const base = FLOOR_Y;
+  ctx.save();
+
+  // Main fortress wall
+  ctx.globalAlpha = 0.5;
+  ctx.fillStyle = "#1a1208";
+  ctx.fillRect(x, base - 220, 300, 220);
+
+  // Crenellations along the top
+  ctx.fillStyle = "#120d06";
+  for (let i = 0; i < 12; i++) {
+    if (i % 2 === 0) ctx.fillRect(x + i * 25, base - 240, 22, 22);
+  }
+  // Some crenellations broken off
+  ctx.fillStyle = "#2c1e0e";
+  ctx.fillRect(x + 50, base - 240, 12, 12);
+  ctx.fillRect(x + 150, base - 235, 18, 15);
+
+  // Left tower
+  ctx.globalAlpha = 0.55;
+  ctx.fillStyle = "#1e1409";
+  ctx.fillRect(x - 55, base - 280, 65, 280);
+  // Tower crenellations
+  ctx.fillStyle = "#150f06";
+  for (let i = 0; i < 4; i++) {
+    ctx.fillRect(x - 55 + i * 16, base - 296, 12, 18);
+  }
+
+  // Right tower (partially collapsed)
+  ctx.fillRect(x + 290, base - 240, 60, 240);
+  ctx.fillStyle = "#150f06";
+  for (let i = 0; i < 3; i++) {
+    ctx.fillRect(x + 290 + i * 18, base - 255, 12, 18);
+  }
+  // Right tower damaged top
+  ctx.fillStyle = "#3d2a12";
+  ctx.beginPath();
+  ctx.moveTo(x + 320, base - 240);
+  ctx.lineTo(x + 360, base - 220);
+  ctx.lineTo(x + 380, base - 240);
+  ctx.lineTo(x + 380, base - 228);
+  ctx.lineTo(x + 350, base - 245);
+  ctx.fill();
+
+  // Arched entrance gate
+  ctx.globalAlpha = 0.6;
+  ctx.fillStyle = "#0a0704";
+  ctx.fillRect(x + 115, base - 140, 70, 140);
+  ctx.beginPath();
+  ctx.arc(x + 150, base - 140, 35, Math.PI, 0);
+  ctx.fill();
+
+  // Mamluk decorative banding
+  ctx.globalAlpha = 0.3;
+  ctx.fillStyle = "#8b6914";
+  ctx.fillRect(x, base - 185, 300, 6);
+  ctx.fillRect(x, base - 125, 300, 6);
+  ctx.fillRect(x - 55, base - 215, 65, 5);
+
+  // Stone texture lines
+  ctx.strokeStyle = "#0f0b05";
+  ctx.lineWidth = 1;
+  ctx.globalAlpha = 0.25;
+  for (let row = 0; row < 6; row++) {
+    ctx.beginPath();
+    ctx.moveTo(x, base - 220 + row * 35);
+    ctx.lineTo(x + 300, base - 220 + row * 35);
+    ctx.stroke();
+  }
+
+  // Rubble at base
+  ctx.globalAlpha = 0.65;
+  ctx.fillStyle = "#2c1e0e";
+  ctx.beginPath();
+  ctx.moveTo(x - 55, base);
+  ctx.lineTo(x - 30, base - 44);
+  ctx.lineTo(x + 30, base - 25);
+  ctx.lineTo(x + 110, base - 52);
+  ctx.lineTo(x + 240, base - 30);
+  ctx.lineTo(x + 355, base - 48);
+  ctx.lineTo(x + 360, base);
+  ctx.fill();
+
+  // Label
+  ctx.globalAlpha = 0.42;
+  ctx.fillStyle = "#fcd34d";
+  ctx.font = "bold 11px monospace";
+  ctx.fillText("KHAN YOUNIS CASTLE  (14th C.)", x - 30, base - 310);
+
+  ctx.restore();
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  LANDMARK: Rafah Border Crossing Terminal
+//  Seized May 7 2024 — sole humanitarian lifeline closed
+// ─────────────────────────────────────────────────────────────────────────────
+function drawLandmark_RafahCrossing(ctx: CanvasRenderingContext2D, bg: BgData) {
+  const scroll = (bg.offset * 0.07) % (CANVAS_W + 500);
+  const x = 760 - scroll;
+  const base = FLOOR_Y;
+  ctx.save();
+
+  // Terminal building left
+  ctx.globalAlpha = 0.48;
+  ctx.fillStyle = "#0a1422";
+  ctx.fillRect(x, base - 210, 160, 210);
+
+  // Terminal building right
+  ctx.fillRect(x + 240, base - 210, 160, 210);
+
+  // Large gate arch spanning the gap
+  ctx.fillStyle = "#081020";
+  ctx.fillRect(x + 155, base - 230, 90, 30); // arch lintel
+  ctx.beginPath(); // arch curve
+  ctx.arc(x + 200, base - 230, 55, Math.PI, 0);
+  ctx.fill();
+
+  // Gate opening (darker)
+  ctx.globalAlpha = 0.7;
+  ctx.fillStyle = "#030810";
+  ctx.fillRect(x + 158, base - 228, 84, 228);
+
+  // Barrier boom arm
+  ctx.globalAlpha = 0.55;
+  ctx.fillStyle = "#dc2626";
+  ctx.fillRect(x + 200, base - 100, 5, 18);
+  ctx.fillStyle = "#b91c1c";
+  ctx.fillRect(x + 204, base - 96, 90, 8);
+  // Black/yellow stripes on boom
+  ctx.globalAlpha = 0.35;
+  for (let i = 0; i < 6; i++) {
+    ctx.fillStyle = i % 2 === 0 ? "#fbbf24" : "#b91c1c";
+    ctx.fillRect(x + 205 + i * 15, base - 96, 14, 8);
+  }
+
+  // Control tower
+  ctx.globalAlpha = 0.52;
+  ctx.fillStyle = "#0d1a2e";
+  ctx.fillRect(x - 50, base - 290, 52, 290);
+  ctx.fillRect(x - 70, base - 310, 90, 26);
+
+  // Windows — lit faintly with orange from fire
+  ctx.globalAlpha = 0.3;
+  ctx.fillStyle = "#7c2d12";
+  for (let row = 0; row < 4; row++) {
+    for (let col = 0; col < 3; col++) {
+      ctx.fillRect(x + 14 + col * 48, base - 192 + row * 45, 32, 28);
+    }
+  }
+  // Right building windows
+  for (let row = 0; row < 4; row++) {
+    for (let col = 0; col < 3; col++) {
+      ctx.fillRect(x + 254 + col * 48, base - 192 + row * 45, 32, 28);
+    }
+  }
+
+  // Palestinian crescent (damaged)
+  ctx.globalAlpha = 0.22;
+  ctx.strokeStyle = "#16a34a";
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.arc(x + 80, base - 180, 24, 0, Math.PI * 1.6);
+  ctx.stroke();
+
+  // Concrete blast barriers at base
+  ctx.globalAlpha = 0.6;
+  ctx.fillStyle = "#1e293b";
+  for (let i = 0; i < 10; i++) {
+    ctx.fillRect(x - 80 + i * 44, base - 30, 30, 30);
+  }
+
+  // Label
+  ctx.globalAlpha = 0.4;
+  ctx.fillStyle = "#6ee7b7";
+  ctx.font = "bold 11px monospace";
+  ctx.fillText("RAFAH CROSSING", x + 60, base - 325);
+
+  ctx.restore();
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  STAGE BACKGROUNDS
+// ─────────────────────────────────────────────────────────────────────────────
+
 function drawJabalia(ctx: CanvasRenderingContext2D, bg: BgData, frame: number) {
   const skyGrad = ctx.createLinearGradient(0, 0, 0, FLOOR_Y);
   skyGrad.addColorStop(0, "#1c1917");
@@ -79,7 +533,7 @@ function drawJabalia(ctx: CanvasRenderingContext2D, bg: BgData, frame: number) {
   ctx.fillStyle = skyGrad;
   ctx.fillRect(0, 0, CANVAS_W, FLOOR_Y);
 
-  // Moon
+  // Crescent moon
   ctx.fillStyle = "rgba(251,191,36,0.9)";
   ctx.beginPath();
   ctx.arc(120, 80, 36, 0, Math.PI * 2);
@@ -110,7 +564,10 @@ function drawJabalia(ctx: CanvasRenderingContext2D, bg: BgData, frame: number) {
     ctx.stroke();
   });
 
-  // Ruins silhouettes
+  // Landmark: Al-Fakhoura UNRWA School
+  drawLandmark_School(ctx, bg);
+
+  // Ruins silhouettes over landmark
   drawRuinSilhouette(ctx, bg, frame, "#292524", 0.4, 0.65);
   drawRuinSilhouette(ctx, bg, frame, "#1c1917", 0.6, 0.8);
 
@@ -155,7 +612,7 @@ function drawGazaCity(ctx: CanvasRenderingContext2D, bg: BgData, frame: number) 
   });
   ctx.globalAlpha = 1;
 
-  // City skyline
+  // City skyline (dark background buildings)
   const heights = [240, 180, 280, 160, 220, 300, 190, 250, 170, 210];
   heights.forEach((h, i) => {
     const bx = (i * 140 - bg.offset * 0.5) % (CANVAS_W + 140) - 70;
@@ -164,7 +621,6 @@ function drawGazaCity(ctx: CanvasRenderingContext2D, bg: BgData, frame: number) 
     ctx.strokeStyle = "#2d2d4e";
     ctx.lineWidth = 1;
     ctx.strokeRect(bx, FLOOR_Y - h, 100, h);
-    // Windows
     for (let wy = 0; wy < h - 20; wy += 24) {
       for (let wx = 6; wx < 90; wx += 18) {
         const on = Math.sin(frame * 0.02 + i * 3 + wy + wx) > 0.3;
@@ -174,6 +630,9 @@ function drawGazaCity(ctx: CanvasRenderingContext2D, bg: BgData, frame: number) 
     }
   });
 
+  // Landmark: Al-Shifa Hospital
+  drawLandmark_Shifa(ctx, bg);
+
   // Artillery fire glow
   const artGlow = ctx.createRadialGradient(CANVAS_W * 0.55, FLOOR_Y - 80, 0, CANVAS_W * 0.55, FLOOR_Y - 80, 380);
   artGlow.addColorStop(0, "rgba(239,68,68,0.08)");
@@ -181,12 +640,82 @@ function drawGazaCity(ctx: CanvasRenderingContext2D, bg: BgData, frame: number) 
   ctx.fillStyle = artGlow;
   ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
 
-  // Fog
+  // Fog layer
   const fGrad = ctx.createLinearGradient(0, FLOOR_Y - 120, 0, FLOOR_Y);
   fGrad.addColorStop(0, "rgba(0,0,0,0)");
   fGrad.addColorStop(1, "rgba(0,0,0,0.35)");
   ctx.fillStyle = fGrad;
   ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
+}
+
+function drawNuseirat(ctx: CanvasRenderingContext2D, bg: BgData, frame: number) {
+  // Sky: grey-ochre dust haze — midday bombardment
+  const skyGrad = ctx.createLinearGradient(0, 0, 0, FLOOR_Y);
+  skyGrad.addColorStop(0, "#1a1208");
+  skyGrad.addColorStop(0.35, "#3d2808");
+  skyGrad.addColorStop(0.7, "#7c4d14");
+  skyGrad.addColorStop(1, "#b5722a");
+  ctx.fillStyle = skyGrad;
+  ctx.fillRect(0, 0, CANVAS_W, FLOOR_Y);
+
+  // Dust haze overlay
+  const dustGrad = ctx.createLinearGradient(0, 0, 0, FLOOR_Y);
+  dustGrad.addColorStop(0, "rgba(120,80,20,0)");
+  dustGrad.addColorStop(0.5, "rgba(160,100,30,0.15)");
+  dustGrad.addColorStop(1, "rgba(180,120,40,0.3)");
+  ctx.fillStyle = dustGrad;
+  ctx.fillRect(0, 0, CANVAS_W, FLOOR_Y);
+
+  // Dense low-rise camp buildings scrolling
+  const campHeights = [120, 100, 140, 90, 130, 110, 150, 95, 125, 115, 138, 105, 145, 98];
+  campHeights.forEach((h, i) => {
+    const bx = (i * 95 - bg.offset * 0.45) % (CANVAS_W + 150) - 75;
+    ctx.fillStyle = "#2a1a0a";
+    ctx.fillRect(bx, FLOOR_Y - h, 75, h);
+    ctx.strokeStyle = "#1c1006";
+    ctx.lineWidth = 1;
+    ctx.strokeRect(bx, FLOOR_Y - h, 75, h);
+    // Windows
+    for (let wy = 0; wy < h - 16; wy += 28) {
+      for (let wx = 6; wx < 65; wx += 20) {
+        const lit = Math.sin(frame * 0.015 + i * 7 + wy) > 0.6;
+        ctx.fillStyle = lit ? "rgba(200,120,20,0.3)" : "#0f0802";
+        ctx.fillRect(bx + wx, FLOOR_Y - h + wy + 8, 12, 16);
+      }
+    }
+  });
+
+  // Landmark: Al-Huda Mosque
+  drawLandmark_NuseiratMosque(ctx, bg);
+
+  // Heavier dust particles
+  bg.smoke.forEach((s) => {
+    const px = (s.x - bg.offset * 0.22) % (CANVAS_W + 80) - 40;
+    const rise = (frame * s.speed * 0.22) % 180;
+    ctx.globalAlpha = Math.max(0, 0.28 - rise / 500);
+    ctx.fillStyle = "#8b5e1a";
+    ctx.beginPath();
+    ctx.arc(px, s.y - rise, s.r * 1.2 + rise * 0.25, 0, Math.PI * 2);
+    ctx.fill();
+  });
+  ctx.globalAlpha = 1;
+
+  // Fire glow from market area
+  const mktGlow = ctx.createRadialGradient(CANVAS_W * 0.45, FLOOR_Y - 40, 0, CANVAS_W * 0.45, FLOOR_Y - 40, 260);
+  mktGlow.addColorStop(0, "rgba(249,115,22,0.18)");
+  mktGlow.addColorStop(1, "rgba(0,0,0,0)");
+  ctx.fillStyle = mktGlow;
+  ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
+
+  // Stars (barely visible through dust)
+  bg.stars.slice(0, 18).forEach((s) => {
+    ctx.globalAlpha = Math.sin(frame * 0.03 + s.twinkle) * 0.06 + 0.07;
+    ctx.fillStyle = "#fff";
+    ctx.beginPath();
+    ctx.arc(s.x, s.y, s.r * 0.6, 0, Math.PI * 2);
+    ctx.fill();
+  });
+  ctx.globalAlpha = 1;
 }
 
 function drawKhanYounis(ctx: CanvasRenderingContext2D, bg: BgData, frame: number) {
@@ -214,6 +743,9 @@ function drawKhanYounis(ctx: CanvasRenderingContext2D, bg: BgData, frame: number
     ctx.fillStyle = "#292524";
     ctx.fillRect(px + 8, FLOOR_Y - h2 + 14, 14, 12);
   });
+
+  // Landmark: Khan Younis Castle
+  drawLandmark_KhanYouniscastle(ctx, bg);
 
   bg.mountains.forEach((m) => {
     const px = (m.x - bg.offset * 0.2) % (CANVAS_W + m.w) - m.w / 2;
@@ -261,6 +793,9 @@ function drawRafah(ctx: CanvasRenderingContext2D, bg: BgData, frame: number) {
     ctx.fill();
   });
   ctx.globalAlpha = 1;
+
+  // Landmark: Rafah Crossing Terminal
+  drawLandmark_RafahCrossing(ctx, bg);
 
   // Border fence
   ctx.fillStyle = "#374151";

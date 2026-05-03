@@ -3,7 +3,7 @@ import { useLocation } from "wouter";
 import GazaMap from "../components/GazaMap";
 import {
   CANVAS_W, CANVAS_H, FLOOR_Y,
-  CHARACTERS, STAGE_DEFS, STAGE_COLLECTIBLES, STAGE_STORIES, STAGE_ARABIC, STAGE_HISTORY, COLLECTIBLE_DEFS,
+  CHARACTERS, STAGE_DEFS, STAGE_COLLECTIBLES, STAGE_STORIES, STAGE_ARABIC, STAGE_HISTORY, STAGE_LANDMARKS, COLLECTIBLE_DEFS,
 } from "../lib/gameConstants";
 import {
   createPlayer, spawnEnemy, spawnDeathParticles, updateGame,
@@ -35,12 +35,27 @@ function FlagBar() {
 
 function HistoryCard({ stageIndex, stageColor }: { stageIndex: number; stageColor: string }) {
   const h = STAGE_HISTORY[stageIndex];
+  const lm = STAGE_LANDMARKS[stageIndex];
   if (!h) return null;
   return (
-    <div style={{ background: "rgba(0,0,0,0.5)", border: `1px solid ${stageColor}44`, borderRadius: 4, padding: "10px 16px", maxWidth: 540, width: "100%" }}>
-      <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 6.5, color: stageColor, marginBottom: 8 }}>{h.title}</div>
-      <p style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 5.5, color: "#d4d4d4", lineHeight: 2, margin: 0, marginBottom: 8 }}>{h.text}</p>
-      <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 5, color: "#6b7280", borderTop: `1px solid ${stageColor}30`, paddingTop: 6 }}>{h.fact}</div>
+    <div style={{ display: "flex", flexDirection: "column", gap: 8, maxWidth: 560, width: "100%" }}>
+      {/* Area history */}
+      <div style={{ background: "rgba(0,0,0,0.5)", border: `1px solid ${stageColor}44`, borderRadius: 4, padding: "10px 16px" }}>
+        <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 6.5, color: stageColor, marginBottom: 8 }}>{h.title}</div>
+        <p style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 5.5, color: "#d4d4d4", lineHeight: 2, margin: 0, marginBottom: 8 }}>{h.text}</p>
+        <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 5, color: "#6b7280", borderTop: `1px solid ${stageColor}30`, paddingTop: 6 }}>{h.fact}</div>
+      </div>
+      {/* Destroyed landmark */}
+      {lm && (
+        <div style={{ background: "rgba(0,0,0,0.5)", border: "1px solid #7f1d1d88", borderRadius: 4, padding: "10px 16px" }}>
+          <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 6, flexWrap: "wrap" }}>
+            <span style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 5.5, color: "#ef4444" }}>▶ DESTROYED</span>
+            <span style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 6, color: "#fca5a5" }}>{lm.name}</span>
+          </div>
+          <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 5, color: "#f87171", marginBottom: 6, opacity: 0.8 }}>{lm.when}</div>
+          <p style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 5.5, color: "#c4b5b5", lineHeight: 2, margin: 0 }}>{lm.desc}</p>
+        </div>
+      )}
     </div>
   );
 }

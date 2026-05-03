@@ -1,12 +1,25 @@
 import { STAGE_DEFS } from "../lib/gameConstants";
 
+// 5 stages now — Jabalia, Gaza City, Nuseirat, Khan Younis, Rafah
+const PIN_X = [44, 41, 39, 37, 34];
+const PIN_Y = [30, 72, 112, 160, 218];
+
 const STAGES = STAGE_DEFS.map((s, i) => ({
   ...s,
-  pinX: [44, 40, 38, 34][i],
-  pinY: [32, 85, 155, 230][i],
+  pinX: PIN_X[i],
+  pinY: PIN_Y[i],
 }));
 
-const STRIP_PATH = "M 12 5 L 78 10 L 78 55 L 76 115 L 67 205 L 58 248 L 20 250 L 12 246 L 9 205 L 10 115 L 10 55 Z";
+// Zone fill paths for each completed stage segment
+const ZONES = [
+  "M 12 5 L 78 10 L 78 50 L 10 50 Z",
+  "M 10 50 L 78 50 L 76 92 L 10 92 Z",
+  "M 10 92 L 76 92 L 74 132 L 10 132 Z",
+  "M 10 132 L 74 132 L 67 200 L 9 200 Z",
+  "M 9 200 L 67 200 L 58 248 L 20 250 L 12 246 Z",
+];
+
+const STRIP_PATH = "M 12 5 L 78 10 L 78 50 L 76 92 L 74 132 L 67 200 L 58 248 L 20 250 L 12 246 L 9 200 L 10 132 L 10 92 L 10 50 L 10 10 Z";
 
 interface GazaMapProps {
   currentStage: number;
@@ -31,19 +44,13 @@ export default function GazaMap({ currentStage }: GazaMapProps) {
         <rect x="12" y="250" width="48" height="15" fill="#374151" opacity="0.2" rx="2" />
         <text x="36" y="261" fill="#9ca3af" fontSize="3.5" textAnchor="middle" fontFamily="monospace" opacity="0.8">EGYPT</text>
 
-        {/* Gaza strip */}
+        {/* Gaza strip outline */}
         <path d={STRIP_PATH} fill="#1c1917" stroke="#78716c" strokeWidth="1.2" />
 
         {/* Completed zone fills */}
         {STAGES.map((s, i) => {
           if (i >= currentStage) return null;
-          const zones = [
-            "M 12 5 L 78 10 L 78 55 L 10 55 Z",
-            "M 10 55 L 78 55 L 76 115 L 10 115 Z",
-            "M 10 115 L 76 115 L 67 205 L 9 205 Z",
-            "M 9 205 L 67 205 L 58 248 L 20 250 L 12 246 Z",
-          ];
-          return <path key={i} d={zones[i]} fill={s.color} opacity="0.12" />;
+          return <path key={i} d={ZONES[i]} fill={s.color} opacity="0.14" />;
         })}
 
         {/* Dashed path line */}
