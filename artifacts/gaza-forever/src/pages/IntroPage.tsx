@@ -99,7 +99,7 @@ function WatermelonWhole({ size = 60 }: { size?: number }) {
 
 const STORY_PARAGRAPHS = [
   { text: "In the heart of the Jabalia refugee camp in northern Gaza Strip lived a six-year-old boy.", emphasis: false },
-  { text: "His name was Handala.", emphasis: true, arabic: "حنظلة" },
+  { text: "His name was Handala.", emphasis: true },
   { text: "He had a mother who sang him to sleep, a father who lifted him on his shoulders, and two sisters who made the small house feel full.", emphasis: false },
   { text: "Every night his mother told him:", emphasis: false },
   { text: '"Jabalia is our roots. One day we will return to our land."', emphasis: true },
@@ -109,7 +109,7 @@ const STORY_PARAGRAPHS = [
   { text: "He hid alone in the rubble for days — no food, no water, no voice to call his name.", emphasis: false },
   { text: "Then a neighbour found him. She carried one piece of news:", emphasis: false },
   { text: "His older sister Nour had escaped before the strike.", emphasis: false },
-  { text: "She had made it south — all the way to Rafah.", emphasis: true, arabic: "رفح" },
+  { text: "She had made it south — all the way to Rafah.", emphasis: true },
   { text: "She was alive. She was waiting.", emphasis: false },
   { text: "Handala made a decision.", emphasis: false },
   { text: "He would walk south through Gaza City, through Khan Younis, all the way to the Rafah crossing.", emphasis: false },
@@ -117,9 +117,9 @@ const STORY_PARAGRAPHS = [
   { text: "Ahmed. Kareem. Mariam. Samir.", emphasis: true },
   { text: "Together they would fight through every district. Every checkpoint. Every wave of soldiers.", emphasis: false },
   { text: "Because one word kept Handala moving:", emphasis: false },
-  { text: "Nour.", emphasis: true, arabic: "نور — ضوء" },
+  { text: "Nour.", emphasis: true },
   { text: "Light.", emphasis: true },
-  { text: "Palestine will be free.", emphasis: true, arabic: "فلسطين ستبقى حرة" },
+  { text: "Palestine will be free.", emphasis: true },
 ];
 
 export default function IntroPage({ onMusicStart }: IntroPageProps) {
@@ -258,7 +258,7 @@ export default function IntroPage({ onMusicStart }: IntroPageProps) {
             position: "absolute",
             left: "50%",
             transform: "translateX(-50%) translateY(100vh)",
-            width: "min(600px, 70vw)",
+            width: "min(720px, 78vw)",
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
@@ -267,35 +267,30 @@ export default function IntroPage({ onMusicStart }: IntroPageProps) {
           }}
         >
           {/* Top decorative separator */}
-          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 32 }}>
-            <WatermelonSlice size={36} rotation={0} />
-            <div style={{ fontFamily: ar, fontSize: 18, color: "#f97316", opacity: 0.8 }}>✦</div>
-            <WatermelonSlice size={36} rotation={0} />
+          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 36 }}>
+            <WatermelonSlice size={40} rotation={0} />
+            <div style={{ fontSize: 20, color: "#f97316", opacity: 0.8 }}>✦</div>
+            <WatermelonSlice size={40} rotation={0} />
           </div>
 
-          {/* Title */}
-          <div style={{ fontFamily: ar, fontSize: 48, color: "#f97316", textShadow: "0 0 30px #f9731660", direction: "rtl", marginBottom: 4, letterSpacing: 2 }}>حنظلة</div>
-          <div style={{ fontFamily: px, fontSize: 13, color: "#fff", letterSpacing: 4, marginBottom: 6 }}>HANDALA</div>
-          <div style={{ fontFamily: px, fontSize: 6, color: "#78716c", letterSpacing: 2, marginBottom: 40 }}>A BOY FROM JABALIA REFUGEE CAMP</div>
+          {/* Title — only Handala's name in Arabic */}
+          <div style={{ fontFamily: ar, fontSize: 56, color: "#f97316", textShadow: "0 0 30px #f9731660", direction: "rtl", marginBottom: 6, letterSpacing: 2 }}>حنظلة</div>
+          <div style={{ fontFamily: px, fontSize: 16, color: "#fff", letterSpacing: 5, marginBottom: 8 }}>HANDALA</div>
+          <div style={{ fontFamily: px, fontSize: 7.5, color: "#78716c", letterSpacing: 2, marginBottom: 44 }}>A BOY FROM JABALIA REFUGEE CAMP</div>
 
           {/* Olive separator */}
-          <div style={{ width: "80%", height: 1, background: "linear-gradient(to right, transparent, #65a30d60, transparent)", marginBottom: 40 }} />
+          <div style={{ width: "80%", height: 1, background: "linear-gradient(to right, transparent, #65a30d60, transparent)", marginBottom: 44 }} />
 
           {/* Story paragraphs */}
           {STORY_PARAGRAPHS.map((para, i) => (
-            <div key={i} style={{ marginBottom: para.emphasis ? 28 : 18, textAlign: "center", width: "100%" }}>
-              {para.arabic && (
-                <div style={{ fontFamily: ar, fontSize: para.emphasis ? 32 : 22, color: "#f97316", direction: "rtl", marginBottom: 6, textShadow: "0 0 16px #f9731640" }}>
-                  {para.arabic}
-                </div>
-              )}
+            <div key={i} style={{ marginBottom: para.emphasis ? 32 : 22, textAlign: "center", width: "100%" }}>
               <p style={{
                 fontFamily: px,
-                fontSize: para.emphasis ? 8.5 : 7,
-                color: para.emphasis ? "#fff" : "#b5b0a8",
-                lineHeight: 2.4,
+                fontSize: para.emphasis ? 11 : 9,
+                color: para.emphasis ? "#fff" : "#c4bfb8",
+                lineHeight: 2.6,
                 margin: 0,
-                textShadow: para.emphasis ? "0 0 12px rgba(255,255,255,0.15)" : "none",
+                textShadow: para.emphasis ? "0 0 14px rgba(255,255,255,0.18)" : "none",
                 letterSpacing: para.emphasis ? 0.5 : 0,
               }}>
                 {para.text}
@@ -304,14 +299,13 @@ export default function IntroPage({ onMusicStart }: IntroPageProps) {
           ))}
 
           {/* Bottom separator + icons */}
-          <div style={{ width: "80%", height: 1, background: "linear-gradient(to right, transparent, #65a30d60, transparent)", marginTop: 24, marginBottom: 32 }} />
-          <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 16 }}>
-            <WatermelonSlice size={44} rotation={0} />
-            <div style={{ fontFamily: ar, fontSize: 14, color: "#65a30d", opacity: 0.9, letterSpacing: 1 }}>🫒🌿🫒</div>
-            <WatermelonSlice size={44} rotation={0} />
+          <div style={{ width: "80%", height: 1, background: "linear-gradient(to right, transparent, #65a30d60, transparent)", marginTop: 28, marginBottom: 36 }} />
+          <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 18 }}>
+            <WatermelonSlice size={48} rotation={0} />
+            <div style={{ fontSize: 18, color: "#65a30d", opacity: 0.9 }}>🫒🌿🫒</div>
+            <WatermelonSlice size={48} rotation={0} />
           </div>
-          <div style={{ fontFamily: px, fontSize: 7, color: "#65a30d", letterSpacing: 2, marginBottom: 8, textAlign: "center" }}>NOW THE JOURNEY BEGINS</div>
-          <div style={{ fontFamily: ar, fontSize: 20, color: "#16a34a", direction: "rtl", opacity: 0.85 }}>الرحلة تبدأ الآن</div>
+          <div style={{ fontFamily: px, fontSize: 9, color: "#65a30d", letterSpacing: 2, textAlign: "center" }}>NOW THE JOURNEY BEGINS</div>
         </div>
       </div>
 
