@@ -16,7 +16,7 @@ import {
 } from "../lib/gameRenderer";
 import type { GameState, Enemy, Particle, Summon } from "../lib/gameTypes";
 
-type Phase = "story" | "playing" | "stage-clear" | "win" | "dead";
+type Phase = "story" | "playing" | "stage-clear" | "win" | "dead" | "hind-story";
 
 interface GamePageProps {
   onMusicStart?: () => void;
@@ -57,6 +57,210 @@ function HistoryCard({ stageIndex, stageColor }: { stageIndex: number; stageColo
         </div>
       )}
     </div>
+  );
+}
+
+// ─── Hind Rajab memorial story ────────────────────────────────────────────────
+
+const HIND_PAGES = [
+  {
+    heading: "Her name was Hind Rajab.",
+    body: "She was six years old.",
+    portrait: true,
+    car: false,
+  },
+  {
+    heading: "29 January 2024 — Gaza City",
+    body: "Hind was riding in a car with five relatives through the city. Israeli forces opened fire on the vehicle. Everyone inside was killed — except Hind. She was alone, alive, and trapped.",
+    portrait: false,
+    car: false,
+  },
+  {
+    heading: "She called for help.",
+    body: '"Come and take me. I am so scared," she told the Red Crescent. She stayed on the line for over three hours. Two paramedics — Yusuf Zeino and Ahmed al-Madhoun — drove out to reach her. They were killed before they arrived.',
+    portrait: false,
+    car: false,
+  },
+  {
+    heading: "Twelve days later.",
+    body: "Her body was found. She was still inside the car. She was six years old. The same age as Handala.",
+    portrait: false,
+    car: false,
+  },
+  {
+    heading: null,
+    body: "Handala stopped here. He placed a small wildflower against the door. He stood in silence. Then he walked on.",
+    portrait: false,
+    car: true,
+  },
+];
+
+function HindPortrait() {
+  return (
+    <svg viewBox="0 0 120 170" width={196} height={277} style={{ display: "block", filter: "drop-shadow(0 0 22px rgba(251,191,36,0.28))" }}>
+      <defs>
+        <radialGradient id="halo" cx="50%" cy="44%" r="56%">
+          <stop offset="0%" stopColor="#fbbf24" stopOpacity="0.18" />
+          <stop offset="100%" stopColor="#fbbf24" stopOpacity="0" />
+        </radialGradient>
+      </defs>
+      <circle cx="60" cy="80" r="62" fill="url(#halo)" />
+      {/* BODY — Palestinian embroidered dress */}
+      <path d="M 16 170 L 10 116 Q 60 134 110 116 L 104 170 Z" fill="#1d4ed8" />
+      <path d="M 20 124 Q 60 136 100 124" fill="none" stroke="#ef4444" strokeWidth="1.8" opacity="0.85" />
+      <path d="M 22 131 Q 60 143 98 131" fill="none" stroke="#16a34a" strokeWidth="1.2" opacity="0.75" />
+      {[28, 40, 52, 64, 76, 88, 100].map((bx, i) => (
+        <circle key={i} cx={bx} cy={138} r={1.4} fill="#fbbf24" opacity={0.7} />
+      ))}
+      {/* NECK */}
+      <rect x="50" y="100" width="20" height="18" rx="5" fill="#c8916a" />
+      {/* HEAD */}
+      <circle cx="60" cy="72" r="40" fill="#c8916a" />
+      {/* Cheeks */}
+      <ellipse cx="36" cy="80" rx="11" ry="8" fill="#e05050" opacity="0.2" />
+      <ellipse cx="84" cy="80" rx="11" ry="8" fill="#e05050" opacity="0.2" />
+      {/* HAIR cap */}
+      <path d="M 20 72 Q 20 32 60 32 Q 100 32 100 72 L 96 58 Q 84 28 60 28 Q 36 28 24 58 Z" fill="#1a0a04" />
+      <path d="M 21 66 Q 60 58 99 66" fill="none" stroke="#1a0a04" strokeWidth="10" />
+      {/* LEFT BRAID */}
+      <path d="M 22 70 C 6 88 8 118 14 128 C 16 133 22 131 20 124 C 16 110 18 88 24 72 Z" fill="#1a0a04" />
+      {[88, 100, 112].map((y, i) => <ellipse key={i} cx={16} cy={y} rx={5} ry={4} fill="#2d1408" opacity={0.9} />)}
+      <ellipse cx="16" cy="127" rx="7" ry="4" fill="#dc2626" />
+      <ellipse cx="16" cy="127" rx="5" ry="2.5" fill="#f87171" />
+      {/* RIGHT BRAID */}
+      <path d="M 98 70 C 114 88 112 118 106 128 C 104 133 98 131 100 124 C 104 110 102 88 96 72 Z" fill="#1a0a04" />
+      {[88, 100, 112].map((y, i) => <ellipse key={i} cx={104} cy={y} rx={5} ry={4} fill="#2d1408" opacity={0.9} />)}
+      <ellipse cx="104" cy="127" rx="7" ry="4" fill="#dc2626" />
+      <ellipse cx="104" cy="127" rx="5" ry="2.5" fill="#f87171" />
+      {/* Flower in hair */}
+      <circle cx="90" cy="43" r="5" fill="#fbbf24" />
+      {[0, 60, 120, 180, 240, 300].map((deg, i) => {
+        const rad = (deg * Math.PI) / 180;
+        const px = 90 + Math.cos(rad) * 10;
+        const py = 43 + Math.sin(rad) * 10;
+        return <ellipse key={i} cx={px} cy={py} rx="5" ry="3" fill="#f97316" opacity="0.9" transform={`rotate(${deg},${px},${py})`} />;
+      })}
+      {/* EARS */}
+      <ellipse cx="20" cy="74" rx="6" ry="7.5" fill="#c8916a" />
+      <ellipse cx="100" cy="74" rx="6" ry="7.5" fill="#c8916a" />
+      {/* LEFT EYE */}
+      <ellipse cx="44" cy="68" rx="13" ry="14" fill="white" />
+      <ellipse cx="44" cy="69" rx="9.5" ry="10.5" fill="#5c3010" />
+      <circle cx="44" cy="69" r="6" fill="#120600" />
+      <circle cx="47.5" cy="65" r="3" fill="white" />
+      <circle cx="42" cy="67.5" r="1.4" fill="white" opacity="0.6" />
+      <path d="M 31 68 Q 44 56 57 68" fill="none" stroke="#1a0a04" strokeWidth="1.8" />
+      {/* RIGHT EYE */}
+      <ellipse cx="76" cy="68" rx="13" ry="14" fill="white" />
+      <ellipse cx="76" cy="69" rx="9.5" ry="10.5" fill="#5c3010" />
+      <circle cx="76" cy="69" r="6" fill="#120600" />
+      <circle cx="79.5" cy="65" r="3" fill="white" />
+      <circle cx="74" cy="67.5" r="1.4" fill="white" opacity="0.6" />
+      <path d="M 63 68 Q 76 56 89 68" fill="none" stroke="#1a0a04" strokeWidth="1.8" />
+      {/* EYEBROWS */}
+      <path d="M 32 56 Q 44 50 54 56" fill="none" stroke="#1a0a04" strokeWidth="2.8" strokeLinecap="round" />
+      <path d="M 88 56 Q 76 50 66 56" fill="none" stroke="#1a0a04" strokeWidth="2.8" strokeLinecap="round" />
+      {/* NOSE */}
+      <circle cx="60" cy="82" r="4" fill="#a87050" />
+      <circle cx="56" cy="83.5" r="2" fill="#7a4828" opacity="0.7" />
+      <circle cx="64" cy="83.5" r="2" fill="#7a4828" opacity="0.7" />
+      {/* MOUTH — sweet smile */}
+      <path d="M 48 94 Q 60 103 72 94" fill="none" stroke="#8a4020" strokeWidth="2.5" strokeLinecap="round" />
+      <path d="M 50 94 Q 60 99 70 94 Q 60 102 50 94 Z" fill="#c07050" opacity="0.3" />
+    </svg>
+  );
+}
+
+function HindCarScene() {
+  const holes: [number, number][] = [[72, 172], [86, 180], [94, 170], [82, 188], [100, 176]];
+  return (
+    <svg viewBox="0 0 640 220" width={620} height={213} style={{ display: "block", borderRadius: 6, maxWidth: "100%" }}>
+      <defs>
+        <linearGradient id="csky" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#1a0404" />
+          <stop offset="55%" stopColor="#2d0808" />
+          <stop offset="100%" stopColor="#0f0505" />
+        </linearGradient>
+        <radialGradient id="camb" cx="43%" cy="88%" r="52%">
+          <stop offset="0%" stopColor="#7c1d1d" stopOpacity="0.38" />
+          <stop offset="100%" stopColor="#7c1d1d" stopOpacity="0" />
+        </radialGradient>
+        <filter id="sfblur"><feGaussianBlur stdDeviation="7" /></filter>
+      </defs>
+      <rect width="640" height="220" fill="url(#csky)" />
+      <rect width="640" height="220" fill="url(#camb)" />
+      {/* Smoke plumes */}
+      <ellipse cx="270" cy="68" rx="90" ry="36" fill="#0f0808" opacity="0.65" filter="url(#sfblur)" />
+      <ellipse cx="330" cy="50" rx="66" ry="26" fill="#1a0808" opacity="0.5" filter="url(#sfblur)" />
+      <ellipse cx="190" cy="80" rx="54" ry="22" fill="#0f0606" opacity="0.4" filter="url(#sfblur)" />
+      {/* Road */}
+      <rect x="0" y="184" width="640" height="36" fill="#1a1410" />
+      <rect x="0" y="184" width="640" height="2" fill="#252018" />
+      {/* Car shadow */}
+      <ellipse cx="288" cy="186" rx="130" ry="7" fill="#000" opacity="0.55" />
+      {/* WHEELS */}
+      <ellipse cx="168" cy="182" rx="26" ry="10" fill="#0a0806" />
+      <ellipse cx="168" cy="182" rx="16" ry="6" fill="#0f0c08" />
+      <ellipse cx="400" cy="182" rx="26" ry="10" fill="#0a0806" />
+      <ellipse cx="400" cy="182" rx="16" ry="6" fill="#0f0c08" />
+      {/* CAR LOWER BODY */}
+      <rect x="144" y="143" width="282" height="42" rx="5" fill="#0f0c08" />
+      {/* CAR CABIN */}
+      <path d="M 174 143 L 192 102 L 384 102 L 402 143 Z" fill="#0d0a07" />
+      {/* HOOD */}
+      <path d="M 384 102 L 426 135 L 426 143 L 402 143 Z" fill="#0b0906" />
+      {/* TRUNK */}
+      <path d="M 192 102 L 144 135 L 144 143 L 174 143 Z" fill="#0b0906" />
+      {/* WINDSHIELD — shattered */}
+      <path d="M 198 104 L 214 130 L 370 130 L 382 104 Z" fill="#060403" opacity="0.9" />
+      <line x1="248" y1="104" x2="238" y2="130" stroke="#1a120a" strokeWidth="0.9" />
+      <line x1="292" y1="104" x2="312" y2="130" stroke="#1a120a" strokeWidth="0.9" />
+      <line x1="336" y1="106" x2="354" y2="130" stroke="#1a120a" strokeWidth="0.8" />
+      {/* SIDE WINDOWS */}
+      <rect x="180" y="130" width="78" height="13" rx="2" fill="#050302" opacity="0.9" />
+      <rect x="278" y="130" width="78" height="13" rx="2" fill="#050302" opacity="0.9" />
+      {/* DOOR DIVIDER */}
+      <line x1="268" y1="143" x2="268" y2="185" stroke="#181410" strokeWidth="2" />
+      {/* BULLET HOLES */}
+      {holes.map(([bx, by], i) => (
+        <g key={i}>
+          <circle cx={bx} cy={by} r="4.5" fill="#060404" />
+          <circle cx={bx} cy={by} r="2.8" fill="#0a0706" />
+          {[0, 72, 144, 216, 288].map((deg, j) => {
+            const rad = (deg * Math.PI) / 180;
+            return <line key={j} x1={bx} y1={by} x2={bx + Math.cos(rad) * 8} y2={by + Math.sin(rad) * 8} stroke="#1a1208" strokeWidth="0.6" />;
+          })}
+        </g>
+      ))}
+      {/* Char marks */}
+      <ellipse cx="260" cy="120" rx="68" ry="18" fill="#060403" opacity="0.7" />
+      <ellipse cx="390" cy="132" rx="38" ry="14" fill="#060403" opacity="0.5" />
+      {/* Ember glow */}
+      <ellipse cx="288" cy="178" rx="100" ry="7" fill="#7c2d12" opacity="0.14" />
+      {/* WILDFLOWER — Handala's tribute */}
+      <path d="M 272 184 Q 275 171 273 159" fill="none" stroke="#4d7c0f" strokeWidth="2.5" strokeLinecap="round" />
+      <path d="M 273 169 Q 280 164 283 169 Q 279 173 273 169 Z" fill="#4d7c0f" />
+      {[0, 45, 90, 135, 180, 225, 270, 315].map((deg, i) => {
+        const rad = (deg * Math.PI) / 180;
+        const px = 273 + Math.cos(rad) * 7;
+        const py = 159 + Math.sin(rad) * 7;
+        return <ellipse key={i} cx={px} cy={py} rx="4" ry="2.5" fill="#fbbf24" opacity="0.9" transform={`rotate(${deg},${px},${py})`} />;
+      })}
+      <circle cx="273" cy="159" r="4" fill="#f59e0b" />
+      {/* HANDALA — silhouette, head bowed */}
+      <ellipse cx="490" cy="183" rx="14" ry="4" fill="#000" opacity="0.4" />
+      <ellipse cx="484" cy="182" rx="7" ry="3" fill="#181410" />
+      <ellipse cx="497" cy="182" rx="7" ry="3" fill="#181410" />
+      <rect x="483" y="162" width="8" height="20" rx="3" fill="#1e1810" />
+      <rect x="491" y="162" width="8" height="20" rx="3" fill="#1e1810" />
+      <rect x="480" y="140" width="22" height="24" rx="4" fill="#181410" />
+      <rect x="472" y="144" width="8" height="18" rx="3" fill="#181410" />
+      <rect x="502" y="144" width="8" height="18" rx="3" fill="#181410" />
+      <circle cx="491" cy="130" r="13" fill="#1e1a14" />
+      <path d="M 479 130 Q 479 118 491 118 Q 503 118 503 130 L 499 135 L 483 135 Z" fill="#2a2520" opacity="0.85" />
+      {/* Date / location */}
+      <text x="320" y="16" textAnchor="middle" fill="#fca5a5" fontSize="9" fontFamily="monospace" fontWeight="bold" opacity="0.6">JANUARY 29, 2024 · GAZA CITY</text>
+    </svg>
   );
 }
 
@@ -202,6 +406,8 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
   const [score, setScore] = useState(0);
   const [combo, setCombo] = useState(0);
   const [allyCD, setAllyCD] = useState<[number, number, number]>([0, 0, 0]);
+  const [hindPage, setHindPage] = useState(0);
+  const showHindRef = useRef(startStage === 1);
 
   // ─── Input ───────────────────────────────────────────────────────────────
 
@@ -242,6 +448,18 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
         }
         return;
       }
+      if (phaseRef.current === "hind-story") {
+        if (e.code === "Space" || e.code === "Enter") {
+          e.preventDefault();
+          setHindPage((prev) => {
+            if (prev < HIND_PAGES.length - 1) return prev + 1;
+            setPhase("story");
+            phaseRef.current = "story";
+            return 0;
+          });
+        }
+        return;
+      }
       if (phaseRef.current === "stage-clear") {
         if (e.code === "Space" || e.code === "Enter") {
           e.preventDefault();
@@ -250,6 +468,7 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
             setPhase("win");
             phaseRef.current = "win";
           } else {
+            if (next === 1) showHindRef.current = true;
             stageIndexRef.current = next;
             setStageIndex(next);
             setStoryLine(0);
@@ -463,8 +682,15 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
   useEffect(() => {
     stageIndexRef.current = stageIndex;
     setStoryLine(0);
-    setPhase("story");
-    phaseRef.current = "story";
+    if (showHindRef.current) {
+      showHindRef.current = false;
+      setHindPage(0);
+      setPhase("hind-story");
+      phaseRef.current = "hind-story";
+    } else {
+      setPhase("story");
+      phaseRef.current = "story";
+    }
   }, [stageIndex]);
 
   // ─── Render ─────────────────────────────────────────────────────────────
@@ -622,6 +848,78 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
             <FlagBar />
           </div>
         )}
+
+        {/* ── HIND RAJAB MEMORIAL STORY ─────────────────────────────────── */}
+        {phase === "hind-story" && (() => {
+          const pg = HIND_PAGES[hindPage] ?? HIND_PAGES[0];
+          const isLast = hindPage === HIND_PAGES.length - 1;
+          const isFirst = hindPage === 0;
+          return (
+            <div style={{ position: "absolute", inset: 0, background: "#0a0505", display: "flex", flexDirection: "column", overflow: "hidden" }}>
+              <FlagBar />
+
+              {/* ── Portrait page ── */}
+              {isFirst ? (
+                <div style={{ flex: 1, display: "flex", alignItems: "stretch" }}>
+                  {/* Left — portrait */}
+                  <div style={{ width: 260, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", borderRight: "1px solid #3f1515", background: "rgba(120,20,20,0.08)", padding: "24px 16px", gap: 14 }}>
+                    <HindPortrait />
+                    <div style={{ fontFamily: "'Noto Sans Arabic', 'Arial', sans-serif", fontSize: 28, color: "#ef4444", direction: "rtl", opacity: 0.85 }}>هند رجب</div>
+                  </div>
+                  {/* Right — text */}
+                  <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "36px 44px", gap: 22 }}>
+                    <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 6.5, color: "#ef444488", letterSpacing: 3, textTransform: "uppercase" }}>IN MEMORY OF</div>
+                    <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 22, color: "#ef4444", textShadow: "0 0 32px #ef444460", lineHeight: 1.7, textAlign: "center" }}>
+                      {pg.heading}
+                    </div>
+                    <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 14, color: "#fca5a5", lineHeight: 2.1, textAlign: "center" }}>
+                      {pg.body}
+                    </div>
+                    <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 7, color: "#9ca3af", marginTop: 8, lineHeight: 2 }}>
+                      January 29, 2024 · Gaza City, Palestine
+                    </div>
+                  </div>
+                </div>
+              ) : pg.car ? (
+                /* ── Car scene (last page) ── */
+                <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 20, padding: "20px 24px" }}>
+                  <HindCarScene />
+                  <div style={{ maxWidth: 560, textAlign: "center", padding: "0 8px" }}>
+                    <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 10, color: "#d4d4d4", lineHeight: 2.2 }}>
+                      {pg.body}
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                /* ── Text-only pages ── */
+                <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "36px 60px", gap: 28 }}>
+                  {pg.heading && (
+                    <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 18, color: "#ef4444", textShadow: "0 0 24px #ef444450", lineHeight: 1.8, textAlign: "center" }}>
+                      {pg.heading}
+                    </div>
+                  )}
+                  <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 11, color: "#fca5a5", lineHeight: 2.4, textAlign: "center", maxWidth: 680 }}>
+                    {pg.body}
+                  </div>
+                </div>
+              )}
+
+              {/* Bottom bar */}
+              <div style={{ borderTop: "1px solid #3f1515", padding: "14px 24px", display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
+                {/* Progress dots */}
+                <div style={{ display: "flex", gap: 7 }}>
+                  {HIND_PAGES.map((_, i) => (
+                    <div key={i} style={{ width: 7, height: 7, borderRadius: "50%", background: i === hindPage ? "#ef4444" : i < hindPage ? "#7f1d1d" : "#2d1010", border: `1px solid ${i === hindPage ? "#ef4444" : "#3f1515"}`, transition: "all 0.2s" }} />
+                  ))}
+                </div>
+                <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 6.5, color: "#ef444488", animation: "blink 1.1s step-end infinite" }}>
+                  {isLast ? "SPACE / ENTER  ▶  BEGIN" : "SPACE / ENTER  ▶  CONTINUE"}
+                </div>
+              </div>
+              <FlagBar />
+            </div>
+          );
+        })()}
 
         {/* Stage clear screen */}
         {phase === "stage-clear" && (

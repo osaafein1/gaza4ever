@@ -633,6 +633,9 @@ function drawGazaCity(ctx: CanvasRenderingContext2D, bg: BgData, frame: number) 
   // Landmark: Al-Shifa Hospital
   drawLandmark_Shifa(ctx, bg);
 
+  // Hind Rajab's burned car — a permanent memorial in the background
+  drawBurnedCar_HindRajab(ctx, bg, frame);
+
   // Artillery fire glow
   const artGlow = ctx.createRadialGradient(CANVAS_W * 0.55, FLOOR_Y - 80, 0, CANVAS_W * 0.55, FLOOR_Y - 80, 380);
   artGlow.addColorStop(0, "rgba(239,68,68,0.08)");
@@ -646,6 +649,136 @@ function drawGazaCity(ctx: CanvasRenderingContext2D, bg: BgData, frame: number) 
   fGrad.addColorStop(1, "rgba(0,0,0,0.35)");
   ctx.fillStyle = fGrad;
   ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  HIND RAJAB'S CAR — Gaza City
+//  Burned, bullet-riddled car where Hind (age 6) was found, Jan 29 2024
+// ─────────────────────────────────────────────────────────────────────────────
+function drawBurnedCar_HindRajab(ctx: CanvasRenderingContext2D, bg: BgData, frame: number) {
+  const rawX = 560 - (bg.offset * 0.22) % (CANVAS_W + 500);
+  const x = rawX;
+  const base = FLOOR_Y;
+
+  ctx.save();
+
+  // Ground shadow
+  ctx.globalAlpha = 0.4;
+  ctx.fillStyle = "#000";
+  ctx.beginPath();
+  ctx.ellipse(x + 98, base - 2, 112, 8, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Ember/fire glow from within (slow pulse)
+  const pulse = 0.1 + Math.sin(frame * 0.038) * 0.05;
+  ctx.globalAlpha = pulse;
+  const grd = ctx.createRadialGradient(x + 98, base - 48, 8, x + 98, base - 48, 90);
+  grd.addColorStop(0, "#7c2d12");
+  grd.addColorStop(1, "transparent");
+  ctx.fillStyle = grd;
+  ctx.fillRect(x, base - 130, 196, 90);
+  ctx.globalAlpha = 1;
+
+  ctx.globalAlpha = 0.75;
+
+  // WHEELS (burned flat)
+  ctx.fillStyle = "#080604";
+  ctx.beginPath(); ctx.ellipse(x + 36, base - 4, 22, 9, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(x + 160, base - 4, 22, 9, 0, 0, Math.PI * 2); ctx.fill();
+
+  // CAR LOWER BODY
+  ctx.fillStyle = "#0f0c08";
+  ctx.fillRect(x + 14, base - 48, 170, 44);
+
+  // CABIN
+  ctx.fillStyle = "#0d0a06";
+  ctx.beginPath();
+  ctx.moveTo(x + 36, base - 48);
+  ctx.lineTo(x + 52, base - 82);
+  ctx.lineTo(x + 148, base - 82);
+  ctx.lineTo(x + 164, base - 48);
+  ctx.closePath();
+  ctx.fill();
+
+  // HOOD
+  ctx.fillStyle = "#0b0906";
+  ctx.beginPath();
+  ctx.moveTo(x + 148, base - 82);
+  ctx.lineTo(x + 190, base - 58);
+  ctx.lineTo(x + 184, base - 48);
+  ctx.lineTo(x + 164, base - 48);
+  ctx.closePath();
+  ctx.fill();
+
+  // TRUNK
+  ctx.beginPath();
+  ctx.moveTo(x + 36, base - 48);
+  ctx.lineTo(x + 14, base - 48);
+  ctx.lineTo(x + 8, base - 58);
+  ctx.lineTo(x + 52, base - 82);
+  ctx.closePath();
+  ctx.fill();
+
+  // WINDSHIELD — shattered, dark
+  ctx.fillStyle = "#060403";
+  ctx.beginPath();
+  ctx.moveTo(x + 56, base - 80);
+  ctx.lineTo(x + 68, base - 62);
+  ctx.lineTo(x + 136, base - 62);
+  ctx.lineTo(x + 144, base - 80);
+  ctx.closePath();
+  ctx.fill();
+  // Cracks
+  ctx.strokeStyle = "#1a1208"; ctx.lineWidth = 0.6;
+  ctx.beginPath(); ctx.moveTo(x + 80, base - 80); ctx.lineTo(x + 76, base - 62); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(x + 110, base - 80); ctx.lineTo(x + 118, base - 62); ctx.stroke();
+
+  // SIDE WINDOWS — blown out
+  ctx.fillStyle = "#050302";
+  ctx.fillRect(x + 40, base - 60, 38, 12);
+  ctx.fillRect(x + 118, base - 60, 38, 12);
+
+  // BULLET HOLES on door panel
+  const holes: [number, number][] = [
+    [x + 65, base - 30], [x + 76, base - 24], [x + 84, base - 33],
+    [x + 72, base - 18], [x + 92, base - 28],
+  ];
+  for (const [hx, hy] of holes) {
+    ctx.fillStyle = "#060404";
+    ctx.beginPath(); ctx.arc(hx, hy, 3, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = "#1a1208"; ctx.lineWidth = 0.5;
+    for (let r = 0; r < 5; r++) {
+      const a = (r / 5) * Math.PI * 2;
+      ctx.beginPath(); ctx.moveTo(hx, hy); ctx.lineTo(hx + Math.cos(a) * 5.5, hy + Math.sin(a) * 5.5); ctx.stroke();
+    }
+  }
+
+  // Char marks
+  ctx.globalAlpha = 0.55;
+  ctx.fillStyle = "#050403";
+  ctx.beginPath(); ctx.ellipse(x + 98, base - 66, 55, 16, 0, 0, Math.PI * 2); ctx.fill();
+
+  // WILDFLOWER — Handala's tribute, small and quiet
+  ctx.globalAlpha = 0.82;
+  ctx.strokeStyle = "#4d7c0f"; ctx.lineWidth = 1.4; ctx.lineCap = "round";
+  ctx.beginPath(); ctx.moveTo(x + 95, base - 4); ctx.quadraticCurveTo(x + 93, base - 18, x + 94, base - 30); ctx.stroke();
+  const fc: [number, number] = [x + 94, base - 31];
+  [0, 60, 120, 180, 240, 300].forEach((deg) => {
+    const rad = (deg * Math.PI) / 180;
+    ctx.fillStyle = "#f59e0b";
+    ctx.beginPath(); ctx.ellipse(fc[0] + Math.cos(rad) * 4.5, fc[1] + Math.sin(rad) * 4.5, 2.5, 1.5, rad, 0, Math.PI * 2); ctx.fill();
+  });
+  ctx.fillStyle = "#fbbf24";
+  ctx.beginPath(); ctx.arc(fc[0], fc[1], 2.5, 0, Math.PI * 2); ctx.fill();
+
+  // Label — small, faint, respectful
+  ctx.globalAlpha = 0.28;
+  ctx.fillStyle = "#fca5a5";
+  ctx.font = "bold 8px monospace";
+  ctx.fillText("HIND RAJAB · 29.01.24", x + 12, base - 90);
+
+  ctx.globalAlpha = 1;
+  ctx.restore();
 }
 
 function drawNuseirat(ctx: CanvasRenderingContext2D, bg: BgData, frame: number) {
