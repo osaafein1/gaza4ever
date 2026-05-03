@@ -422,7 +422,7 @@ export function updateGame(gs: GameState, enemies: Enemy[], particles: Particle[
           break;
         }
       }
-      if (!rocketHit && (pr.x < -10 || pr.x > CANVAS_W + 10 || pr.y >= FLOOR_Y)) rocketHit = true;
+      if (!rocketHit && (pr.x < -10 || pr.x > CANVAS_W + 10 || pr.y >= FLOOR_Y || pr.y < -20)) rocketHit = true;
       if (rocketHit) {
         const ex = pr.x, ey = Math.min(pr.y, FLOOR_Y);
         gs.shake = Math.max(gs.shake, 28);

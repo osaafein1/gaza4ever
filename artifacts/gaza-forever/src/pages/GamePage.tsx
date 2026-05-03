@@ -1016,14 +1016,28 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
         }
       }
 
-      // Rocket
-      if (e.code === "KeyR" && p.rocketCooldown <= 0) {
+      // Rocket (R key or ArrowUp)
+      if ((e.code === "KeyR" || e.code === "ArrowUp") && p.rocketCooldown <= 0) {
         p.rocketCooldown = 240;
-        const vx = p.facingRight ? 14 : -14;
+        // Auto-aim toward nearest aerial enemy
+        const AERIAL = ["drone", "apache", "warplane"];
+        const aerials = gs.enemies.filter(en => AERIAL.includes(en.type) && en.state !== "dead");
+        let aimVx = 0;
+        if (aerials.length > 0) {
+          const px = p.x + p.width / 2;
+          const nearest = aerials.reduce((best, en) => {
+            const d = Math.abs(en.x + en.width / 2 - px);
+            return d < Math.abs(best.x + best.width / 2 - px) ? en : best;
+          });
+          const dx = (nearest.x + nearest.width / 2) - px;
+          const dy = (nearest.y - nearest.height / 2) - (p.y - p.height);
+          const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+          aimVx = Math.max(-8, Math.min(8, (dx / dist) * 10));
+        }
         gs.projectiles.push({
           id: String(Math.random()), type: "rocket",
-          x: p.x + (p.facingRight ? p.width : 0), y: p.y - p.height / 2,
-          vx, vy: 0,
+          x: p.x + p.width / 2 - 4, y: p.y - p.height - 4,
+          vx: aimVx, vy: -16,
           targetX: 0, targetY: 0,
           damage: 90, trail: [], life: 280, maxLife: 280,
           warned: true, warnTimer: 0, warnMaxTimer: 0,
