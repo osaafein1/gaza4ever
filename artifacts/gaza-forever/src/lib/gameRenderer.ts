@@ -1,6 +1,23 @@
 import type { GameState, Enemy, Particle, PowerUp, Collectible, Projectile, Summon } from "./gameTypes";
 import { CANVAS_W, CANVAS_H, FLOOR_Y, CHARACTERS, COLLECTIBLE_DEFS } from "./gameConstants";
 
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
+function rRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+  ctx.fill();
+}
+
 // ─── Player ─────────────────────────────────────────────────────────────────
 
 export function drawPlayer(ctx: CanvasRenderingContext2D, gs: GameState, frame: number) {
@@ -9,74 +26,290 @@ export function drawPlayer(ctx: CanvasRenderingContext2D, gs: GameState, frame: 
   const hurt = p.hurtTimer > 0 && Math.floor(p.hurtTimer / 3) % 2 === 0;
   const cx = p.x + p.width / 2;
   const groundY = p.y;
-  const col = hurt ? "#fbbf24" : charDef.color;
+
+  // Colour palette
+  const shirt  = hurt ? "#fbbf24" : charDef.color;
+  const skin   = hurt ? "#fbbf24" : "#c8916a";
+  const hair   = hurt ? "#fbbf24" : "#1e0f06";
+  const pants  = hurt ? "#fbbf24" : "#4a3222";
+  const shoe   = hurt ? "#fbbf24" : "#251408";
+  const kCloth = hurt ? "#fbbf24" : "#f5f0e8";
 
   ctx.save();
   if (!p.facingRight) { ctx.scale(-1, 1); ctx.translate(-2 * cx, 0); }
 
-  // Shadow
-  ctx.globalAlpha = 0.3;
+  // Ground shadow
+  ctx.globalAlpha = 0.28;
   ctx.fillStyle = "#000";
   ctx.beginPath();
-  ctx.ellipse(cx, groundY + 4, 20, 6, 0, 0, Math.PI * 2);
+  ctx.ellipse(cx, groundY + 3, 17, 5, 0, 0, Math.PI * 2);
   ctx.fill();
   ctx.globalAlpha = 1;
 
-  // Legs (walking animation)
-  const walkCycle = Math.sin(frame * 0.28) * (Math.abs(p.vx) > 0.5 ? 16 : 0);
-  ctx.fillStyle = col;
-  ctx.fillRect(cx - 10, groundY - 36, 10, 36);
-  ctx.fillRect(cx, groundY - 36, 10, 36);
+  const moving = Math.abs(p.vx) > 0.5;
+  const walk   = Math.sin(frame * 0.32) * (moving ? 1 : 0);
 
-  // Leg pivot
-  ctx.save();
-  ctx.translate(cx - 5, groundY - 36);
-  ctx.rotate(walkCycle * 0.03);
-  ctx.fillRect(-5, 0, 10, 24);
-  ctx.restore();
-  ctx.save();
-  ctx.translate(cx + 5, groundY - 36);
-  ctx.rotate(-walkCycle * 0.03);
-  ctx.fillRect(-5, 0, 10, 24);
-  ctx.restore();
+  // ─── LEGS (two-segment, knee joint) ──────────────────────────────────────
+  const hipY = groundY - 38;
+  const thighLen = 18;
+  const shinLen  = 16;
+  const lAngle = walk * 0.38;   // left thigh angle
+  const rAngle = -walk * 0.38;  // right thigh angle
 
-  // Torso
-  ctx.fillStyle = col;
-  ctx.fillRect(cx - 14, groundY - 72, 28, 38);
+  function drawLeg(thighAngle: number, side: number) {
+    const hx = cx + side * 6;
+    // Knee position
+    const kx = hx + Math.sin(thighAngle) * thighLen;
+    const ky = hipY + Math.cos(thighAngle) * thighLen;
+    // Foot position (lower leg swings opposite)
+    const shinAngle = thighAngle * 0.5;
+    const fx = kx + Math.sin(shinAngle) * shinLen;
+    const fy = ky + Math.cos(shinAngle) * shinLen;
 
-  // Attack animation
-  if (p.isAttacking) {
-    ctx.fillStyle = hurt ? "#fbbf24" : "#f97316";
-    ctx.fillRect(cx + 12, groundY - 68, 28, 12);
-    ctx.fillStyle = col;
-    ctx.fillRect(cx + 36, groundY - 74, 14, 20);
-  } else {
-    // Arms relaxed
-    ctx.fillStyle = col;
-    const armSwing = Math.sin(frame * 0.28) * (Math.abs(p.vx) > 0.5 ? 10 : 0);
-    ctx.save();
-    ctx.translate(cx - 14, groundY - 65);
-    ctx.rotate(-armSwing * 0.04);
-    ctx.fillRect(-8, 0, 8, 24);
-    ctx.restore();
-    ctx.save();
-    ctx.translate(cx + 14, groundY - 65);
-    ctx.rotate(armSwing * 0.04);
-    ctx.fillRect(0, 0, 8, 24);
-    ctx.restore();
+    // Thigh
+    ctx.strokeStyle = pants;
+    ctx.lineWidth = 11;
+    ctx.lineCap = "round";
+    ctx.beginPath();
+    ctx.moveTo(hx, hipY);
+    ctx.lineTo(kx, ky);
+    ctx.stroke();
+    // Shin
+    ctx.lineWidth = 9;
+    ctx.beginPath();
+    ctx.moveTo(kx, ky);
+    ctx.lineTo(fx, fy);
+    ctx.stroke();
+    // Shoe
+    ctx.fillStyle = shoe;
+    ctx.beginPath();
+    ctx.ellipse(fx + side * 2 + 2, fy + 3, 9, 5, shinAngle * 0.3, 0, Math.PI * 2);
+    ctx.fill();
   }
 
-  // Head
-  ctx.fillStyle = col;
-  ctx.fillRect(cx - 12, groundY - 88, 24, 20);
-  // Eyes
-  ctx.fillStyle = "#fff";
-  ctx.fillRect(cx + 2, groundY - 85, 6, 5);
-  // Keffiyeh top
-  ctx.fillStyle = hurt ? "#fbbf24" : "#fff";
-  ctx.fillRect(cx - 13, groundY - 90, 26, 6);
+  drawLeg(lAngle, -1);
+  drawLeg(rAngle, +1);
 
-  // Beam / blast glow
+  // ─── TORSO (shirt) ────────────────────────────────────────────────────────
+  const torsoTop = groundY - 66;
+  const torsoBot = groundY - 40;
+  ctx.fillStyle = shirt;
+  rRect(ctx, cx - 13, torsoTop, 26, torsoBot - torsoTop, 6);
+
+  // Collar shadow
+  ctx.fillStyle = "rgba(0,0,0,0.12)";
+  rRect(ctx, cx - 11, torsoTop, 22, 6, 3);
+
+  // ─── ARMS ────────────────────────────────────────────────────────────────
+  const armSwing = walk * 0.28;
+  const shoulderY = groundY - 62;
+  const armLen = 16;
+
+  if (p.isAttacking) {
+    // Punch arm extended forward
+    ctx.strokeStyle = skin;
+    ctx.lineWidth = 10;
+    ctx.lineCap = "round";
+    ctx.beginPath();
+    ctx.moveTo(cx + 12, shoulderY);
+    ctx.lineTo(cx + 36, shoulderY + 2);
+    ctx.stroke();
+    // Fist
+    ctx.fillStyle = skin;
+    ctx.beginPath();
+    ctx.arc(cx + 38, shoulderY + 2, 6, 0, Math.PI * 2);
+    ctx.fill();
+    // Impact burst
+    ctx.globalAlpha = 0.55 + Math.sin(frame * 0.6) * 0.35;
+    ctx.fillStyle = "#fbbf24";
+    ctx.beginPath();
+    for (let i = 0; i < 6; i++) {
+      const a = (i / 6) * Math.PI * 2 + frame * 0.3;
+      const r1 = 6, r2 = 10;
+      if (i === 0) ctx.moveTo(cx + 46 + Math.cos(a) * r2, shoulderY + 2 + Math.sin(a) * r2);
+      else ctx.lineTo(cx + 46 + Math.cos(a - 0.3) * r1, shoulderY + 2 + Math.sin(a - 0.3) * r1);
+      ctx.lineTo(cx + 46 + Math.cos(a) * r2, shoulderY + 2 + Math.sin(a) * r2);
+    }
+    ctx.closePath(); ctx.fill();
+    ctx.globalAlpha = 1;
+    // Back arm hangs
+    ctx.strokeStyle = skin;
+    ctx.lineWidth = 9;
+    ctx.lineCap = "round";
+    ctx.beginPath();
+    ctx.moveTo(cx - 12, shoulderY);
+    ctx.lineTo(cx - 14, shoulderY + armLen + 2);
+    ctx.stroke();
+    ctx.fillStyle = skin;
+    ctx.beginPath(); ctx.arc(cx - 14, shoulderY + armLen + 3, 5, 0, Math.PI * 2); ctx.fill();
+  } else {
+    // Both arms swing naturally
+    const lax = cx - 12 + Math.sin(-armSwing) * 8;
+    const rax = cx + 12 + Math.sin(armSwing) * 8;
+    ctx.strokeStyle = skin;
+    ctx.lineWidth = 9;
+    ctx.lineCap = "round";
+    // Left
+    ctx.beginPath();
+    ctx.moveTo(cx - 12, shoulderY);
+    ctx.lineTo(lax, shoulderY + armLen);
+    ctx.stroke();
+    ctx.fillStyle = skin;
+    ctx.beginPath(); ctx.arc(lax, shoulderY + armLen + 1, 5, 0, Math.PI * 2); ctx.fill();
+    // Right
+    ctx.strokeStyle = skin;
+    ctx.lineWidth = 9;
+    ctx.beginPath();
+    ctx.moveTo(cx + 12, shoulderY);
+    ctx.lineTo(rax, shoulderY + armLen);
+    ctx.stroke();
+    ctx.fillStyle = skin;
+    ctx.beginPath(); ctx.arc(rax, shoulderY + armLen + 1, 5, 0, Math.PI * 2); ctx.fill();
+  }
+
+  // ─── HEAD (large round — child proportions) ───────────────────────────────
+  const hcy = groundY - 84;  // head centre y
+  const hr  = 20;            // head radius — big relative to body
+
+  // Neck
+  ctx.fillStyle = skin;
+  rRect(ctx, cx - 5, groundY - 68, 10, 8, 3);
+
+  // Head base (skin)
+  ctx.fillStyle = skin;
+  ctx.beginPath();
+  ctx.arc(cx, hcy, hr, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Cheeks (soft blush — child)
+  ctx.globalAlpha = 0.18;
+  ctx.fillStyle = "#e05050";
+  ctx.beginPath(); ctx.ellipse(cx - 13, hcy + 5, 7, 5, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(cx + 13, hcy + 5, 7, 5, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.globalAlpha = 1;
+
+  // EARS
+  ctx.fillStyle = skin;
+  ctx.beginPath(); ctx.ellipse(cx - hr + 1, hcy + 2, 4.5, 5.5, 0.15, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(cx + hr - 1, hcy + 2, 4.5, 5.5, -0.15, 0, Math.PI * 2); ctx.fill();
+  // Inner ear
+  ctx.fillStyle = "#b07860";
+  ctx.globalAlpha = 0.35;
+  ctx.beginPath(); ctx.ellipse(cx - hr + 2, hcy + 2, 2.5, 3.5, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(cx + hr - 2, hcy + 2, 2.5, 3.5, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.globalAlpha = 1;
+
+  // HAIR — dark, covers top 55% of head
+  ctx.fillStyle = hair;
+  ctx.beginPath();
+  ctx.arc(cx, hcy, hr, Math.PI * 1.08, Math.PI * 1.92);
+  ctx.lineTo(cx + hr * Math.cos(Math.PI * 1.92 - Math.PI), hcy + 3);
+  ctx.lineTo(cx - hr * Math.cos(Math.PI * 1.08 - Math.PI), hcy + 3);
+  ctx.closePath();
+  ctx.fill();
+  // Small hair tuft at top
+  ctx.beginPath();
+  ctx.arc(cx, hcy - hr + 4, 6, 0, Math.PI * 2);
+  ctx.fill();
+
+  // EYES — big, expressive (key child feature)
+  const ey = hcy + 3;
+  // Whites
+  ctx.fillStyle = "#fff";
+  ctx.beginPath(); ctx.ellipse(cx - 7, ey, 5.5, 6, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(cx + 7, ey, 5.5, 6, 0, 0, Math.PI * 2); ctx.fill();
+  // Iris (warm brown)
+  ctx.fillStyle = "#5c3010";
+  ctx.beginPath(); ctx.ellipse(cx - 7, ey + 0.5, 4, 4.5, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(cx + 7, ey + 0.5, 4, 4.5, 0, 0, Math.PI * 2); ctx.fill();
+  // Pupils
+  ctx.fillStyle = "#0f0600";
+  ctx.beginPath(); ctx.arc(cx - 7, ey + 0.5, 2.4, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(cx + 7, ey + 0.5, 2.4, 0, Math.PI * 2); ctx.fill();
+  // Eye shine
+  ctx.fillStyle = "#fff";
+  ctx.beginPath(); ctx.arc(cx - 5.5, ey - 1.2, 1.4, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(cx + 8.5, ey - 1.2, 1.4, 0, Math.PI * 2); ctx.fill();
+  // Lower lid
+  ctx.strokeStyle = "rgba(160,90,50,0.4)";
+  ctx.lineWidth = 0.8;
+  ctx.beginPath(); ctx.arc(cx - 7, ey + 0.5, 5.5, 0.1, Math.PI - 0.1); ctx.stroke();
+  ctx.beginPath(); ctx.arc(cx + 7, ey + 0.5, 5.5, 0.1, Math.PI - 0.1); ctx.stroke();
+
+  // EYEBROWS — slightly arched, childlike
+  ctx.strokeStyle = hair;
+  ctx.lineWidth = 2;
+  ctx.lineCap = "round";
+  ctx.beginPath();
+  ctx.moveTo(cx - 12, ey - 8);
+  ctx.quadraticCurveTo(cx - 7, ey - 11, cx - 2, ey - 8);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(cx + 12, ey - 8);
+  ctx.quadraticCurveTo(cx + 7, ey - 11, cx + 2, ey - 8);
+  ctx.stroke();
+
+  // NOSE — small, button
+  ctx.fillStyle = "#a86842";
+  ctx.beginPath();
+  ctx.arc(cx, ey + 7, 2.5, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = "#8a5030";
+  ctx.globalAlpha = 0.6;
+  ctx.beginPath(); ctx.arc(cx - 2.8, ey + 8.5, 1.2, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(cx + 2.8, ey + 8.5, 1.2, 0, Math.PI * 2); ctx.fill();
+  ctx.globalAlpha = 1;
+
+  // MOUTH — small, slight upward curve
+  ctx.strokeStyle = "#8a4020";
+  ctx.lineWidth = 1.6;
+  ctx.lineCap = "round";
+  ctx.beginPath();
+  ctx.moveTo(cx - 4.5, ey + 13.5);
+  ctx.quadraticCurveTo(cx, ey + 15.5, cx + 4.5, ey + 13.5);
+  ctx.stroke();
+
+  // ─── KEFFIYEH ─────────────────────────────────────────────────────────────
+  // White headscarf draped over top of head with a drape on the left side
+  ctx.globalAlpha = 0.9;
+  ctx.fillStyle = kCloth;
+
+  // Top cap covering hair / top of head
+  ctx.beginPath();
+  ctx.arc(cx, hcy, hr + 2, Math.PI * 1.08, Math.PI * 1.92);
+  ctx.lineTo(cx + 8, hcy + 6);
+  ctx.lineTo(cx - 8, hcy + 6);
+  ctx.closePath();
+  ctx.fill();
+
+  // Left-side drape (hangs over shoulder)
+  ctx.beginPath();
+  ctx.moveTo(cx - 8, hcy + 6);
+  ctx.quadraticCurveTo(cx - hr - 2, hcy + 16, cx - 16, groundY - 64);
+  ctx.lineTo(cx - 10, groundY - 60);
+  ctx.quadraticCurveTo(cx - 6, hcy + 20, cx - 2, hcy + 10);
+  ctx.closePath();
+  ctx.fill();
+
+  // Keffiyeh check pattern tint (uses character colour)
+  ctx.globalAlpha = 0.22;
+  ctx.fillStyle = charDef.color;
+  ctx.beginPath();
+  ctx.arc(cx, hcy, hr + 2, Math.PI * 1.08, Math.PI * 1.92);
+  ctx.lineTo(cx + 8, hcy + 6);
+  ctx.lineTo(cx - 8, hcy + 6);
+  ctx.closePath();
+  ctx.fill();
+  ctx.globalAlpha = 1;
+
+  // Keffiyeh edge stitching line
+  ctx.strokeStyle = "rgba(180,160,130,0.5)";
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.arc(cx, hcy, hr + 2, Math.PI * 1.1, Math.PI * 1.9);
+  ctx.stroke();
+
+  // ─── BEAM / BLAST ─────────────────────────────────────────────────────────
   if (gs.beam && gs.beam.active) {
     const charCol = charDef.color;
     ctx.strokeStyle = charCol;
@@ -85,22 +318,21 @@ export function drawPlayer(ctx: CanvasRenderingContext2D, gs: GameState, frame: 
     ctx.lineWidth = 6;
     const beamEnd = gs.beam.facingRight ? CANVAS_W : 0;
     ctx.beginPath();
-    ctx.moveTo(cx + (p.facingRight ? 14 : -14), groundY - 65);
-    ctx.lineTo(beamEnd, groundY - 65);
+    ctx.moveTo(cx + (p.facingRight ? 14 : -14), groundY - 60);
+    ctx.lineTo(beamEnd, groundY - 60);
     ctx.stroke();
     ctx.shadowBlur = 0;
-    // Bright thin core
     ctx.strokeStyle = "#fff";
     ctx.lineWidth = 2;
     ctx.globalAlpha = 0.8;
     ctx.beginPath();
-    ctx.moveTo(cx + (p.facingRight ? 14 : -14), groundY - 65);
-    ctx.lineTo(beamEnd, groundY - 65);
+    ctx.moveTo(cx + (p.facingRight ? 14 : -14), groundY - 60);
+    ctx.lineTo(beamEnd, groundY - 60);
     ctx.stroke();
     ctx.globalAlpha = 1;
   }
 
-  // Shield bubble
+  // ─── SHIELD BUBBLE ────────────────────────────────────────────────────────
   if (p.buffs.shielded) {
     ctx.strokeStyle = "#22d3ee";
     ctx.lineWidth = 2;
@@ -108,7 +340,7 @@ export function drawPlayer(ctx: CanvasRenderingContext2D, gs: GameState, frame: 
     ctx.shadowBlur = 12;
     ctx.globalAlpha = 0.55 + Math.sin(frame * 0.15) * 0.2;
     ctx.beginPath();
-    ctx.ellipse(cx, groundY - 46, 28, 52, 0, 0, Math.PI * 2);
+    ctx.ellipse(cx, groundY - 48, 30, 54, 0, 0, Math.PI * 2);
     ctx.stroke();
     ctx.globalAlpha = 1;
     ctx.shadowBlur = 0;
@@ -116,7 +348,7 @@ export function drawPlayer(ctx: CanvasRenderingContext2D, gs: GameState, frame: 
 
   ctx.restore();
 
-  // HP bar above player
+  // ─── HP BAR ───────────────────────────────────────────────────────────────
   if (p.hp < p.maxHp) {
     const ratio = p.hp / p.maxHp;
     ctx.fillStyle = "rgba(0,0,0,0.7)";
@@ -125,7 +357,7 @@ export function drawPlayer(ctx: CanvasRenderingContext2D, gs: GameState, frame: 
     ctx.fillRect(p.x - 4, p.y - p.height - 12, (p.width + 8) * ratio, 7);
   }
 
-  // Summons
+  // ─── SUMMONS ──────────────────────────────────────────────────────────────
   if (gs.summons) {
     for (const s of gs.summons) {
       const alpha = s.life / s.maxLife;
