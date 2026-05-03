@@ -979,10 +979,23 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
       gs.keysDown[e.code] = true;
       const p = gs.player;
 
-      // Jump
-      if ((e.code === "Space" || e.code === "ArrowUp" || e.code === "KeyW") && !p.isJumping) {
+      // Jump / double-jump
+      if (e.code === "Space" || e.code === "KeyW") {
+        if (!p.isJumping) {
+          // Normal jump
+          p.vy = -18;
+          p.isJumping = true;
+          p.canDoubleJump = true;
+        } else if (p.canDoubleJump) {
+          // Double-tap Space in the air → super jump to clear tanks
+          p.vy = -28;
+          p.canDoubleJump = false;
+        }
+      }
+      if (e.code === "ArrowUp" && !p.isJumping) {
         p.vy = -18;
         p.isJumping = true;
+        p.canDoubleJump = true;
       }
 
       // Attack

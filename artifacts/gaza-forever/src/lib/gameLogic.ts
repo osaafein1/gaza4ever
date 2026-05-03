@@ -24,6 +24,7 @@ export function createPlayer(charIndex = 0): Player {
     summonCooldown: 0,
     rockCooldown: 0,
     rocketCooldown: 0,
+    canDoubleJump: true,
   };
 }
 
@@ -135,6 +136,7 @@ export function updateGame(gs: GameState, enemies: Enemy[], particles: Particle[
     p.y = FLOOR_Y;
     p.vy = 0;
     p.isJumping = false;
+    p.canDoubleJump = true;
   }
   p.x = Math.max(0, Math.min(CANVAS_W - p.width, p.x));
 

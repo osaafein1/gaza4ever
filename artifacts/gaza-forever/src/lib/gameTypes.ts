@@ -19,6 +19,7 @@ export interface Player {
   summonCooldown: number;
   rockCooldown: number;
   rocketCooldown: number;
+  canDoubleJump: boolean;
 }
 
 export interface Enemy {
