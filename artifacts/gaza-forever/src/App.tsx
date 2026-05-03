@@ -19,10 +19,11 @@ function MusicPlayer({ playing }: { playing: boolean }) {
 }
 
 function AppInner() {
-  const [musicStarted, setMusicStarted] = useState(false);
+  const [musicStarted, setMusicStarted] = useState(() => !!sessionStorage.getItem("gz_music_on"));
   const [location] = useLocation();
 
   const handleMusicStart = useCallback(() => {
+    sessionStorage.setItem("gz_music_on", "1");
     setMusicStarted(true);
   }, []);
 

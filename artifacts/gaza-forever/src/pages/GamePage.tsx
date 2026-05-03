@@ -350,6 +350,8 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
     enemiesRef.current = gs.enemies;
     particlesRef.current = gs.particles;
     waveInStageRef.current = 0;
+    checkpointActiveRef.current = false;
+    setCheckpointActive(false);
     // Spawn first wave
     const target = spawnWave(gs, sIdx, 0, false);
     gs.waveTarget = target;
@@ -379,10 +381,9 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
       setWaveTarget(target);
       setWaveNum(nextWave);
     } else if (nextWave > stageDef.waves) {
-      // Stage clear
-      setStageScore(gs.score);
-      setPhase("stage-clear");
-      phaseRef.current = "stage-clear";
+      // All waves cleared — activate exit checkpoint
+      checkpointActiveRef.current = true;
+      setCheckpointActive(true);
     } else {
       const target = spawnWave(gs, sIdx, nextWave, false);
       gs.waveTarget = target;
@@ -423,6 +424,8 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
   const [waveTarget, setWaveTarget] = useState(0);
   const [waveNum, setWaveNum] = useState(0);
   const lastWaveKillsRef = useRef(-1);
+  const checkpointActiveRef = useRef(false);
+  const [checkpointActive, setCheckpointActive] = useState(false);
 
   // ─── Input ───────────────────────────────────────────────────────────────
 
@@ -691,6 +694,64 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
 
       drawHUD(ctx, gs);
 
+      // ── Exit checkpoint ────────────────────────────────────────────────
+      if (checkpointActiveRef.current && gs) {
+        const flagX = CANVAS_W - 90;
+        const flagBase = FLOOR_Y;
+        const glow = 0.5 + Math.sin(frame * 0.07) * 0.3;
+
+        ctx.save();
+        // Halo glow
+        ctx.globalAlpha = glow * 0.22;
+        const haloGrd = ctx.createRadialGradient(flagX, flagBase - 90, 0, flagX, flagBase - 90, 150);
+        haloGrd.addColorStop(0, "#22c55e");
+        haloGrd.addColorStop(1, "transparent");
+        ctx.fillStyle = haloGrd;
+        ctx.fillRect(flagX - 150, flagBase - 240, 300, 240);
+        ctx.globalAlpha = 1;
+
+        // Pole
+        ctx.fillStyle = "#a1a1aa";
+        ctx.fillRect(flagX - 4, flagBase - 190, 7, 190);
+
+        // Palestinian flag — 3 stripes + red triangle
+        ctx.fillStyle = "#111";
+        ctx.fillRect(flagX + 3, flagBase - 190, 78, 26);
+        ctx.fillStyle = "#e8e8e8";
+        ctx.fillRect(flagX + 3, flagBase - 164, 78, 26);
+        ctx.fillStyle = "#16a34a";
+        ctx.fillRect(flagX + 3, flagBase - 138, 78, 26);
+        ctx.fillStyle = "#dc2626";
+        ctx.beginPath();
+        ctx.moveTo(flagX + 3, flagBase - 190);
+        ctx.lineTo(flagX + 3, flagBase - 112);
+        ctx.lineTo(flagX + 49, flagBase - 151);
+        ctx.closePath();
+        ctx.fill();
+
+        // Pulsing "EXIT →" label above flag
+        ctx.globalAlpha = glow;
+        ctx.fillStyle = "#22c55e";
+        ctx.shadowColor = "#22c55e";
+        ctx.shadowBlur = 14;
+        ctx.font = "bold 12px 'Press Start 2P', monospace";
+        ctx.textAlign = "center";
+        ctx.fillText("EXIT →", flagX + 15, flagBase - 204);
+        ctx.textAlign = "left";
+        ctx.shadowBlur = 0;
+        ctx.globalAlpha = 1;
+        ctx.restore();
+
+        // Detect player reaching the checkpoint
+        if (gs.player.x + gs.player.width > flagX - 50) {
+          checkpointActiveRef.current = false;
+          setCheckpointActive(false);
+          setStageScore(gs.score);
+          setPhase("stage-clear");
+          phaseRef.current = "stage-clear";
+        }
+      }
+
       ctx.restore();
 
       rafRef.current = requestAnimationFrame(loop);
@@ -733,45 +794,57 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
         {/* Stage banner + pause/exit buttons */}
         {phase === "playing" && (
           <>
-            <div style={{ position: "absolute", top: 8, left: "50%", transform: "translateX(-50%)", display: "flex", flexDirection: "column", alignItems: "center", pointerEvents: "none", gap: 2 }}>
-              <div style={{ fontFamily: "'Noto Sans Arabic', 'Arial', sans-serif", fontSize: 15, color: stageData2.color, textShadow: `0 0 12px ${stageData2.color}80`, direction: "rtl", lineHeight: 1.1 }}>
+            <div style={{ position: "absolute", top: 8, left: "50%", transform: "translateX(-50%)", display: "flex", flexDirection: "column", alignItems: "center", pointerEvents: "none", gap: 3 }}>
+              <div style={{ fontFamily: "'Noto Sans Arabic', 'Arial', sans-serif", fontSize: 18, color: stageData2.color, textShadow: `0 0 14px ${stageData2.color}90`, direction: "rtl", lineHeight: 1.1 }}>
                 {STAGE_ARABIC[stageIndex]}
               </div>
-              <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 7, color: stageData2.color, letterSpacing: 1 }}>{stageData2.name}</div>
-              {/* Wave indicator */}
-              <div style={{ display: "flex", gap: 4, marginTop: 2 }}>
+              <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 10, color: stageData2.color, letterSpacing: 2 }}>{stageData2.name}</div>
+
+              {/* Wave pip indicators */}
+              <div style={{ display: "flex", gap: 5, marginTop: 1 }}>
                 {Array.from({ length: stageData2.waves + 1 }, (_, i) => {
                   const isBoss = i === stageData2.waves;
-                  const done = i < waveNum;
-                  const current = i === waveNum;
+                  const done = i < waveNum || checkpointActive;
+                  const current = i === waveNum && !checkpointActive;
                   return (
-                    <div key={i} style={{
-                      width: isBoss ? 14 : 10, height: 6, borderRadius: 2,
-                      background: done ? stageData2.color : current ? `${stageData2.color}cc` : "rgba(255,255,255,0.12)",
-                      border: `1px solid ${current ? stageData2.color : "rgba(255,255,255,0.2)"}`,
-                      boxShadow: current ? `0 0 6px ${stageData2.color}` : "none",
+                    <div key={i} title={isBoss ? "BOSS" : `Wave ${i + 1}`} style={{
+                      width: isBoss ? 18 : 13, height: 8, borderRadius: 3,
+                      background: done ? stageData2.color : current ? `${stageData2.color}cc` : "rgba(255,255,255,0.1)",
+                      border: `1px solid ${current ? stageData2.color : done ? stageData2.color : "rgba(255,255,255,0.18)"}`,
+                      boxShadow: current ? `0 0 8px ${stageData2.color}` : "none",
                     }} />
                   );
                 })}
+                {checkpointActive && (
+                  <div style={{ width: 18, height: 8, borderRadius: 3, background: "#22c55e", border: "1px solid #22c55e", boxShadow: "0 0 8px #22c55e", animation: "blink 0.8s step-end infinite" }} title="EXIT" />
+                )}
               </div>
-              {/* Kill progress */}
-              {waveTarget > 0 && (() => {
+
+              {/* Kill / checkpoint progress */}
+              {checkpointActive ? (
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 3, marginTop: 2, background: "rgba(0,0,0,0.55)", borderRadius: 6, padding: "6px 14px", border: "1px solid #22c55e55" }}>
+                  <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 10, color: "#22c55e", textShadow: "0 0 12px #22c55e", letterSpacing: 1, animation: "blink 1s step-end infinite" }}>
+                    → REACH THE EXIT!
+                  </div>
+                </div>
+              ) : waveTarget > 0 ? (() => {
                 const isBossWave = waveNum === stageData2.waves;
                 const pct = Math.min(waveKills / waveTarget, 1);
+                const barColor = isBossWave ? "#ef4444" : stageData2.color;
                 return (
-                  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2, marginTop: 1 }}>
-                    <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 5, color: isBossWave ? "#ef4444" : "#9ca3af", letterSpacing: 1 }}>
-                      {isBossWave ? "★ BOSS" : `WAVE ${waveNum + 1} / ${stageData2.waves + 1}`}
+                  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4, marginTop: 2, background: "rgba(0,0,0,0.5)", borderRadius: 6, padding: "6px 14px", border: `1px solid ${barColor}33` }}>
+                    <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 9, color: isBossWave ? "#ef4444" : "#d4d4d4", letterSpacing: 1, textShadow: isBossWave ? "0 0 10px #ef4444" : "none" }}>
+                      {isBossWave ? "★  BOSS  WAVE  ★" : `WAVE  ${waveNum + 1}  /  ${stageData2.waves + 1}`}
                     </div>
-                    <div style={{ width: 100, height: 5, background: "rgba(255,255,255,0.1)", borderRadius: 3, overflow: "hidden", border: "1px solid rgba(255,255,255,0.15)" }}>
-                      <div style={{ width: `${pct * 100}%`, height: "100%", background: isBossWave ? "#ef4444" : stageData2.color, borderRadius: 3, transition: "width 0.15s" }} />
+                    <div style={{ width: 180, height: 9, background: "rgba(255,255,255,0.08)", borderRadius: 4, overflow: "hidden", border: `1px solid ${barColor}44` }}>
+                      <div style={{ width: `${pct * 100}%`, height: "100%", background: barColor, borderRadius: 4, transition: "width 0.18s", boxShadow: `0 0 6px ${barColor}` }} />
                     </div>
-                    <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 4.5, color: "#6b7280" }}>
-                      {waveKills} / {waveTarget} kills
+                    <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 8, color: "#9ca3af", letterSpacing: 1 }}>
+                      {waveKills} / {waveTarget} KILLS
                     </div>
                   </div>
                 );
-              })()}
+              })() : null}
             </div>
             {/* HUD pause & exit buttons */}
             <div style={{ position: "absolute", top: 8, right: 10, display: "flex", gap: 6 }}>
