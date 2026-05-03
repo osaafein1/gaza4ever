@@ -3,7 +3,7 @@ import { useLocation } from "wouter";
 import GazaMap from "../components/GazaMap";
 import {
   CANVAS_W, CANVAS_H, FLOOR_Y,
-  CHARACTERS, STAGE_DEFS, STAGE_COLLECTIBLES, STAGE_STORIES, STAGE_ARABIC, STAGE_HISTORY, STAGE_LANDMARKS, COLLECTIBLE_DEFS,
+  CHARACTERS, STAGE_DEFS, STAGE_COLLECTIBLES, getStageStories, STAGE_ARABIC, STAGE_HISTORY, STAGE_LANDMARKS, COLLECTIBLE_DEFS,
 } from "../lib/gameConstants";
 import {
   createPlayer, spawnEnemy, spawnDeathParticles, updateGame,
@@ -72,10 +72,11 @@ function HistoryCard({ stageIndex, stageColor }: { stageIndex: number; stageColo
 
 // ─── Nasser Hospital / Khan Younis story ─────────────────────────────────────
 
-const NASSER_PAGES = [
+function getNasserPages(charName: string) {
+  return [
   {
-    heading: "He needed help.",
-    body: "Handala had been walking for days through the rubble of Khan Younis. He was bleeding. Someone told him: there is still a hospital — Nasser Medical Complex. It is the largest in the south. Go there.",
+    heading: "They needed help.",
+    body: `${charName} had been walking for days through the rubble of Khan Younis. They were bleeding. Someone told them: there is still a hospital — Nasser Medical Complex. It is the largest in the south. Go there.`,
     scene: false,
     hospital: true,
   },
@@ -99,11 +100,12 @@ const NASSER_PAGES = [
   },
   {
     heading: null,
-    body: "Handala reached the gate. He saw what remained. He sat down in the dust and held his bleeding leg. The crescent had been shelled. There was nowhere left to go.",
+    body: `${charName} reached the gate. They saw what remained. They sat down in the dust, holding a bleeding wound. The crescent had been shelled. There was nowhere left to go.`,
     scene: true,
     hospital: false,
   },
-];
+  ];
+}
 
 function NasserIntroPanel() {
   return (
@@ -278,7 +280,8 @@ function NasserHospitalScene() {
 
 // ─── Khalid & Reem Nabhan memorial story ─────────────────────────────────────
 
-const KHALID_PAGES = [
+function getKhalidPages(charName: string) {
+  return [
   {
     heading: "His name was Khalid Nabhan.",
     body: "He was a grandfather from Jabalia, northern Gaza. He called his granddaughter Reem روح الروح — the soul of his soul.",
@@ -305,15 +308,17 @@ const KHALID_PAGES = [
   },
   {
     heading: null,
-    body: "Handala found their graves among the ruins. He knelt. He placed a red rose for Reem — and one for Khalid. He stayed in silence. Then he kept walking south.",
+    body: `${charName} found their graves among the ruins. They knelt. They placed a red rose for Reem — and one for Khalid. They stayed in silence. Then they kept walking south.`,
     portrait: false,
     grave: true,
   },
-];
+  ];
+}
 
 // ─── Hind Rajab memorial story ────────────────────────────────────────────────
 
-const HIND_PAGES = [
+function getHindPages(charName: string) {
+  return [
   {
     heading: "Her name was Hind Rajab.",
     body: "She was six years old.",
@@ -334,17 +339,18 @@ const HIND_PAGES = [
   },
   {
     heading: "Twelve days later.",
-    body: "Her body was found. She was still inside the car. She was six years old. The same age as Handala.",
+    body: `Her body was found. She was still inside the car. She was six years old. The same age as ${charName}.`,
     portrait: false,
     car: false,
   },
   {
     heading: null,
-    body: "Handala stopped here. He placed a small wildflower against the door. He stood in silence. Then he walked on.",
+    body: `${charName} stopped here. They placed a small wildflower against the door. They stood in silence. Then they walked on.`,
     portrait: false,
     car: true,
   },
-];
+  ];
+}
 
 function HindPortrait() {
   return (
@@ -746,6 +752,13 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
   const charIndex = Number(sessionStorage.getItem("gz_char") || "0");
   const startStage = Number(sessionStorage.getItem("gz_stage") || "0");
 
+  const charName = CHARACTERS[charIndex].name.charAt(0).toUpperCase() + CHARACTERS[charIndex].name.slice(1).toLowerCase();
+  const companions = CHARACTERS.filter((_, i) => i !== charIndex).map(c => c.name.charAt(0).toUpperCase() + c.name.slice(1).toLowerCase());
+  const STORIES = getStageStories(charName, companions);
+  const HIND_PAGES = getHindPages(charName);
+  const KHALID_PAGES = getKhalidPages(charName);
+  const NASSER_PAGES = getNasserPages(charName);
+
   const [phase, setPhase] = useState<Phase>("story");
   const [stageIndex, setStageIndex] = useState(startStage);
   const [stageScore, setStageScore] = useState(0);
@@ -763,7 +776,7 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
   const inventoryRef = useRef<string[]>([]);
 
   const stageData = STAGE_DEFS[stageIndex];
-  const storyLines = STAGE_STORIES[stageIndex] || [];
+  const storyLines = STORIES[stageIndex] || [];
 
   // ─── Start / advance stage ───────────────────────────────────────────────
 
@@ -890,7 +903,7 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
         if (e.code === "Space" || e.code === "Enter") {
           e.preventDefault();
           setStoryLine((prev) => {
-            const lines = STAGE_STORIES[stageIndexRef.current] || [];
+            const lines = STORIES[stageIndexRef.current] || [];
             if (prev < lines.length - 1) return prev + 1;
             startStageGame(stageIndexRef.current);
             return 0;
@@ -1362,7 +1375,7 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
                 <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 13, color: "#ef4444", textShadow: "0 0 16px #ef444450", letterSpacing: 2, textAlign: "center" }}>EXIT GAME?</div>
                 <div style={{ background: "rgba(0,0,0,0.6)", border: "1px solid #44403c", borderRadius: 4, padding: "14px 24px", maxWidth: 340, textAlign: "center" }}>
                   <p style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 7, color: "#d4d4d4", lineHeight: 2.2, margin: 0 }}>
-                    Your progress in this stage will be lost. Handala is still waiting for you.
+                    Your progress in this stage will be lost. {charName} is still waiting for you.
                   </p>
                 </div>
                 <div style={{ display: "flex", gap: 12 }}>

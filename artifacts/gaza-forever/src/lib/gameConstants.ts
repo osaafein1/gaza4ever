@@ -4,10 +4,10 @@ export const GRAVITY = 1.1;
 export const FLOOR_Y = CANVAS_H - 100;
 
 export const CHARACTERS = [
-  { name: "AHMED",  color: "#3b82f6", maxHp: 100, moveSpeed: 6,   attackDamage: 22, blastCost: 200 },
-  { name: "KAREEM", color: "#22c55e", maxHp: 140, moveSpeed: 4.8, attackDamage: 20, blastCost: 220 },
-  { name: "MARIAM", color: "#f97316", maxHp: 80,  moveSpeed: 8.2, attackDamage: 32, blastCost: 180 },
-  { name: "SAMIR",  color: "#a78bfa", maxHp: 110, moveSpeed: 6,   attackDamage: 26, blastCost: 160 },
+  { name: "HANDALAH", color: "#3b82f6", maxHp: 100, moveSpeed: 6,   attackDamage: 22, blastCost: 200 },
+  { name: "KAREEM",   color: "#22c55e", maxHp: 140, moveSpeed: 4.8, attackDamage: 20, blastCost: 220 },
+  { name: "MARIAM",   color: "#f97316", maxHp: 80,  moveSpeed: 8.2, attackDamage: 32, blastCost: 180 },
+  { name: "FATIMAH",  color: "#a78bfa", maxHp: 110, moveSpeed: 6,   attackDamage: 26, blastCost: 160 },
 ];
 
 export const ENEMY_DEFS: Record<string, { hp: number; speed: number; w: number; h: number; dmg: number }> = {
@@ -183,50 +183,55 @@ export const STAGE_HISTORY: Record<number, { title: string; text: string; fact: 
   },
 };
 
-export const STAGE_STORIES: Record<number, string[]> = {
-  0: [
-    "Handala walks with the fighters out of the rubble.",
-    "Jabalia camp is burning behind them.",
-    "He carries nothing — only his sister's name.",
-    '"Nour is in Rafah. We will reach her."',
-    "Behind them: the ruins of Al-Fakhoura school.",
-    "Families sheltered there. Now it is dust.",
-    "STAGE 1 — ESCAPE JABALIA",
-  ],
-  1: [
-    "Gaza City. Once a living, breathing heart.",
-    "Now its streets are silence and dust.",
-    "Al-Shifa hospital rises ahead — dark, powerless.",
-    "Patients died when the electricity was cut.",
-    '"Every Palestinian child carries a key," Ahmed says.',
-    "STAGE 2 — CROSS GAZA CITY",
-  ],
-  2: [
-    "Nuseirat camp. A city inside a camp.",
-    "85,000 people living in the heart of Gaza.",
-    "Handala recognises the smell of the market.",
-    "His father used to bring him here on Fridays.",
-    "The market is gone. The mosque is rubble.",
-    '"Keep moving," Mariam says. "Nour is waiting."',
-    "STAGE 3 — THROUGH NUSEIRAT",
-  ],
-  3: [
-    "Khan Younis. Hundreds of thousands on the road.",
-    "Handala walks between Mariam and Kareem.",
-    "He is small but he does not slow them down.",
-    "The ancient fortress crumbles. Nasser hospital is dark.",
-    '"Even the birds must escape," Samir whispers.',
-    "One more stop. Nour is close.",
-    "STAGE 4 — THROUGH KHAN YOUNIS",
-  ],
-  4: [
-    "Rafah. The border shimmers in the morning light.",
-    "Over a million people have gathered here.",
-    "Handala runs ahead, scanning every face.",
-    "Then — a voice. His name. Her voice.",
-    '"Handala!"',
-    "Nour is alive. But the crossing is blocked.",
-    "Fight through. Together. Freedom is one step away.",
-    "STAGE 5 — REACH RAFAH",
-  ],
-};
+export function getStageStories(charName: string, companions: string[]): Record<number, string[]> {
+  const c0 = companions[0] ?? "Kareem";
+  const c1 = companions[1] ?? "Mariam";
+  const c2 = companions[2] ?? "Fatimah";
+  return {
+    0: [
+      `${charName} walks with the fighters out of the rubble.`,
+      "Jabalia camp is burning behind them.",
+      "They carry nothing — only a sister's name.",
+      '"Nour is in Rafah. We will reach her."',
+      "Behind them: the ruins of Al-Fakhoura school.",
+      "Families sheltered there. Now it is dust.",
+      "STAGE 1 — ESCAPE JABALIA",
+    ],
+    1: [
+      "Gaza City. Once a living, breathing heart.",
+      "Now its streets are silence and dust.",
+      "Al-Shifa hospital rises ahead — dark, powerless.",
+      "Patients died when the electricity was cut.",
+      `"Every Palestinian child carries a key," ${c0} says.`,
+      "STAGE 2 — CROSS GAZA CITY",
+    ],
+    2: [
+      "Nuseirat camp. A city inside a camp.",
+      "85,000 people living in the heart of Gaza.",
+      `${charName} recognises the smell of the market.`,
+      "Their family used to come here on Fridays.",
+      "The market is gone. The mosque is rubble.",
+      `"Keep moving," ${c1} says. "Nour is waiting."`,
+      "STAGE 3 — THROUGH NUSEIRAT",
+    ],
+    3: [
+      "Khan Younis. Hundreds of thousands on the road.",
+      `${charName} walks between ${c0} and ${c1}.`,
+      "Together they move through the dust.",
+      "The ancient fortress crumbles. Nasser hospital is dark.",
+      `"Even the birds must escape," ${c2} whispers.`,
+      "One more stop. Nour is close.",
+      "STAGE 4 — THROUGH KHAN YOUNIS",
+    ],
+    4: [
+      "Rafah. The border shimmers in the morning light.",
+      "Over a million people have gathered here.",
+      `${charName} runs ahead, scanning every face.`,
+      "Then — a voice. Their name. Her voice.",
+      `"${charName}!"`,
+      "Nour is alive. But the crossing is blocked.",
+      "Fight through. Together. Freedom is one step away.",
+      "STAGE 5 — REACH RAFAH",
+    ],
+  };
+}

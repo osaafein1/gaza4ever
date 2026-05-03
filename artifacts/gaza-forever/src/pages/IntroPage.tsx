@@ -99,24 +99,24 @@ function WatermelonWhole({ size = 60 }: { size?: number }) {
 
 const STORY_PARAGRAPHS = [
   { text: "In the heart of the Jabalia refugee camp in northern Gaza Strip lived a six-year-old boy.", emphasis: false },
-  { text: "His name was Handala.", emphasis: true },
-  { text: "He had a mother who sang him to sleep, a father who lifted him on his shoulders, and two sisters who made the small house feel full.", emphasis: false },
-  { text: "Every night his mother told him:", emphasis: false },
+  { text: "Their name was Handalah.", emphasis: true },
+  { text: "They had a mother who sang them to sleep, a father who lifted them on his shoulders, and two sisters who made the small house feel full.", emphasis: false },
+  { text: "Every night their mother told them:", emphasis: false },
   { text: '"Jabalia is our roots. One day we will return to our land."', emphasis: true },
   { text: "Then one night, the bombs came.", emphasis: false },
   { text: "The occupation forces struck the whole neighbourhood. Buildings became dust. The camp became silence.", emphasis: false },
-  { text: "Handala survived. His family did not.", emphasis: true },
-  { text: "He hid alone in the rubble for days — no food, no water, no voice to call his name.", emphasis: false },
-  { text: "Then a neighbour found him. She carried one piece of news:", emphasis: false },
-  { text: "His older sister Nour had escaped before the strike.", emphasis: false },
+  { text: "Handalah survived. Their family did not.", emphasis: true },
+  { text: "They hid alone in the rubble for days — no food, no water, no voice to call their name.", emphasis: false },
+  { text: "Then a neighbour found them. She carried one piece of news:", emphasis: false },
+  { text: "Their older sister Nour had escaped before the strike.", emphasis: false },
   { text: "She had made it south — all the way to Rafah.", emphasis: true },
   { text: "She was alive. She was waiting.", emphasis: false },
-  { text: "Handala made a decision.", emphasis: false },
-  { text: "He would walk south through Gaza City, through Khan Younis, all the way to the Rafah crossing.", emphasis: false },
-  { text: "On the road out of Jabalia, he met four survivors who would protect him:", emphasis: false },
-  { text: "Ahmed. Kareem. Mariam. Samir.", emphasis: true },
+  { text: "Handalah made a decision.", emphasis: false },
+  { text: "They would walk south through Gaza City, through Khan Younis, all the way to the Rafah crossing.", emphasis: false },
+  { text: "On the road out of Jabalia, they met three survivors who would protect them:", emphasis: false },
+  { text: "Handalah. Kareem. Mariam. Fatimah.", emphasis: true },
   { text: "Together they would fight through every district. Every checkpoint. Every wave of soldiers.", emphasis: false },
-  { text: "Because one word kept Handala moving:", emphasis: false },
+  { text: "Because one word kept Handalah moving:", emphasis: false },
   { text: "Nour.", emphasis: true },
   { text: "Light.", emphasis: true },
   { text: "Palestine will be free.", emphasis: true },
@@ -275,7 +275,7 @@ export default function IntroPage({ onMusicStart }: IntroPageProps) {
 
           {/* Title — only Handala's name in Arabic */}
           <div style={{ fontFamily: ar, fontSize: 56, color: "#f97316", textShadow: "0 0 30px #f9731660", direction: "rtl", marginBottom: 6, letterSpacing: 2 }}>حنظلة</div>
-          <div style={{ fontFamily: px, fontSize: 16, color: "#fff", letterSpacing: 5, marginBottom: 8 }}>HANDALA</div>
+          <div style={{ fontFamily: px, fontSize: 16, color: "#fff", letterSpacing: 5, marginBottom: 8 }}>HANDALAH</div>
           <div style={{ fontFamily: px, fontSize: 7.5, color: "#78716c", letterSpacing: 2, marginBottom: 44 }}>A BOY FROM JABALIA REFUGEE CAMP</div>
 
           {/* Olive separator */}

@@ -95,13 +95,13 @@ export default function MenuPage({ onMusicStart }: MenuPageProps) {
           {/* Story + Intro button */}
           <div style={{ background: "rgba(0,0,0,0.7)", border: "1px solid #44403c", borderRadius: 4, padding: "10px 14px", maxWidth: 520, marginBottom: 10, textAlign: "center", position: "relative" }}>
             <p style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 5.5, color: "#d4d4d4", lineHeight: 2, margin: 0, marginBottom: 8 }}>
-              Handala, age 6, lost his family in Jabalia. His sister Nour survived — she made it to Rafah. He must reach her. Four defenders rise to protect him on the road south.
+              Handalah, age 6, lost their family in Jabalia. Their sister Nour survived — she made it to Rafah. They must reach her. Three defenders rise to protect them on the road south.
             </p>
             <button
               onClick={() => navigate("/intro")}
               style={{ background: "rgba(249,115,22,0.12)", border: "1px solid #f97316", borderRadius: 3, padding: "5px 14px", cursor: "pointer", fontFamily: "'Press Start 2P', monospace", fontSize: 5.5, color: "#f97316", letterSpacing: 1 }}
             >
-              📖  READ HANDALA'S STORY
+              📖  READ HANDALAH'S STORY
             </button>
           </div>
 
