@@ -1,4 +1,4 @@
-import { Switch, Route, Router as WouterRouter, useLocation } from "wouter";
+import { Switch, Route, Router as WouterRouter, useLocation, Redirect } from "wouter";
 import { useState, useCallback } from "react";
 import MenuPage from "./pages/MenuPage";
 import GamePage from "./pages/GamePage";
@@ -37,7 +37,14 @@ function AppInner() {
           {() => <IntroPage onMusicStart={handleMusicStart} />}
         </Route>
         <Route path="/">
-          {() => <MenuPage onMusicStart={handleMusicStart} />}
+          {() => {
+            const seen = sessionStorage.getItem("gz_intro_seen");
+            if (!seen) {
+              sessionStorage.setItem("gz_intro_seen", "1");
+              return <Redirect to="/intro" />;
+            }
+            return <MenuPage onMusicStart={handleMusicStart} />;
+          }}
         </Route>
         <Route path="/game">
           {() => <GamePage onMusicStart={handleMusicStart} />}
