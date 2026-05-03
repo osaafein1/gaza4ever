@@ -17,7 +17,7 @@ import {
 import type { GameState, Enemy, Particle, Summon } from "../lib/gameTypes";
 import { startMusic } from "../lib/music";
 
-type Phase = "story" | "playing" | "stage-clear" | "win" | "dead" | "hind-story";
+type Phase = "story" | "playing" | "stage-clear" | "win" | "dead" | "hind-story" | "khalid-story";
 
 interface GamePageProps {
   onMusicStart?: () => void;
@@ -69,6 +69,41 @@ function HistoryCard({ stageIndex, stageColor }: { stageIndex: number; stageColo
     </div>
   );
 }
+
+// ─── Khalid & Reem Nabhan memorial story ─────────────────────────────────────
+
+const KHALID_PAGES = [
+  {
+    heading: "His name was Khalid Nabhan.",
+    body: "He was a grandfather from Jabalia, northern Gaza. He called his granddaughter Reem روح الروح — the soul of his soul.",
+    portrait: true,
+    grave: false,
+  },
+  {
+    heading: "October 2023 — Jabalia",
+    body: "When Israeli bombs fell on Jabalia refugee camp, Reem Nabhan was killed. She was a small child — the light of her grandfather's world. Khalid appeared on camera, searching for words that could hold the weight of her loss.",
+    portrait: false,
+    grave: false,
+  },
+  {
+    heading: '"She was everything to me."',
+    body: '"I loved her so much. She used to play beside me every morning. Now I sit and she does not come." His words reached the world. They became a symbol of what Gaza had lost — not a statistic, but a name, a laugh, a presence.',
+    portrait: false,
+    grave: false,
+  },
+  {
+    heading: "Then Khalid too was gone.",
+    body: "Months later, Khalid Nabhan was also killed in the bombardment of Gaza. The grandfather who mourned his granddaughter now rested beside her. Two souls — reunited in the rubble of Jabalia.",
+    portrait: false,
+    grave: false,
+  },
+  {
+    heading: null,
+    body: "Handala found their graves among the ruins. He knelt. He placed a red rose for Reem — and one for Khalid. He stayed in silence. Then he kept walking south.",
+    portrait: false,
+    grave: true,
+  },
+];
 
 // ─── Hind Rajab memorial story ────────────────────────────────────────────────
 
@@ -274,6 +309,182 @@ function HindCarScene() {
   );
 }
 
+function KhalidPortrait() {
+  return (
+    <svg viewBox="0 0 120 170" width={196} height={277} style={{ display: "block", filter: "drop-shadow(0 0 22px rgba(34,197,94,0.25))" }}>
+      <defs>
+        <radialGradient id="khalo" cx="50%" cy="44%" r="56%">
+          <stop offset="0%" stopColor="#22c55e" stopOpacity="0.14" />
+          <stop offset="100%" stopColor="#22c55e" stopOpacity="0" />
+        </radialGradient>
+      </defs>
+      <circle cx="60" cy="80" r="62" fill="url(#khalo)" />
+      {/* BODY — white Palestinian thobe */}
+      <path d="M 12 170 L 6 108 Q 60 130 114 108 L 108 170 Z" fill="#e8e3d6" />
+      <path d="M 46 112 L 60 120 L 74 112 L 74 109 L 60 117 L 46 109 Z" fill="#ccc8b8" />
+      {/* NECK */}
+      <rect x="52" y="98" width="16" height="16" rx="4" fill="#8a6a50" />
+      {/* HEAD */}
+      <circle cx="60" cy="72" r="36" fill="#8a6a50" />
+      {/* Cheeks (aged) */}
+      <ellipse cx="36" cy="78" rx="9" ry="7" fill="#7a5840" opacity="0.25" />
+      <ellipse cx="84" cy="78" rx="9" ry="7" fill="#7a5840" opacity="0.25" />
+      {/* KEFFIYEH dome (white, top of head only) */}
+      <path d="M 24 62 Q 24 34 60 30 Q 96 34 96 62 Q 80 56 60 56 Q 40 56 24 62 Z" fill="#f5f0e6" />
+      {/* Folded forehead band */}
+      <path d="M 24 62 Q 60 58 96 62 Q 60 64 24 62 Z" fill="#e0d8c4" />
+      {/* Check grid on dome */}
+      <path d="M 28 50 Q 60 48 92 50" stroke="#2a1a0a" strokeWidth="0.7" fill="none" opacity="0.12" />
+      <path d="M 26 42 Q 60 40 94 42" stroke="#2a1a0a" strokeWidth="0.7" fill="none" opacity="0.10" />
+      <path d="M 60 56 L 60 30" stroke="#2a1a0a" strokeWidth="0.6" opacity="0.09" />
+      <path d="M 43 54 L 45 32" stroke="#2a1a0a" strokeWidth="0.6" opacity="0.08" />
+      <path d="M 77 54 L 75 32" stroke="#2a1a0a" strokeWidth="0.6" opacity="0.08" />
+      {/* Left drape */}
+      <path d="M 24 64 Q 14 80 12 102 L 20 100 Q 20 82 26 68 Z" fill="#f0ebe0" opacity="0.9" />
+      {/* EARS */}
+      <ellipse cx="24" cy="74" rx="5" ry="6" fill="#7a5840" />
+      <ellipse cx="96" cy="74" rx="5" ry="6" fill="#7a5840" />
+      {/* EYES — aged, deep-set, sorrowful */}
+      <path d="M 54 65 Q 44 61 32 66" fill="none" stroke="#6a4828" strokeWidth="0.9" opacity="0.32" />
+      <path d="M 66 65 Q 76 61 88 66" fill="none" stroke="#6a4828" strokeWidth="0.9" opacity="0.32" />
+      <path d="M 33 75 Q 44 79 55 75" fill="none" stroke="#7a5838" strokeWidth="0.9" opacity="0.28" />
+      <path d="M 65 75 Q 76 79 87 75" fill="none" stroke="#7a5838" strokeWidth="0.9" opacity="0.28" />
+      {/* Left eye */}
+      <ellipse cx="44" cy="70" rx="10" ry="10" fill="white" />
+      <ellipse cx="44" cy="71" rx="7.5" ry="8" fill="#3d2010" />
+      <circle cx="44" cy="71" r="4.8" fill="#080300" />
+      <circle cx="46.5" cy="68" r="2.5" fill="white" />
+      {/* Right eye */}
+      <ellipse cx="76" cy="70" rx="10" ry="10" fill="white" />
+      <ellipse cx="76" cy="71" rx="7.5" ry="8" fill="#3d2010" />
+      <circle cx="76" cy="71" r="4.8" fill="#080300" />
+      <circle cx="78.5" cy="68" r="2.5" fill="white" />
+      {/* EYEBROWS — bushy, grey-white, elderly */}
+      <path d="M 32 60 Q 44 54 56 60" fill="none" stroke="#b8b0a0" strokeWidth="4" strokeLinecap="round" />
+      <path d="M 88 60 Q 76 54 64 60" fill="none" stroke="#b8b0a0" strokeWidth="4" strokeLinecap="round" />
+      {/* NOSE */}
+      <path d="M 56 78 Q 56 85 60 87 Q 64 85 64 78" fill="none" stroke="#7a5838" strokeWidth="1.8" strokeLinecap="round" />
+      <circle cx="57" cy="86" r="2" fill="#7a5838" opacity="0.55" />
+      <circle cx="63" cy="86" r="2" fill="#7a5838" opacity="0.55" />
+      {/* MOUTH — downturned with grief */}
+      <path d="M 46 94 Q 60 91 74 94" fill="none" stroke="#6a4020" strokeWidth="2" strokeLinecap="round" />
+      <path d="M 46 94 Q 50 98 54 97" fill="none" stroke="#6a4020" strokeWidth="1.1" strokeLinecap="round" opacity="0.45" />
+      <path d="M 74 94 Q 70 98 66 97" fill="none" stroke="#6a4020" strokeWidth="1.1" strokeLinecap="round" opacity="0.45" />
+      {/* FULL WHITE BEARD — dignified Palestinian elder */}
+      <path d="M 24 84 Q 20 104 24 120 Q 38 132 60 134 Q 82 132 96 120 Q 100 104 96 84 Q 80 94 60 94 Q 40 94 24 84 Z" fill="#f0ece4" />
+      <path d="M 30 90 Q 28 110 30 122" fill="none" stroke="#ddd8cc" strokeWidth="1" opacity="0.6" />
+      <path d="M 44 95 Q 44 116 46 128" fill="none" stroke="#ddd8cc" strokeWidth="1" opacity="0.5" />
+      <path d="M 60 96 L 60 132" fill="none" stroke="#ddd8cc" strokeWidth="1" opacity="0.5" />
+      <path d="M 76 95 Q 76 116 74 128" fill="none" stroke="#ddd8cc" strokeWidth="1" opacity="0.5" />
+      <path d="M 90 90 Q 92 110 90 122" fill="none" stroke="#ddd8cc" strokeWidth="1" opacity="0.6" />
+      <path d="M 46 93 Q 60 90 74 93" fill="none" stroke="#e4e0d8" strokeWidth="3.5" strokeLinecap="round" />
+      {/* Small photo frame — Reem */}
+      <rect x="72" y="20" width="38" height="46" rx="3" fill="#1e1206" />
+      <rect x="74" y="22" width="34" height="42" rx="2" fill="#120a04" />
+      {/* Child face */}
+      <circle cx="91" cy="36" r="10" fill="#c8916a" opacity="0.75" />
+      <path d="M 81 32 Q 81 23 91 23 Q 101 23 101 32 L 98 27 Q 91 21 84 27 Z" fill="#1a0a04" opacity="0.82" />
+      <path d="M 86 40 Q 91 44 96 40" fill="none" stroke="#8a5030" strokeWidth="1.5" strokeLinecap="round" opacity="0.82" />
+      <circle cx="87" cy="35" r="2.4" fill="#060200" opacity="0.8" />
+      <circle cx="95" cy="35" r="2.4" fill="#060200" opacity="0.8" />
+      <rect x="72" y="20" width="38" height="46" rx="3" fill="none" stroke="#8a6840" strokeWidth="1.2" />
+      <text x="91" y="73" textAnchor="middle" fill="#fca5a5" fontSize="8" fontFamily="'Noto Sans Arabic', Arial, sans-serif" opacity="0.88">ريم</text>
+    </svg>
+  );
+}
+
+function KhalidGraveScene() {
+  const stars: [number, number][] = [[55,18],[110,10],[195,26],[295,8],[415,16],[498,22],[572,12],[78,38],[444,34],[530,48]];
+  const rubble: [number,number,number,number][] = [[170,203,22,8],[205,199,14,6],[558,204,18,7],[585,200,12,5],[348,203,16,6],[430,201,20,7]];
+  return (
+    <svg viewBox="0 0 640 240" width={620} height={233} style={{ display: "block", borderRadius: 6, maxWidth: "100%" }}>
+      <defs>
+        <linearGradient id="gsky" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#040c04" />
+          <stop offset="55%" stopColor="#0a1a0a" />
+          <stop offset="100%" stopColor="#050a05" />
+        </linearGradient>
+        <radialGradient id="gamb" cx="50%" cy="92%" r="52%">
+          <stop offset="0%" stopColor="#14532d" stopOpacity="0.22" />
+          <stop offset="100%" stopColor="#14532d" stopOpacity="0" />
+        </radialGradient>
+        <filter id="gbl"><feGaussianBlur stdDeviation="5" /></filter>
+        <filter id="gbl2"><feGaussianBlur stdDeviation="2.5" /></filter>
+      </defs>
+      {/* Sky */}
+      <rect width="640" height="240" fill="url(#gsky)" />
+      <rect width="640" height="240" fill="url(#gamb)" />
+      {/* Stars */}
+      {stars.map(([sx, sy], i) => (
+        <circle key={i} cx={sx} cy={sy} r={1.2} fill="#fff" opacity={0.35 + i * 0.04} />
+      ))}
+      {/* Crescent moon */}
+      <circle cx="580" cy="30" r="13" fill="#0a1a0a" />
+      <circle cx="574" cy="28" r="10" fill="#1a2d1a" />
+      {/* Ruined buildings silhouette */}
+      <path d="M 0 162 L 48 162 L 48 112 L 68 90 L 88 112 L 88 132 L 118 132 L 118 102 L 138 80 L 158 102 L 158 162 L 198 162 L 198 122 L 218 100 L 238 122 L 238 162 L 640 162 L 640 200 L 0 200 Z" fill="#0a0e08" />
+      {[[64,106],[128,108],[212,114]].map(([wx, wy], i) => (
+        <rect key={i} x={wx} y={wy} width="12" height="14" rx="1" fill="#141a10" opacity="0.8" />
+      ))}
+      {/* Ground */}
+      <rect x="0" y="200" width="640" height="40" fill="#0a0e08" />
+      <path d="M 0 200 Q 80 196 160 200 Q 240 204 320 200 Q 400 196 480 200 Q 560 204 640 200" fill="none" stroke="#141a10" strokeWidth="2" />
+      {/* Rubble */}
+      {rubble.map(([rx, ry, rw, rh], i) => (
+        <ellipse key={i} cx={rx} cy={ry} rx={rw} ry={rh} fill="#101408" opacity={0.8} />
+      ))}
+      {/* ── Reem's grave (left, smaller — a child) ── */}
+      <ellipse cx="248" cy="204" rx="50" ry="9" fill="#0a0e08" opacity="0.7" filter="url(#gbl2)" />
+      <ellipse cx="248" cy="200" rx="44" ry="14" fill="#161a10" />
+      <ellipse cx="248" cy="195" rx="40" ry="10" fill="#1a1e12" />
+      {/* Stone marker — Reem */}
+      <path d="M 238 194 L 238 172 Q 248 163 258 172 L 258 194 Z" fill="#20261a" />
+      <path d="M 236 172 Q 248 161 260 172" fill="none" stroke="#2a3020" strokeWidth="1.5" />
+      <text x="248" y="186" textAnchor="middle" fill="#fca5a5" fontSize="9" fontFamily="'Noto Sans Arabic', Arial, sans-serif" opacity="0.72">ريم</text>
+      {/* ── Khalid's grave (right, larger — adult) ── */}
+      <ellipse cx="392" cy="204" rx="62" ry="10" fill="#0a0e08" opacity="0.7" filter="url(#gbl2)" />
+      <ellipse cx="392" cy="200" rx="56" ry="16" fill="#161a10" />
+      <ellipse cx="392" cy="194" rx="52" ry="11" fill="#1a1e12" />
+      {/* Stone marker — Khalid */}
+      <path d="M 380 193 L 380 168 Q 392 157 404 168 L 404 193 Z" fill="#20261a" />
+      <path d="M 378 168 Q 392 155 406 168" fill="none" stroke="#2a3020" strokeWidth="1.5" />
+      <text x="392" y="179" textAnchor="middle" fill="#bbf7d0" fontSize="8" fontFamily="'Noto Sans Arabic', Arial, sans-serif" opacity="0.72">خالد</text>
+      <text x="392" y="190" textAnchor="middle" fill="#86efac" fontSize="6" fontFamily="'Noto Sans Arabic', Arial, sans-serif" opacity="0.55">روح الروح</text>
+      {/* ── Red rose on Reem's grave ── */}
+      <path d="M 250 197 Q 251 182 250 170" fill="none" stroke="#4d7c0f" strokeWidth="2.2" strokeLinecap="round" />
+      <path d="M 250 182 Q 257 177 259 182 Q 255 187 250 182 Z" fill="#4d7c0f" />
+      {[0,45,90,135,180,225,270,315].map((deg, i) => {
+        const rad = (deg * Math.PI) / 180;
+        return <ellipse key={i} cx={250 + Math.cos(rad) * 6.5} cy={170 + Math.sin(rad) * 6.5} rx="4" ry="2.5" fill="#dc2626" opacity="0.92" transform={`rotate(${deg},${250 + Math.cos(rad) * 6.5},${170 + Math.sin(rad) * 6.5})`} />;
+      })}
+      <circle cx="250" cy="170" r="3.8" fill="#b91010" />
+      {/* ── Red rose on Khalid's grave ── */}
+      <path d="M 394 195 Q 395 179 394 166" fill="none" stroke="#4d7c0f" strokeWidth="2.2" strokeLinecap="round" />
+      <path d="M 394 179 Q 401 174 403 179 Q 399 184 394 179 Z" fill="#4d7c0f" />
+      {[0,45,90,135,180,225,270,315].map((deg, i) => {
+        const rad = (deg * Math.PI) / 180;
+        return <ellipse key={i} cx={394 + Math.cos(rad) * 6.5} cy={166 + Math.sin(rad) * 6.5} rx="4" ry="2.5" fill="#dc2626" opacity="0.92" transform={`rotate(${deg},${394 + Math.cos(rad) * 6.5},${166 + Math.sin(rad) * 6.5})`} />;
+      })}
+      <circle cx="394" cy="166" r="3.8" fill="#b91010" />
+      {/* ── HANDALA — kneeling silhouette between the graves ── */}
+      <ellipse cx="318" cy="204" rx="18" ry="4" fill="#000" opacity="0.4" />
+      {/* Knees/lower legs */}
+      <rect x="308" y="192" width="8" height="12" rx="3" fill="#161a10" />
+      <rect x="320" y="192" width="8" height="12" rx="3" fill="#161a10" />
+      {/* Body */}
+      <rect x="304" y="174" width="24" height="20" rx="4" fill="#141810" />
+      {/* Arms extended to place roses */}
+      <path d="M 304 180 Q 278 177 260 184" fill="none" stroke="#141810" strokeWidth="8" strokeLinecap="round" />
+      <path d="M 328 180 Q 354 177 370 182" fill="none" stroke="#141810" strokeWidth="8" strokeLinecap="round" />
+      {/* Head bowed in grief */}
+      <circle cx="316" cy="165" r="13" fill="#1a1e14" />
+      <path d="M 304 160 Q 304 152 316 152 Q 328 152 328 160 L 324 164 L 308 164 Z" fill="#262c1e" opacity="0.9" />
+      {/* Caption */}
+      <text x="320" y="18" textAnchor="middle" fill="#86efac" fontSize="9" fontFamily="monospace" fontWeight="bold" opacity="0.55">JABALIA, NORTHERN GAZA · 2023</text>
+    </svg>
+  );
+}
+
 function buildInitialState(charIndex: number, stageIndex: number): GameState {
   const stageDef = STAGE_DEFS[stageIndex];
   return {
@@ -430,6 +641,8 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
   const [allyCD, setAllyCD] = useState<[number, number, number]>([0, 0, 0]);
   const [hindPage, setHindPage] = useState(0);
   const showHindRef = useRef(startStage === 1);
+  const [khalidPage, setKhalidPage] = useState(0);
+  const showKhalidRef = useRef(startStage === 2);
   const [waveKills, setWaveKills] = useState(0);
   const [waveTarget, setWaveTarget] = useState(0);
   const [waveNum, setWaveNum] = useState(0);
@@ -489,6 +702,18 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
         }
         return;
       }
+      if (phaseRef.current === "khalid-story") {
+        if (e.code === "Space" || e.code === "Enter") {
+          e.preventDefault();
+          setKhalidPage((prev) => {
+            if (prev < KHALID_PAGES.length - 1) return prev + 1;
+            setPhase("story");
+            phaseRef.current = "story";
+            return 0;
+          });
+        }
+        return;
+      }
       if (phaseRef.current === "stage-clear") {
         if (e.code === "Space" || e.code === "Enter") {
           e.preventDefault();
@@ -498,6 +723,7 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
             phaseRef.current = "win";
           } else {
             if (next === 1) showHindRef.current = true;
+            if (next === 2) showKhalidRef.current = true;
             stageIndexRef.current = next;
             setStageIndex(next);
             setStoryLine(0);
@@ -781,6 +1007,11 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
       setHindPage(0);
       setPhase("hind-story");
       phaseRef.current = "hind-story";
+    } else if (showKhalidRef.current) {
+      showKhalidRef.current = false;
+      setKhalidPage(0);
+      setPhase("khalid-story");
+      phaseRef.current = "khalid-story";
     } else {
       setPhase("story");
       phaseRef.current = "story";
@@ -1050,6 +1281,78 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
                   ))}
                 </div>
                 <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 10, color: "#ef444488", animation: "blink 1.1s step-end infinite" }}>
+                  {isLast ? "SPACE / ENTER  ▶  BEGIN" : "SPACE / ENTER  ▶  CONTINUE"}
+                </div>
+              </div>
+              <FlagBar />
+            </div>
+          );
+        })()}
+
+        {/* ── KHALID & REEM NABHAN MEMORIAL ───────────────────────── */}
+        {phase === "khalid-story" && (() => {
+          const pg = KHALID_PAGES[khalidPage] ?? KHALID_PAGES[0];
+          const isLast = khalidPage === KHALID_PAGES.length - 1;
+          const isFirst = khalidPage === 0;
+          return (
+            <div style={{ position: "absolute", inset: 0, background: "#030a03", display: "flex", flexDirection: "column", overflow: "hidden" }}>
+              <FlagBar />
+
+              {/* ── Portrait page ── */}
+              {isFirst ? (
+                <div style={{ flex: 1, display: "flex", alignItems: "stretch" }}>
+                  {/* Left — portrait */}
+                  <div style={{ width: 270, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", borderRight: "1px solid #14532d", background: "rgba(20,83,45,0.08)", padding: "24px 16px", gap: 14 }}>
+                    <KhalidPortrait />
+                    <div style={{ fontFamily: "'Noto Sans Arabic', 'Arial', sans-serif", fontSize: 26, color: "#22c55e", direction: "rtl", opacity: 0.88 }}>خالد نبهان</div>
+                    <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 7, color: "#86efac", textAlign: "center", lineHeight: 1.8 }}>& Reem Nabhan</div>
+                  </div>
+                  {/* Right — text */}
+                  <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "36px 44px", gap: 22 }}>
+                    <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 6.5, color: "#22c55e88", letterSpacing: 3, textTransform: "uppercase" }}>IN MEMORY OF</div>
+                    <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 22, color: "#22c55e", textShadow: "0 0 32px #22c55e60", lineHeight: 1.7, textAlign: "center" }}>
+                      {pg.heading}
+                    </div>
+                    <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 14, color: "#bbf7d0", lineHeight: 2.1, textAlign: "center" }}>
+                      {pg.body}
+                    </div>
+                    <div style={{ fontFamily: "'Noto Sans Arabic', 'Arial', sans-serif", fontSize: 32, color: "#dc2626", direction: "rtl", lineHeight: 1.6, textAlign: "center", opacity: 0.88, textShadow: "0 0 20px #dc262640" }}>
+                      روح الروح
+                    </div>
+                  </div>
+                </div>
+              ) : pg.grave ? (
+                /* ── Grave scene (last page) ── */
+                <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 22, padding: "18px 24px" }}>
+                  <KhalidGraveScene />
+                  <div style={{ maxWidth: 580, textAlign: "center", padding: "0 8px" }}>
+                    <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 10, color: "#d4d4d4", lineHeight: 2.2 }}>
+                      {pg.body}
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                /* ── Text-only pages ── */
+                <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "36px 60px", gap: 28 }}>
+                  {pg.heading && (
+                    <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 18, color: "#22c55e", textShadow: "0 0 24px #22c55e50", lineHeight: 1.8, textAlign: "center" }}>
+                      {pg.heading}
+                    </div>
+                  )}
+                  <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 11, color: "#bbf7d0", lineHeight: 2.4, textAlign: "center", maxWidth: 700 }}>
+                    {pg.body}
+                  </div>
+                </div>
+              )}
+
+              {/* Bottom bar */}
+              <div style={{ borderTop: "1px solid #14532d", padding: "14px 24px", display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
+                <div style={{ display: "flex", gap: 7 }}>
+                  {KHALID_PAGES.map((_, i) => (
+                    <div key={i} style={{ width: 7, height: 7, borderRadius: "50%", background: i === khalidPage ? "#22c55e" : i < khalidPage ? "#14532d" : "#0a1f0a", border: `1px solid ${i === khalidPage ? "#22c55e" : "#14532d"}`, transition: "all 0.2s" }} />
+                  ))}
+                </div>
+                <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 10, color: "#22c55e88", animation: "blink 1.1s step-end infinite" }}>
                   {isLast ? "SPACE / ENTER  ▶  BEGIN" : "SPACE / ENTER  ▶  CONTINUE"}
                 </div>
               </div>
