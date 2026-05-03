@@ -17,7 +17,7 @@ import {
 import type { GameState, Enemy, Particle, Summon } from "../lib/gameTypes";
 import { startMusic } from "../lib/music";
 
-type Phase = "story" | "playing" | "stage-clear" | "win" | "dead" | "hind-story" | "khalid-story";
+type Phase = "story" | "playing" | "stage-clear" | "win" | "dead" | "hind-story" | "khalid-story" | "nasser-story";
 
 interface GamePageProps {
   onMusicStart?: () => void;
@@ -67,6 +67,212 @@ function HistoryCard({ stageIndex, stageColor }: { stageIndex: number; stageColo
         </div>
       )}
     </div>
+  );
+}
+
+// ─── Nasser Hospital / Khan Younis story ─────────────────────────────────────
+
+const NASSER_PAGES = [
+  {
+    heading: "He needed help.",
+    body: "Handala had been walking for days through the rubble of Khan Younis. He was bleeding. Someone told him: there is still a hospital — Nasser Medical Complex. It is the largest in the south. Go there.",
+    scene: false,
+    hospital: true,
+  },
+  {
+    heading: "Nasser Medical Complex",
+    body: "For months it stood as the last refuge. Thousands of wounded arrived — children with no limbs, parents carrying dead sons. Doctors worked without electricity, without anaesthetic, operating by the light of mobile phones.",
+    scene: false,
+    hospital: false,
+  },
+  {
+    heading: "February 2024",
+    body: "Israeli forces surrounded the hospital. Armoured vehicles sealed every road. Soldiers entered the wards. Patients on ventilators were left to die when the generators were cut. Dozens of medical staff were dragged out, blindfolded, and detained.",
+    scene: false,
+    hospital: false,
+  },
+  {
+    heading: "The snipers were still there.",
+    body: "After the raid, Israeli snipers positioned on the hospital rooftops and surrounding buildings shot anyone who came close. A nurse. A father carrying his child. An ambulance driver. The road to the hospital became a killing ground.",
+    scene: false,
+    hospital: false,
+  },
+  {
+    heading: null,
+    body: "Handala reached the gate. He saw what remained. He sat down in the dust and held his bleeding leg. The crescent had been shelled. There was nowhere left to go.",
+    scene: true,
+    hospital: false,
+  },
+];
+
+function NasserIntroPanel() {
+  return (
+    <svg viewBox="0 0 120 170" width={196} height={277} style={{ display: "block", filter: "drop-shadow(0 0 22px rgba(239,68,68,0.22))" }}>
+      <defs>
+        <radialGradient id="nhalo" cx="50%" cy="55%" r="56%">
+          <stop offset="0%" stopColor="#ef4444" stopOpacity="0.13" />
+          <stop offset="100%" stopColor="#ef4444" stopOpacity="0" />
+        </radialGradient>
+      </defs>
+      <circle cx="60" cy="90" r="64" fill="url(#nhalo)" />
+      {/* Hospital building silhouette */}
+      <rect x="10" y="70" width="100" height="80" rx="2" fill="#141008" />
+      <rect x="18" y="58" width="84" height="16" rx="2" fill="#181408" />
+      <rect x="30" y="46" width="60" height="16" rx="2" fill="#1a1608" />
+      {/* Broken windows */}
+      {[[18,78],[40,78],[62,78],[84,78],[18,100],[40,100],[62,100],[84,100],[18,122],[40,122],[62,122],[84,122]].map(([wx,wy],i) => (
+        <rect key={i} x={wx} y={wy} width="14" height="14" rx="1" fill={i%3===1?"#0a0806":"#0d0a06"} opacity={0.9} />
+      ))}
+      {/* Cracked/broken window overlays */}
+      <line x1="18" y1="78" x2="32" y2="92" stroke="#050402" strokeWidth="0.8" opacity="0.7" />
+      <line x1="62" y1="100" x2="76" y2="114" stroke="#050402" strokeWidth="0.8" opacity="0.7" />
+      {/* Red Crescent symbol — damaged */}
+      <text x="60" y="68" textAnchor="middle" fill="#dc2626" fontSize="18" fontFamily="serif" opacity="0.75">☽</text>
+      <line x1="48" y1="54" x2="74" y2="80" stroke="#dc2626" strokeWidth="1.5" opacity="0.55" />
+      {/* Sniper on rooftop */}
+      <circle cx="92" cy="44" r="5" fill="#1a1408" />
+      <rect x="88" y="49" width="8" height="10" rx="2" fill="#161208" />
+      <line x1="88" y1="52" x2="78" y2="58" stroke="#1a1408" strokeWidth="3" strokeLinecap="round" />
+      {/* Gun barrel */}
+      <line x1="86" y1="53" x2="68" y2="60" stroke="#0f0c08" strokeWidth="1.8" strokeLinecap="round" />
+      {/* Sniper crosshair glow */}
+      <circle cx="68" cy="61" r="4" fill="none" stroke="#ef4444" strokeWidth="0.8" opacity="0.45" />
+      <line x1="64" y1="61" x2="72" y2="61" stroke="#ef4444" strokeWidth="0.5" opacity="0.45" />
+      <line x1="68" y1="57" x2="68" y2="65" stroke="#ef4444" strokeWidth="0.5" opacity="0.45" />
+      {/* Rubble at base */}
+      <path d="M 10 150 Q 30 144 50 150 Q 70 144 90 150 Q 110 144 110 150 L 110 170 L 10 170 Z" fill="#0f0c08" />
+      {/* Handala small silhouette, stopped at gate */}
+      <ellipse cx="40" cy="153" rx="6" ry="2" fill="#000" opacity="0.4" />
+      <circle cx="40" cy="140" r="5.5" fill="#1a1610" />
+      <rect x="36" y="145" width="8" height="10" rx="2" fill="#151210" />
+      {/* Arm reaching toward hospital */}
+      <line x1="44" y1="148" x2="54" y2="146" stroke="#151210" strokeWidth="3" strokeLinecap="round" />
+      {/* STOP / barbed wire barrier */}
+      <rect x="52" y="148" width="30" height="3" rx="1" fill="#1e1810" />
+      {[54,60,66,72,78].map((bx, i) => (
+        <line key={i} x1={bx} y1={148} x2={bx+2} y2={151} stroke="#ef4444" strokeWidth="0.9" opacity={0.7} />
+      ))}
+      {/* Warning sign */}
+      <rect x="54" y="130" width="20" height="14" rx="1" fill="#1a1208" />
+      <text x="64" y="141" textAnchor="middle" fill="#ef4444" fontSize="9" fontFamily="monospace" fontWeight="bold" opacity="0.85">!</text>
+      <line x1="64" y1="144" x2="64" y2="148" stroke="#1a1208" strokeWidth="1.5" />
+    </svg>
+  );
+}
+
+function NasserHospitalScene() {
+  const brokenWins: [number,number][] = [[62,52],[92,52],[122,52],[62,82],[92,82],[122,82],[62,112],[92,112],[122,112],[152,52],[152,82],[152,112]];
+  const rubblePts: [number,number,number,number][] = [[30,208,28,9],[70,204,18,7],[440,206,24,8],[490,202,16,6],[540,208,20,7],[580,204,14,5]];
+  return (
+    <svg viewBox="0 0 640 240" width={620} height={233} style={{ display: "block", borderRadius: 6, maxWidth: "100%" }}>
+      <defs>
+        <linearGradient id="nsky" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#0c0404" />
+          <stop offset="45%" stopColor="#180808" />
+          <stop offset="100%" stopColor="#0a0404" />
+        </linearGradient>
+        <radialGradient id="namb" cx="38%" cy="88%" r="55%">
+          <stop offset="0%" stopColor="#7c1d1d" stopOpacity="0.28" />
+          <stop offset="100%" stopColor="#7c1d1d" stopOpacity="0" />
+        </radialGradient>
+        <radialGradient id="sniperglow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="#ef4444" stopOpacity="0.5" />
+          <stop offset="100%" stopColor="#ef4444" stopOpacity="0" />
+        </radialGradient>
+        <filter id="nbl"><feGaussianBlur stdDeviation="5" /></filter>
+        <filter id="nbl2"><feGaussianBlur stdDeviation="2" /></filter>
+      </defs>
+      {/* Sky */}
+      <rect width="640" height="240" fill="url(#nsky)" />
+      <rect width="640" height="240" fill="url(#namb)" />
+      {/* Stars */}
+      {[[40,14],[90,8],[170,20],[280,6],[390,16],[480,10],[560,22],[75,34],[340,28],[530,38]].map(([sx,sy],i) => (
+        <circle key={i} cx={sx} cy={sy} r={1.1} fill="#fff" opacity={0.3+i*0.04} />
+      ))}
+      {/* Smoke plumes (burning hospital) */}
+      <ellipse cx="200" cy="50" rx="80" ry="30" fill="#0c0606" opacity="0.7" filter="url(#nbl)" />
+      <ellipse cx="260" cy="34" rx="60" ry="22" fill="#150808" opacity="0.55" filter="url(#nbl)" />
+      <ellipse cx="140" cy="62" rx="50" ry="20" fill="#0a0404" opacity="0.45" filter="url(#nbl)" />
+      {/* ── NASSER HOSPITAL BUILDING ── */}
+      {/* Main body */}
+      <rect x="42" y="80" width="360" height="130" rx="3" fill="#110e08" />
+      {/* Upper floor */}
+      <rect x="72" y="54" width="300" height="32" rx="2" fill="#131008" />
+      {/* Roof parapet */}
+      <rect x="62" y="46" width="320" height="12" rx="2" fill="#151208" />
+      {/* Cracks in facade */}
+      <path d="M 120 80 L 108 110 L 115 140" fill="none" stroke="#0a0806" strokeWidth="2" opacity="0.7" />
+      <path d="M 280 54 L 270 80 L 285 110" fill="none" stroke="#0a0806" strokeWidth="2" opacity="0.6" />
+      <path d="M 360 80 L 375 120 L 368 150" fill="none" stroke="#0a0806" strokeWidth="1.5" opacity="0.5" />
+      {/* Shell hole */}
+      <ellipse cx="220" cy="108" rx="28" ry="22" fill="#0a0806" />
+      <ellipse cx="220" cy="108" rx="20" ry="15" fill="#080604" />
+      {/* Broken windows */}
+      {brokenWins.map(([wx,wy],i) => (
+        <g key={i}>
+          <rect x={wx} y={wy} width="22" height="22" rx="1" fill={i%4===2?"#060403":"#080604"} />
+          <line x1={wx} y1={wy} x2={wx+22} y2={wy+22} stroke="#0d0a06" strokeWidth="0.7" opacity="0.6" />
+          <line x1={wx+22} y1={wy} x2={wx} y2={wy+22} stroke="#0d0a06" strokeWidth="0.7" opacity="0.6" />
+        </g>
+      ))}
+      {/* Collapsed left wing */}
+      <path d="M 42 140 Q 20 148 10 160 L 10 210 L 80 210 L 80 170 L 60 155 L 42 140 Z" fill="#0d0a06" />
+      {/* Red Crescent symbol — cracked */}
+      <text x="218" y="44" textAnchor="middle" fill="#dc2626" fontSize="26" fontFamily="serif" opacity="0.55">☽</text>
+      <text x="236" y="44" textAnchor="middle" fill="#dc2626" fontSize="14" fontFamily="serif" opacity="0.45">✚</text>
+      <line x1="195" y1="22" x2="252" y2="52" stroke="#dc2626" strokeWidth="2.5" opacity="0.35" />
+      {/* ── SNIPERS on rooftop ── */}
+      {/* Sniper 1 */}
+      <circle cx="110" cy="42" r="6" fill="#1a1610" />
+      <rect x="106" y="48" width="9" height="12" rx="2" fill="#161410" />
+      <line x1="106" y1="52" x2="92" y2="56" stroke="#1a1610" strokeWidth="4" strokeLinecap="round" />
+      <line x1="104" y1="53" x2="82" y2="60" stroke="#0f0c08" strokeWidth="2" strokeLinecap="round" />
+      {/* Gun flash */}
+      <ellipse cx="81" cy="60" rx="5" ry="3" fill="#fbbf24" opacity="0.35" filter="url(#nbl2)" />
+      {/* Sniper 2 */}
+      <circle cx="310" cy="42" r="6" fill="#1a1610" />
+      <rect x="306" y="48" width="9" height="12" rx="2" fill="#161410" />
+      <line x1="306" y1="52" x2="292" y2="56" stroke="#1a1610" strokeWidth="4" strokeLinecap="round" />
+      <line x1="304" y1="53" x2="558" y2="148" stroke="#ef4444" strokeWidth="0.6" opacity="0.18" strokeDasharray="4 6" />
+      {/* Sniper 3 on adjacent building */}
+      <rect x="420" y="90" width="80" height="100" rx="2" fill="#0e0b08" />
+      <rect x="410" y="80" width="100" height="16" rx="2" fill="#121008" />
+      <circle cx="468" cy="74" r="6" fill="#1a1610" />
+      <rect x="464" y="80" width="9" height="12" rx="2" fill="#161410" />
+      <line x1="464" y1="84" x2="450" y2="88" stroke="#1a1610" strokeWidth="4" strokeLinecap="round" />
+      <line x1="462" y1="85" x2="240" y2="160" stroke="#ef4444" strokeWidth="0.5" opacity="0.15" strokeDasharray="4 6" />
+      {/* Laser dot */}
+      <circle cx="240" cy="161" r="3" fill="#ef4444" opacity="0.5" filter="url(#nbl2)" />
+      {/* ── BARRICADE / road block ── */}
+      <rect x="190" y="196" width="180" height="8" rx="2" fill="#1a1610" />
+      {[196,212,228,244,260,276,292,308,324,340,356].map((bx,i) => (
+        <line key={i} x1={bx} y1={196} x2={bx-6} y2={204} stroke="#ef4444" strokeWidth="1.2" opacity={0.65} />
+      ))}
+      {/* WARNING sign */}
+      <rect x="232" y="178" width="36" height="18" rx="2" fill="#1a1008" />
+      <text x="250" y="191" textAnchor="middle" fill="#ef4444" fontSize="11" fontFamily="monospace" fontWeight="bold" opacity="0.88">✕</text>
+      <line x1="250" y1="196" x2="250" y2="204" stroke="#1a1008" strokeWidth="2" />
+      {/* ── Ground / rubble ── */}
+      <rect x="0" y="208" width="640" height="32" fill="#0a0806" />
+      {rubblePts.map(([rx,ry,rw,rh],i) => (
+        <ellipse key={i} cx={rx} cy={ry} rx={rw} ry={rh} fill="#0f0c08" opacity={0.85} />
+      ))}
+      {/* ── HANDALA — sitting in the dust at the gate ── */}
+      <ellipse cx="530" cy="212" rx="20" ry="5" fill="#000" opacity="0.4" />
+      {/* Sitting pose legs */}
+      <path d="M 520 208 Q 516 218 526 220 Q 534 218 534 208 Z" fill="#161410" />
+      {/* Body hunched */}
+      <rect x="520" y="192" width="20" height="18" rx="4" fill="#141210" />
+      {/* Head bowed down */}
+      <circle cx="530" cy="184" r="12" fill="#1a1810" />
+      <path d="M 518 180 Q 518 174 530 174 Q 542 174 542 180 L 538 183 L 522 183 Z" fill="#222018" opacity="0.9" />
+      {/* Arm holding leg (wounded) */}
+      <path d="M 520 202 Q 512 214 516 222" fill="none" stroke="#141210" strokeWidth="7" strokeLinecap="round" />
+      {/* Bloodstain */}
+      <ellipse cx="516" cy="221" rx="5" ry="3" fill="#7c1d1d" opacity="0.55" filter="url(#nbl2)" />
+      {/* Caption */}
+      <text x="320" y="18" textAnchor="middle" fill="#fca5a5" fontSize="9" fontFamily="monospace" fontWeight="bold" opacity="0.58">NASSER MEDICAL COMPLEX · KHAN YOUNIS · FEB 2024</text>
+    </svg>
   );
 }
 
@@ -643,6 +849,8 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
   const showHindRef = useRef(startStage === 1);
   const [khalidPage, setKhalidPage] = useState(0);
   const showKhalidRef = useRef(startStage === 2);
+  const [nasserPage, setNasserPage] = useState(0);
+  const showNasserRef = useRef(startStage === 3);
   const [waveKills, setWaveKills] = useState(0);
   const [waveTarget, setWaveTarget] = useState(0);
   const [waveNum, setWaveNum] = useState(0);
@@ -714,6 +922,18 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
         }
         return;
       }
+      if (phaseRef.current === "nasser-story") {
+        if (e.code === "Space" || e.code === "Enter") {
+          e.preventDefault();
+          setNasserPage((prev) => {
+            if (prev < NASSER_PAGES.length - 1) return prev + 1;
+            setPhase("story");
+            phaseRef.current = "story";
+            return 0;
+          });
+        }
+        return;
+      }
       if (phaseRef.current === "stage-clear") {
         if (e.code === "Space" || e.code === "Enter") {
           e.preventDefault();
@@ -724,6 +944,7 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
           } else {
             if (next === 1) showHindRef.current = true;
             if (next === 2) showKhalidRef.current = true;
+            if (next === 3) showNasserRef.current = true;
             stageIndexRef.current = next;
             setStageIndex(next);
             setStoryLine(0);
@@ -1012,6 +1233,11 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
       setKhalidPage(0);
       setPhase("khalid-story");
       phaseRef.current = "khalid-story";
+    } else if (showNasserRef.current) {
+      showNasserRef.current = false;
+      setNasserPage(0);
+      setPhase("nasser-story");
+      phaseRef.current = "nasser-story";
     } else {
       setPhase("story");
       phaseRef.current = "story";
@@ -1353,6 +1579,79 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
                   ))}
                 </div>
                 <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 10, color: "#22c55e88", animation: "blink 1.1s step-end infinite" }}>
+                  {isLast ? "SPACE / ENTER  ▶  BEGIN" : "SPACE / ENTER  ▶  CONTINUE"}
+                </div>
+              </div>
+              <FlagBar />
+            </div>
+          );
+        })()}
+
+        {/* ── NASSER HOSPITAL / KHAN YOUNIS STORY ─────────────────── */}
+        {phase === "nasser-story" && (() => {
+          const pg = NASSER_PAGES[nasserPage] ?? NASSER_PAGES[0];
+          const isLast = nasserPage === NASSER_PAGES.length - 1;
+          const isFirst = nasserPage === 0;
+          return (
+            <div style={{ position: "absolute", inset: 0, background: "#080404", display: "flex", flexDirection: "column", overflow: "hidden" }}>
+              <FlagBar />
+
+              {/* ── Hospital intro page (illustration left, text right) ── */}
+              {isFirst ? (
+                <div style={{ flex: 1, display: "flex", alignItems: "stretch" }}>
+                  {/* Left — hospital illustration */}
+                  <div style={{ width: 270, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", borderRight: "1px solid #3f1515", background: "rgba(120,20,20,0.07)", padding: "24px 16px", gap: 18 }}>
+                    <NasserIntroPanel />
+                    <div style={{ fontFamily: "'Noto Sans Arabic', 'Arial', sans-serif", fontSize: 20, color: "#ef4444", direction: "rtl", opacity: 0.82, textAlign: "center", lineHeight: 1.6 }}>
+                      مجمع ناصر الطبي
+                    </div>
+                    <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 6.5, color: "#fca5a5", textAlign: "center", lineHeight: 1.9, opacity: 0.7 }}>
+                      NASSER MEDICAL COMPLEX<br />KHAN YOUNIS
+                    </div>
+                  </div>
+                  {/* Right — text */}
+                  <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "36px 44px", gap: 24 }}>
+                    <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 6.5, color: "#ef444488", letterSpacing: 3, textTransform: "uppercase" }}>A TRUE STORY</div>
+                    <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 22, color: "#ef4444", textShadow: "0 0 32px #ef444460", lineHeight: 1.7, textAlign: "center" }}>
+                      {pg.heading}
+                    </div>
+                    <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 13, color: "#fca5a5", lineHeight: 2.2, textAlign: "center" }}>
+                      {pg.body}
+                    </div>
+                  </div>
+                </div>
+              ) : pg.scene ? (
+                /* ── Hospital ruin scene (last page) ── */
+                <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 22, padding: "18px 24px" }}>
+                  <NasserHospitalScene />
+                  <div style={{ maxWidth: 600, textAlign: "center", padding: "0 8px" }}>
+                    <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 10, color: "#d4d4d4", lineHeight: 2.2 }}>
+                      {pg.body}
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                /* ── Text-only pages ── */
+                <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "36px 60px", gap: 28 }}>
+                  {pg.heading && (
+                    <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 18, color: "#ef4444", textShadow: "0 0 24px #ef444450", lineHeight: 1.8, textAlign: "center" }}>
+                      {pg.heading}
+                    </div>
+                  )}
+                  <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 11, color: "#fca5a5", lineHeight: 2.4, textAlign: "center", maxWidth: 700 }}>
+                    {pg.body}
+                  </div>
+                </div>
+              )}
+
+              {/* Bottom bar */}
+              <div style={{ borderTop: "1px solid #3f1515", padding: "14px 24px", display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
+                <div style={{ display: "flex", gap: 7 }}>
+                  {NASSER_PAGES.map((_, i) => (
+                    <div key={i} style={{ width: 7, height: 7, borderRadius: "50%", background: i === nasserPage ? "#ef4444" : i < nasserPage ? "#7f1d1d" : "#2d1010", border: `1px solid ${i === nasserPage ? "#ef4444" : "#3f1515"}`, transition: "all 0.2s" }} />
+                  ))}
+                </div>
+                <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 10, color: "#ef444488", animation: "blink 1.1s step-end infinite" }}>
                   {isLast ? "SPACE / ENTER  ▶  BEGIN" : "SPACE / ENTER  ▶  CONTINUE"}
                 </div>
               </div>
