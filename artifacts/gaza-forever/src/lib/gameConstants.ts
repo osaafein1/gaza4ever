@@ -102,31 +102,56 @@ export const STAGE_ARABIC: Record<number, string> = {
   4: "رفح",
 };
 
-export const STAGE_LANDMARKS: Record<number, { name: string; when: string; desc: string }> = {
+export const STAGE_LANDMARKS: Record<number, { name: string; when: string; desc: string; impact: string[] }> = {
   0: {
     name: "Al-Fakhoura UNRWA School",
     when: "Struck October 19, 2023",
-    desc: "Hundreds of displaced families were sheltering inside when an airstrike hit the school. At least 20 people were killed. UNRWA had given Israel the school's coordinates to protect it.",
+    desc: "Hundreds of displaced families were sheltering inside when an Israeli airstrike hit. At least 20 people were killed and dozens more wounded. UNRWA had shared the school's GPS coordinates with Israel to protect it — they were ignored. The school was one of over 100 UNRWA facilities struck during the conflict.",
+    impact: [
+      "20+ killed, dozens wounded inside the shelter",
+      "70% of all Gaza schools damaged or destroyed by 2024",
+      "1.9 million people displaced — nearly Gaza's entire population",
+    ],
   },
   1: {
     name: "Al-Shifa Hospital",
     when: "Raided November 2023 & March 2024",
-    desc: "Gaza's largest hospital, with over 700 beds and 1,500 sheltering patients. Israeli forces surrounded and cut power and water for weeks, then conducted two large raids. Patients died without electricity for life-support machines.",
+    desc: "Gaza's largest hospital, with over 700 beds and 1,500 patients sheltering inside. Israeli forces cut electricity and water for weeks before conducting two major military raids. Patients on ventilators died without power. The March 2024 raid lasted two weeks and left the complex completely destroyed.",
+    impact: [
+      "Gaza's 36 hospitals — none fully functional by April 2024",
+      "WHO documented 34+ hospital attacks in first 6 months",
+      "500+ medical workers killed or detained across Gaza",
+    ],
   },
   2: {
     name: "Nuseirat Camp Massacre",
     when: "June 8, 2024",
-    desc: "An Israeli military rescue operation in a crowded market killed at least 274 Palestinian civilians and wounded over 700 — one of the deadliest single incidents of the war. The Al-Huda mosque, serving the camp for generations, was also destroyed.",
+    desc: "An Israeli military operation launched into a crowded Saturday market in broad daylight killed at least 274 Palestinian civilians and wounded over 700 — one of the single deadliest incidents of the war. The Al-Huda mosque, which had served camp families for generations, was also destroyed in the bombardment.",
+    impact: [
+      "274+ civilians killed in one daytime operation",
+      "700+ wounded — hospitals overwhelmed within hours",
+      "4 Israeli hostages rescued; 1 killed in the operation",
+    ],
   },
   3: {
     name: "Nasser Hospital",
     when: "Besieged February 2024",
-    desc: "The largest hospital in southern Gaza. During a two-week Israeli siege, fuel for generators ran out. Patients on ventilators and in intensive care died. Doctors performed surgeries without anaesthesia.",
+    desc: "The largest functioning hospital in southern Gaza, serving over 400,000 displaced people. During a two-week Israeli siege, generator fuel ran out. Patients on ventilators and in intensive care died. Surgeons operated without anaesthesia. After Israeli forces withdrew, mass graves were found in the hospital grounds.",
+    impact: [
+      "Served 400,000+ displaced people at peak displacement",
+      "Mass graves discovered in hospital grounds after withdrawal",
+      "Over 700 healthcare workers detained or killed across Gaza",
+    ],
   },
   4: {
     name: "Rafah Border Crossing",
     when: "Seized May 7, 2024",
-    desc: "The only crossing not controlled by Israel — the sole humanitarian lifeline into Gaza. Israeli forces seized the Palestinian side, halting all aid deliveries for weeks. Over one million displaced people were sheltering in Rafah at the time.",
+    desc: "Gaza's only crossing not under Israeli control — the sole humanitarian lifeline for medicine, food, and fuel. Israeli forces seized the Palestinian side, halting all aid deliveries. Over one million displaced Palestinians were sheltering in Rafah when the ground offensive began. The UN declared famine in northern Gaza.",
+    impact: [
+      "500 aid trucks/day before war — near zero after seizure",
+      "UN declared famine conditions in northern Gaza by March 2024",
+      "1.1 million sheltering in Rafah when offensive began",
+    ],
   },
 };
 

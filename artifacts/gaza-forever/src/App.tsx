@@ -1,38 +1,26 @@
 import { Switch, Route, Router as WouterRouter, useLocation, Redirect } from "wouter";
-import { useState, useCallback } from "react";
+import { useEffect } from "react";
 import MenuPage from "./pages/MenuPage";
 import GamePage from "./pages/GamePage";
 import IntroPage from "./pages/IntroPage";
+import { startMusic, stopMusic } from "./lib/music";
 
-function MusicPlayer({ playing }: { playing: boolean }) {
-  if (!playing) return null;
-  return (
-    <iframe
-      title="background-music"
-      width="0"
-      height="0"
-      src="https://www.youtube.com/embed/ypaKsrujm3E?autoplay=1&loop=1&playlist=ypaKsrujm3E&controls=0&mute=0"
-      allow="autoplay"
-      style={{ position: "fixed", top: -9999, left: -9999, opacity: 0, pointerEvents: "none" }}
-    />
-  );
+function MusicController() {
+  const [location] = useLocation();
+  useEffect(() => {
+    if (location === "/") {
+      stopMusic();
+    }
+  }, [location]);
+  return null;
 }
 
 function AppInner() {
-  const [musicStarted, setMusicStarted] = useState(() => !!sessionStorage.getItem("gz_music_on"));
-  const [location] = useLocation();
-
-  const handleMusicStart = useCallback(() => {
-    sessionStorage.setItem("gz_music_on", "1");
-    setMusicStarted(true);
-  }, []);
-
-  // Music plays only on /intro and /game — stops (iframe removed) on menu
-  const musicPlaying = musicStarted && (location === "/intro" || location === "/game");
+  const handleMusicStart = () => startMusic();
 
   return (
     <>
-      <MusicPlayer playing={musicPlaying} />
+      <MusicController />
       <Switch>
         <Route path="/intro">
           {() => <IntroPage onMusicStart={handleMusicStart} />}
