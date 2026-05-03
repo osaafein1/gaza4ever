@@ -46,7 +46,11 @@ function FlagBar() {
   );
 }
 
-export default function MenuPage() {
+interface MenuPageProps {
+  onMusicStart?: () => void;
+}
+
+export default function MenuPage({ onMusicStart }: MenuPageProps) {
   const [, navigate] = useLocation();
   const [selectedChar, setSelectedChar] = useState(0);
   const [selectedStage, setSelectedStage] = useState(0);
@@ -55,6 +59,7 @@ export default function MenuPage() {
   const stageDef = STAGE_DEFS[selectedStage];
 
   function startGame() {
+    onMusicStart?.();
     sessionStorage.setItem("gz_char", String(selectedChar));
     sessionStorage.setItem("gz_stage", String(selectedStage));
     navigate("/game");
@@ -87,11 +92,17 @@ export default function MenuPage() {
             <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 8, color: "#f97316", letterSpacing: 1 }}>Earth Defenders</div>
           </div>
 
-          {/* Story */}
-          <div style={{ background: "rgba(0,0,0,0.7)", border: "1px solid #44403c", borderRadius: 4, padding: "10px 14px", maxWidth: 520, marginBottom: 10, textAlign: "center" }}>
-            <p style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 5.5, color: "#d4d4d4", lineHeight: 2, margin: 0 }}>
-              Four survivors in Jabalia, Northern Gaza. Bombs fall. The camp burns. They must travel south — through Gaza City, Khan Younis — to reach the Rafah crossing. Collect supplies. Resist. Survive.
+          {/* Story + Intro button */}
+          <div style={{ background: "rgba(0,0,0,0.7)", border: "1px solid #44403c", borderRadius: 4, padding: "10px 14px", maxWidth: 520, marginBottom: 10, textAlign: "center", position: "relative" }}>
+            <p style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 5.5, color: "#d4d4d4", lineHeight: 2, margin: 0, marginBottom: 8 }}>
+              Handala, age 6, lost his family in Jabalia. His sister Nour survived — she made it to Rafah. He must reach her. Four defenders rise to protect him on the road south.
             </p>
+            <button
+              onClick={() => navigate("/intro")}
+              style={{ background: "rgba(249,115,22,0.12)", border: "1px solid #f97316", borderRadius: 3, padding: "5px 14px", cursor: "pointer", fontFamily: "'Press Start 2P', monospace", fontSize: 5.5, color: "#f97316", letterSpacing: 1 }}
+            >
+              📖  READ HANDALA'S STORY
+            </button>
           </div>
 
           {/* Character select */}

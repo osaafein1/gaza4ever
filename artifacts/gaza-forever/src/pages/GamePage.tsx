@@ -18,6 +18,10 @@ import type { GameState, Enemy, Particle, Summon } from "../lib/gameTypes";
 
 type Phase = "story" | "playing" | "stage-clear" | "win" | "dead";
 
+interface GamePageProps {
+  onMusicStart?: () => void;
+}
+
 function FlagBar() {
   return (
     <div style={{ display: "flex", width: "100%", height: 12, flexShrink: 0 }}>
@@ -84,7 +88,7 @@ function spawnWave(gs: GameState, stageIndex: number, waveIndex: number, isBoss:
   return count;
 }
 
-export default function GamePage() {
+export default function GamePage({ onMusicStart }: GamePageProps) {
   const [, navigate] = useLocation();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const gsRef = useRef<GameState | null>(null);
@@ -101,6 +105,11 @@ export default function GamePage() {
   const [stageScore, setStageScore] = useState(0);
   const [storyLine, setStoryLine] = useState(0);
   const [inventory, setInventory] = useState<string[]>([]);
+
+  // ─── Pause / exit state ──────────────────────────────────────────────────
+  const [paused, setPaused] = useState(false);
+  const [showExitConfirm, setShowExitConfirm] = useState(false);
+  const pausedRef = useRef(false);
 
   const stageIndexRef = useRef(stageIndex);
   const phaseRef = useRef<Phase>("story");
@@ -181,9 +190,31 @@ export default function GamePage() {
 
   // ─── Input ───────────────────────────────────────────────────────────────
 
+  // ─── Pause toggle helper ─────────────────────────────────────────────────
+  const togglePause = useCallback(() => {
+    setPaused((prev) => {
+      pausedRef.current = !prev;
+      return !prev;
+    });
+    setShowExitConfirm(false);
+  }, []);
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       const gs = gsRef.current;
+
+      // Escape toggles pause during gameplay
+      if (e.code === "Escape") {
+        e.preventDefault();
+        if (phaseRef.current === "playing") {
+          togglePause();
+        }
+        return;
+      }
+
+      // While paused, ignore all game input
+      if (pausedRef.current) return;
+
       if (phaseRef.current === "story") {
         if (e.code === "Space" || e.code === "Enter") {
           e.preventDefault();
@@ -345,6 +376,12 @@ export default function GamePage() {
       if (!gs) { rafRef.current = requestAnimationFrame(loop); return; }
       if (phaseRef.current !== "playing") { rafRef.current = requestAnimationFrame(loop); return; }
 
+      // If paused, keep rendering the frozen frame but skip update
+      if (pausedRef.current) {
+        rafRef.current = requestAnimationFrame(loop);
+        return;
+      }
+
       frameRef.current++;
       const frame = frameRef.current;
 
@@ -430,16 +467,85 @@ export default function GamePage() {
           style={{ display: "block", width: "100%", height: "100%", imageRendering: "pixelated" }}
         />
 
-        {/* Stage banner */}
+        {/* Stage banner + pause/exit buttons */}
         {phase === "playing" && (
-          <div style={{ position: "absolute", top: 8, left: "50%", transform: "translateX(-50%)", display: "flex", flexDirection: "column", alignItems: "center", pointerEvents: "none" }}>
-            <div style={{ fontFamily: "'Noto Sans Arabic', 'Arial', sans-serif", fontSize: 16, color: stageData2.color, textShadow: `0 0 12px ${stageData2.color}80`, direction: "rtl", lineHeight: 1.1 }}>
-              {STAGE_ARABIC[stageIndex]}
+          <>
+            <div style={{ position: "absolute", top: 8, left: "50%", transform: "translateX(-50%)", display: "flex", flexDirection: "column", alignItems: "center", pointerEvents: "none" }}>
+              <div style={{ fontFamily: "'Noto Sans Arabic', 'Arial', sans-serif", fontSize: 16, color: stageData2.color, textShadow: `0 0 12px ${stageData2.color}80`, direction: "rtl", lineHeight: 1.1 }}>
+                {STAGE_ARABIC[stageIndex]}
+              </div>
+              <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 7, color: stageData2.color, letterSpacing: 1 }}>{stageData2.name}</div>
+              <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 4.5, color: "#6b7280", marginTop: 2 }}>
+                WAVE {waveInStageRef.current + 1} / {stageData2.waves + 1}
+              </div>
             </div>
-            <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 7, color: stageData2.color, letterSpacing: 1 }}>{stageData2.name}</div>
-            <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 4.5, color: "#6b7280", marginTop: 2 }}>
-              WAVE {waveInStageRef.current + 1} / {stageData2.waves + 1}
+            {/* HUD pause & exit buttons */}
+            <div style={{ position: "absolute", top: 8, right: 10, display: "flex", gap: 6 }}>
+              <button
+                onClick={togglePause}
+                title="Pause (Esc)"
+                style={{ background: "rgba(0,0,0,0.65)", border: "1px solid #44403c", borderRadius: 3, padding: "4px 9px", cursor: "pointer", fontFamily: "'Press Start 2P', monospace", fontSize: 7, color: "#9ca3af" }}
+              >
+                {paused ? "▶" : "⏸"}
+              </button>
+              <button
+                onClick={() => { setPaused(true); pausedRef.current = true; setShowExitConfirm(true); }}
+                title="Exit to menu"
+                style={{ background: "rgba(0,0,0,0.65)", border: "1px solid #44403c", borderRadius: 3, padding: "4px 9px", cursor: "pointer", fontFamily: "'Press Start 2P', monospace", fontSize: 7, color: "#9ca3af" }}
+              >
+                ✕
+              </button>
             </div>
+          </>
+        )}
+
+        {/* ── PAUSE OVERLAY ─────────────────────────────────────────────── */}
+        {phase === "playing" && paused && (
+          <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.82)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 20, backdropFilter: "blur(2px)" }}>
+            {!showExitConfirm ? (
+              <>
+                <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 22, color: "#fbbf24", textShadow: "0 0 20px #fbbf2470", letterSpacing: 3 }}>PAUSED</div>
+                <div style={{ fontFamily: "'Noto Sans Arabic', 'Arial', sans-serif", fontSize: 28, color: "#f97316", direction: "rtl" }}>متوقف مؤقتاً</div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 10, width: 240 }}>
+                  <button
+                    onClick={togglePause}
+                    style={{ background: "rgba(34,197,94,0.15)", border: "2px solid #22c55e", borderRadius: 4, padding: "12px 0", cursor: "pointer", fontFamily: "'Press Start 2P', monospace", fontSize: 9, color: "#fff", letterSpacing: 1 }}
+                  >
+                    ▶  RESUME
+                  </button>
+                  <button
+                    onClick={() => setShowExitConfirm(true)}
+                    style={{ background: "rgba(239,68,68,0.1)", border: "2px solid #6b7280", borderRadius: 4, padding: "12px 0", cursor: "pointer", fontFamily: "'Press Start 2P', monospace", fontSize: 9, color: "#9ca3af", letterSpacing: 1 }}
+                  >
+                    ✕  EXIT GAME
+                  </button>
+                </div>
+                <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 5.5, color: "#44403c", marginTop: 4 }}>PRESS ESC TO RESUME</div>
+              </>
+            ) : (
+              <>
+                <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 13, color: "#ef4444", textShadow: "0 0 16px #ef444450", letterSpacing: 2, textAlign: "center" }}>EXIT GAME?</div>
+                <div style={{ background: "rgba(0,0,0,0.6)", border: "1px solid #44403c", borderRadius: 4, padding: "14px 24px", maxWidth: 340, textAlign: "center" }}>
+                  <p style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 7, color: "#d4d4d4", lineHeight: 2.2, margin: 0 }}>
+                    Your progress in this stage will be lost. Handala is still waiting for you.
+                  </p>
+                </div>
+                <div style={{ display: "flex", gap: 12 }}>
+                  <button
+                    onClick={() => navigate("/")}
+                    style={{ background: "rgba(239,68,68,0.15)", border: "2px solid #ef4444", borderRadius: 4, padding: "11px 24px", cursor: "pointer", fontFamily: "'Press Start 2P', monospace", fontSize: 8, color: "#ef4444" }}
+                  >
+                    YES, EXIT
+                  </button>
+                  <button
+                    onClick={() => { setShowExitConfirm(false); togglePause(); }}
+                    style={{ background: "rgba(34,197,94,0.12)", border: "2px solid #22c55e", borderRadius: 4, padding: "11px 24px", cursor: "pointer", fontFamily: "'Press Start 2P', monospace", fontSize: 8, color: "#22c55e" }}
+                  >
+                    NO, CONTINUE
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         )}
 
@@ -565,14 +671,24 @@ export default function GamePage() {
 
         {/* Win screen */}
         {phase === "win" && (
-          <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.97)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 16, padding: 40 }}>
+          <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.97)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 14, padding: 40, overflowY: "auto" }}>
             <FlagBar />
             <GazaMap currentStage={4} />
-            <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 22, color: "#22c55e", textShadow: "0 0 30px #22c55e", textAlign: "center" }}>YOU ESCAPED!</div>
-            <div style={{ fontFamily: "'Noto Sans Arabic', 'Arial', sans-serif", fontSize: 40, color: "#22c55e", direction: "rtl" }}>رفح — حرية</div>
-            <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 9, color: "#d4d4d4", textAlign: "center", maxWidth: 500, lineHeight: 2 }}>
-              You fought through every district, from Jabalia to Rafah. Your family reached the border. The struggle for Gaza never ends — but today, you survived.
+            <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 20, color: "#22c55e", textShadow: "0 0 30px #22c55e", textAlign: "center", letterSpacing: 2 }}>YOU ESCAPED!</div>
+            <div style={{ fontFamily: "'Noto Sans Arabic', 'Arial', sans-serif", fontSize: 36, color: "#22c55e", direction: "rtl" }}>رفح — حرية</div>
+            <div style={{ background: "rgba(34,197,94,0.08)", border: "1px solid #22c55e44", borderRadius: 6, padding: "14px 24px", maxWidth: 520, textAlign: "center" }}>
+              <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 7.5, color: "#22c55e", marginBottom: 10 }}>HANDALA FINDS NOUR</div>
+              <p style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 7.5, color: "#d4d4d4", lineHeight: 2.2, margin: 0 }}>
+                He ran through the crowd at the Rafah crossing, calling her name. Then he heard her voice. <span style={{ color: "#22c55e" }}>Nour was there.</span>
+              </p>
+              <p style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 7.5, color: "#d4d4d4", lineHeight: 2.2, margin: "10px 0 0" }}>
+                She held him and said: <span style={{ color: "#fbbf24" }}>"You came. I knew you would."</span>
+              </p>
             </div>
+            <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 7.5, color: "#9ca3af", textAlign: "center", maxWidth: 480, lineHeight: 2 }}>
+              The struggle for Gaza never ends — but today, two children found each other. And that matters.
+            </div>
+            <div style={{ fontFamily: "'Noto Sans Arabic', 'Arial', sans-serif", fontSize: 28, color: "#f97316", direction: "rtl" }}>فلسطين ستبقى حرة</div>
             <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 14, color: "#fbbf24" }}>FINAL SCORE: {score.toLocaleString()}</div>
             <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 7, color: "#fbbf24", animation: "blink 1.1s step-end infinite" }}>SPACE / ENTER  ▶  MAIN MENU</div>
             <FlagBar />
