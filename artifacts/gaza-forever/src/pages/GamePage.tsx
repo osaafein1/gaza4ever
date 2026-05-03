@@ -353,6 +353,11 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
     // Spawn first wave
     const target = spawnWave(gs, sIdx, 0, false);
     gs.waveTarget = target;
+    waveInStageRef.current = 0;
+    lastWaveKillsRef.current = -1;
+    setWaveKills(0);
+    setWaveTarget(target);
+    setWaveNum(0);
     setPhase("playing");
     phaseRef.current = "playing";
   }, [charIndex]);
@@ -366,10 +371,13 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
     waveInStageRef.current = nextWave;
     gs.waveKills = 0;
 
-    if (nextWave >= stageDef.waves) {
-      // Spawn boss
+    if (nextWave === stageDef.waves) {
+      // Spawn boss wave
       const target = spawnWave(gs, sIdx, nextWave, true);
       gs.waveTarget = target;
+      setWaveKills(0);
+      setWaveTarget(target);
+      setWaveNum(nextWave);
     } else if (nextWave > stageDef.waves) {
       // Stage clear
       setStageScore(gs.score);
@@ -378,6 +386,9 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
     } else {
       const target = spawnWave(gs, sIdx, nextWave, false);
       gs.waveTarget = target;
+      setWaveKills(0);
+      setWaveTarget(target);
+      setWaveNum(nextWave);
     }
   }, []);
 
@@ -408,6 +419,10 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
   const [allyCD, setAllyCD] = useState<[number, number, number]>([0, 0, 0]);
   const [hindPage, setHindPage] = useState(0);
   const showHindRef = useRef(startStage === 1);
+  const [waveKills, setWaveKills] = useState(0);
+  const [waveTarget, setWaveTarget] = useState(0);
+  const [waveNum, setWaveNum] = useState(0);
+  const lastWaveKillsRef = useRef(-1);
 
   // ─── Input ───────────────────────────────────────────────────────────────
 
@@ -633,6 +648,13 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
         onCollectItem,
       });
 
+      // Sync wave kill progress to React state (only when changed)
+      if (gs.waveKills !== lastWaveKillsRef.current) {
+        lastWaveKillsRef.current = gs.waveKills;
+        setWaveKills(gs.waveKills);
+        setWaveTarget(gs.waveTarget);
+      }
+
       // ── Draw ──
       const shakeX = gs.shake > 0 ? (Math.random() - 0.5) * gs.shake : 0;
       const shakeY = gs.shake > 0 ? (Math.random() - 0.5) * gs.shake : 0;
@@ -711,14 +733,45 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
         {/* Stage banner + pause/exit buttons */}
         {phase === "playing" && (
           <>
-            <div style={{ position: "absolute", top: 8, left: "50%", transform: "translateX(-50%)", display: "flex", flexDirection: "column", alignItems: "center", pointerEvents: "none" }}>
-              <div style={{ fontFamily: "'Noto Sans Arabic', 'Arial', sans-serif", fontSize: 16, color: stageData2.color, textShadow: `0 0 12px ${stageData2.color}80`, direction: "rtl", lineHeight: 1.1 }}>
+            <div style={{ position: "absolute", top: 8, left: "50%", transform: "translateX(-50%)", display: "flex", flexDirection: "column", alignItems: "center", pointerEvents: "none", gap: 2 }}>
+              <div style={{ fontFamily: "'Noto Sans Arabic', 'Arial', sans-serif", fontSize: 15, color: stageData2.color, textShadow: `0 0 12px ${stageData2.color}80`, direction: "rtl", lineHeight: 1.1 }}>
                 {STAGE_ARABIC[stageIndex]}
               </div>
               <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 7, color: stageData2.color, letterSpacing: 1 }}>{stageData2.name}</div>
-              <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 4.5, color: "#6b7280", marginTop: 2 }}>
-                WAVE {waveInStageRef.current + 1} / {stageData2.waves + 1}
+              {/* Wave indicator */}
+              <div style={{ display: "flex", gap: 4, marginTop: 2 }}>
+                {Array.from({ length: stageData2.waves + 1 }, (_, i) => {
+                  const isBoss = i === stageData2.waves;
+                  const done = i < waveNum;
+                  const current = i === waveNum;
+                  return (
+                    <div key={i} style={{
+                      width: isBoss ? 14 : 10, height: 6, borderRadius: 2,
+                      background: done ? stageData2.color : current ? `${stageData2.color}cc` : "rgba(255,255,255,0.12)",
+                      border: `1px solid ${current ? stageData2.color : "rgba(255,255,255,0.2)"}`,
+                      boxShadow: current ? `0 0 6px ${stageData2.color}` : "none",
+                    }} />
+                  );
+                })}
               </div>
+              {/* Kill progress */}
+              {waveTarget > 0 && (() => {
+                const isBossWave = waveNum === stageData2.waves;
+                const pct = Math.min(waveKills / waveTarget, 1);
+                return (
+                  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2, marginTop: 1 }}>
+                    <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 5, color: isBossWave ? "#ef4444" : "#9ca3af", letterSpacing: 1 }}>
+                      {isBossWave ? "★ BOSS" : `WAVE ${waveNum + 1} / ${stageData2.waves + 1}`}
+                    </div>
+                    <div style={{ width: 100, height: 5, background: "rgba(255,255,255,0.1)", borderRadius: 3, overflow: "hidden", border: "1px solid rgba(255,255,255,0.15)" }}>
+                      <div style={{ width: `${pct * 100}%`, height: "100%", background: isBossWave ? "#ef4444" : stageData2.color, borderRadius: 3, transition: "width 0.15s" }} />
+                    </div>
+                    <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 4.5, color: "#6b7280" }}>
+                      {waveKills} / {waveTarget} kills
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
             {/* HUD pause & exit buttons */}
             <div style={{ position: "absolute", top: 8, right: 10, display: "flex", gap: 6 }}>
