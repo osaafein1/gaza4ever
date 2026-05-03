@@ -270,43 +270,107 @@ export function drawPlayer(ctx: CanvasRenderingContext2D, gs: GameState, frame: 
   ctx.stroke();
 
   // ─── KEFFIYEH ─────────────────────────────────────────────────────────────
-  // White headscarf draped over top of head with a drape on the left side
-  ctx.globalAlpha = 0.9;
+  // Worn properly: dome over top of head, face fully visible.
+  // Folded band at hairline; one end drapes down the left side.
+  const kR       = hr + 2;                           // fabric radius
+  const kA1      = Math.PI * 1.18;                   // left start angle
+  const kA2      = Math.PI * 1.82;                   // right end angle
+  // Chord y: where the dome meets the forehead (above eyebrows)
+  const kChordY  = hcy + kR * Math.sin(kA1);        // ≈ hcy - 11.8
+  const kChordHW = Math.abs(kR * Math.cos(kA1));    // ≈ 18.6
+
+  // --- White dome (top of head only, above hairline) ----
+  ctx.globalAlpha = 0.94;
   ctx.fillStyle = kCloth;
-
-  // Top cap covering hair / top of head
   ctx.beginPath();
-  ctx.arc(cx, hcy, hr + 2, Math.PI * 1.08, Math.PI * 1.92);
-  ctx.lineTo(cx + 8, hcy + 6);
-  ctx.lineTo(cx - 8, hcy + 6);
-  ctx.closePath();
+  ctx.arc(cx, hcy, kR, kA1, kA2);
+  ctx.closePath();  // straight chord across forehead
   ctx.fill();
 
-  // Left-side drape (hangs over shoulder)
-  ctx.beginPath();
-  ctx.moveTo(cx - 8, hcy + 6);
-  ctx.quadraticCurveTo(cx - hr - 2, hcy + 16, cx - 16, groundY - 64);
-  ctx.lineTo(cx - 10, groundY - 60);
-  ctx.quadraticCurveTo(cx - 6, hcy + 20, cx - 2, hcy + 10);
-  ctx.closePath();
-  ctx.fill();
+  // --- Charcoal check grid on dome ----------------------
+  ctx.globalAlpha = 0.11;
+  ctx.strokeStyle = "#2a1a0a";
+  ctx.lineWidth = 0.9;
+  for (let dy = -kR + 2; dy < kChordY - hcy + 1; dy += 5) {
+    const hw = Math.sqrt(Math.max(0, kR * kR - dy * dy));
+    ctx.beginPath();
+    ctx.moveTo(cx - hw, hcy + dy);
+    ctx.lineTo(cx + hw, hcy + dy);
+    ctx.stroke();
+  }
+  for (let dx = -kChordHW; dx <= kChordHW; dx += 5) {
+    const topY = hcy - Math.sqrt(Math.max(0, kR * kR - dx * dx));
+    ctx.beginPath();
+    ctx.moveTo(cx + dx, kChordY);
+    ctx.lineTo(cx + dx, topY);
+    ctx.stroke();
+  }
 
-  // Keffiyeh check pattern tint (uses character colour)
-  ctx.globalAlpha = 0.22;
+  // --- Colour pattern tint (character-coloured diamonds) ---
+  ctx.globalAlpha = 0.16;
   ctx.fillStyle = charDef.color;
   ctx.beginPath();
-  ctx.arc(cx, hcy, hr + 2, Math.PI * 1.08, Math.PI * 1.92);
-  ctx.lineTo(cx + 8, hcy + 6);
-  ctx.lineTo(cx - 8, hcy + 6);
+  ctx.arc(cx, hcy, kR, kA1, kA2);
   ctx.closePath();
   ctx.fill();
   ctx.globalAlpha = 1;
 
-  // Keffiyeh edge stitching line
-  ctx.strokeStyle = "rgba(180,160,130,0.5)";
+  // --- Folded forehead band (hem of fabric) -------------
+  ctx.fillStyle = "#d4ccb5";
+  ctx.beginPath();
+  ctx.moveTo(cx - kChordHW, kChordY);
+  ctx.lineTo(cx + kChordHW, kChordY);
+  ctx.lineTo(cx + kChordHW - 1, kChordY + 5);
+  ctx.lineTo(cx - kChordHW + 1, kChordY + 5);
+  ctx.closePath();
+  ctx.fill();
+  // Drop shadow under band
+  ctx.fillStyle = "rgba(0,0,0,0.18)";
+  ctx.fillRect(cx - kChordHW + 1, kChordY + 4, kChordHW * 2 - 2, 3);
+
+  // --- Fringe tassels along bottom of band --------------
+  ctx.strokeStyle = "#988860";
+  ctx.lineWidth = 0.8;
+  ctx.globalAlpha = 0.65;
+  const nTassels = 8;
+  for (let i = 0; i < nTassels; i++) {
+    const tx = cx - kChordHW + 2 + i * ((kChordHW * 2 - 4) / (nTassels - 1));
+    ctx.beginPath();
+    ctx.moveTo(tx, kChordY + 5);
+    ctx.lineTo(tx, kChordY + 9.5);
+    ctx.stroke();
+  }
+  ctx.globalAlpha = 1;
+
+  // --- Left-side drape (hangs from temple to shoulder) --
+  ctx.fillStyle = kCloth;
+  ctx.globalAlpha = 0.91;
+  ctx.beginPath();
+  ctx.moveTo(cx - kChordHW + 1, kChordY + 3);
+  ctx.quadraticCurveTo(cx - hr - 5, hcy + 10, cx - 20, groundY - 62);
+  ctx.lineTo(cx - 13, groundY - 58);
+  ctx.quadraticCurveTo(cx - 9, hcy + 16, cx - hr + 2, hcy + 4);
+  ctx.lineTo(cx - kChordHW + 4, kChordY + 1);
+  ctx.closePath();
+  ctx.fill();
+  // Colour tint on drape
+  ctx.globalAlpha = 0.17;
+  ctx.fillStyle = charDef.color;
+  ctx.beginPath();
+  ctx.moveTo(cx - kChordHW + 1, kChordY + 3);
+  ctx.quadraticCurveTo(cx - hr - 5, hcy + 10, cx - 20, groundY - 62);
+  ctx.lineTo(cx - 13, groundY - 58);
+  ctx.quadraticCurveTo(cx - 9, hcy + 16, cx - hr + 2, hcy + 4);
+  ctx.lineTo(cx - kChordHW + 4, kChordY + 1);
+  ctx.closePath();
+  ctx.fill();
+  ctx.globalAlpha = 1;
+
+  // --- Dome edge stitching ------------------------------
+  ctx.strokeStyle = "rgba(155,145,125,0.5)";
   ctx.lineWidth = 1;
   ctx.beginPath();
-  ctx.arc(cx, hcy, hr + 2, Math.PI * 1.1, Math.PI * 1.9);
+  ctx.arc(cx, hcy, kR + 0.5, kA1, kA2);
   ctx.stroke();
 
   // ─── BEAM / BLAST ─────────────────────────────────────────────────────────
