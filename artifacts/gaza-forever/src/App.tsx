@@ -1,4 +1,4 @@
-import { Switch, Route, Router as WouterRouter } from "wouter";
+import { Switch, Route, Router as WouterRouter, useLocation } from "wouter";
 import { useState, useCallback } from "react";
 import MenuPage from "./pages/MenuPage";
 import GamePage from "./pages/GamePage";
@@ -18,36 +18,42 @@ function MusicPlayer({ playing }: { playing: boolean }) {
   );
 }
 
-function Router({ onMusicStart }: { onMusicStart: () => void }) {
+function AppInner() {
+  const [musicStarted, setMusicStarted] = useState(false);
+  const [location] = useLocation();
+
+  const handleMusicStart = useCallback(() => {
+    setMusicStarted(true);
+  }, []);
+
+  // Music plays only on /intro and /game — stops (iframe removed) on menu
+  const musicPlaying = musicStarted && (location === "/intro" || location === "/game");
+
   return (
-    <Switch>
-      <Route path="/intro">
-        {() => <IntroPage onMusicStart={onMusicStart} />}
-      </Route>
-      <Route path="/">
-        {() => <MenuPage onMusicStart={onMusicStart} />}
-      </Route>
-      <Route path="/game">
-        {() => <GamePage onMusicStart={onMusicStart} />}
-      </Route>
-      <Route>
-        {() => <IntroPage onMusicStart={onMusicStart} />}
-      </Route>
-    </Switch>
+    <>
+      <MusicPlayer playing={musicPlaying} />
+      <Switch>
+        <Route path="/intro">
+          {() => <IntroPage onMusicStart={handleMusicStart} />}
+        </Route>
+        <Route path="/">
+          {() => <MenuPage onMusicStart={handleMusicStart} />}
+        </Route>
+        <Route path="/game">
+          {() => <GamePage onMusicStart={handleMusicStart} />}
+        </Route>
+        <Route>
+          {() => <IntroPage onMusicStart={handleMusicStart} />}
+        </Route>
+      </Switch>
+    </>
   );
 }
 
 export default function App() {
-  const [musicPlaying, setMusicPlaying] = useState(false);
-
-  const handleMusicStart = useCallback(() => {
-    setMusicPlaying(true);
-  }, []);
-
   return (
     <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-      <MusicPlayer playing={musicPlaying} />
-      <Router onMusicStart={handleMusicStart} />
+      <AppInner />
     </WouterRouter>
   );
 }
