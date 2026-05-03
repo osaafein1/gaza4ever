@@ -276,7 +276,7 @@ export default function IntroPage({ onMusicStart }: IntroPageProps) {
           {/* Title — only Handala's name in Arabic */}
           <div style={{ fontFamily: ar, fontSize: 56, color: "#f97316", textShadow: "0 0 30px #f9731660", direction: "rtl", marginBottom: 6, letterSpacing: 2 }}>حنظلة</div>
           <div style={{ fontFamily: px, fontSize: 16, color: "#fff", letterSpacing: 5, marginBottom: 8 }}>HANDALAH</div>
-          <div style={{ fontFamily: px, fontSize: 7.5, color: "#78716c", letterSpacing: 2, marginBottom: 44 }}>A BOY FROM JABALIA REFUGEE CAMP</div>
+          <div style={{ fontFamily: px, fontSize: 9.5, color: "#78716c", letterSpacing: 2, marginBottom: 44 }}>A BOY FROM JABALIA REFUGEE CAMP</div>
 
           {/* Olive separator */}
           <div style={{ width: "80%", height: 1, background: "linear-gradient(to right, transparent, #65a30d60, transparent)", marginBottom: 44 }} />
@@ -286,7 +286,7 @@ export default function IntroPage({ onMusicStart }: IntroPageProps) {
             <div key={i} style={{ marginBottom: para.emphasis ? 32 : 22, textAlign: "center", width: "100%" }}>
               <p style={{
                 fontFamily: px,
-                fontSize: para.emphasis ? 11 : 9,
+                fontSize: para.emphasis ? 13 : 11,
                 color: para.emphasis ? "#fff" : "#c4bfb8",
                 lineHeight: 2.6,
                 margin: 0,
@@ -305,7 +305,7 @@ export default function IntroPage({ onMusicStart }: IntroPageProps) {
             <div style={{ fontSize: 18, color: "#65a30d", opacity: 0.9 }}>🫒🌿🫒</div>
             <WatermelonSlice size={48} rotation={0} />
           </div>
-          <div style={{ fontFamily: px, fontSize: 9, color: "#65a30d", letterSpacing: 2, textAlign: "center" }}>NOW THE JOURNEY BEGINS</div>
+          <div style={{ fontFamily: px, fontSize: 11, color: "#65a30d", letterSpacing: 2, textAlign: "center" }}>NOW THE JOURNEY BEGINS</div>
         </div>
       </div>
 
@@ -322,7 +322,7 @@ export default function IntroPage({ onMusicStart }: IntroPageProps) {
           background: "rgba(5,10,2,0.9)",
         }}
       >
-        <div style={{ fontFamily: px, fontSize: 5.5, color: "#2d4a1a" }}>
+        <div style={{ fontFamily: px, fontSize: 7.5, color: "#2d4a1a" }}>
           {scrolling ? "ESC — SKIP" : "SPACE / ENTER — BEGIN"}
         </div>
         {!started ? (
@@ -335,7 +335,7 @@ export default function IntroPage({ onMusicStart }: IntroPageProps) {
               padding: "10px 28px",
               cursor: "pointer",
               fontFamily: px,
-              fontSize: 8,
+              fontSize: 10,
               color: "#fff",
               letterSpacing: 1,
               animation: "blink 1.4s step-end infinite",
@@ -346,12 +346,12 @@ export default function IntroPage({ onMusicStart }: IntroPageProps) {
         ) : (
           <button
             onClick={() => { cancelAnimationFrame(animRef.current); navigate("/"); }}
-            style={{ background: "none", border: "none", cursor: "pointer", fontFamily: px, fontSize: 6, color: "#44403c", padding: "4px 8px" }}
+            style={{ background: "none", border: "none", cursor: "pointer", fontFamily: px, fontSize: 8, color: "#44403c", padding: "4px 8px" }}
           >
             SKIP →
           </button>
         )}
-        <div style={{ fontFamily: px, fontSize: 5.5, color: "#2d4a1a" }}>JABALIA</div>
+        <div style={{ fontFamily: px, fontSize: 7.5, color: "#2d4a1a" }}>JABALIA</div>
       </div>
 
       {/* Flag bottom strip */}

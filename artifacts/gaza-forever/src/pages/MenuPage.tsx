@@ -89,24 +89,24 @@ export default function MenuPage({ onMusicStart }: MenuPageProps) {
           <div style={{ textAlign: "center", marginBottom: 10, marginTop: 4 }}>
             <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 10, color: "#dc2626", textShadow: "0 0 20px #dc262660", letterSpacing: 2, lineHeight: 1.6 }}>ESCAPE</div>
             <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 24, color: "#fff", textShadow: "0 0 30px #ef444480", letterSpacing: 3, lineHeight: 1.2, marginBottom: 2 }}>GAZA</div>
-            <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 8, color: "#f97316", letterSpacing: 1 }}>Earth Defenders</div>
+            <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 10, color: "#f97316", letterSpacing: 1 }}>Earth Defenders</div>
           </div>
 
           {/* Story + Intro button */}
           <div style={{ background: "rgba(0,0,0,0.7)", border: "1px solid #44403c", borderRadius: 4, padding: "10px 14px", maxWidth: 520, marginBottom: 10, textAlign: "center", position: "relative" }}>
-            <p style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 5.5, color: "#d4d4d4", lineHeight: 2, margin: 0, marginBottom: 8 }}>
+            <p style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 7.5, color: "#d4d4d4", lineHeight: 2, margin: 0, marginBottom: 8 }}>
               Handalah, age 6, lost their family in Jabalia. Their sister Nour survived — she made it to Rafah. They must reach her. Three defenders rise to protect them on the road south.
             </p>
             <button
               onClick={() => navigate("/intro")}
-              style={{ background: "rgba(249,115,22,0.12)", border: "1px solid #f97316", borderRadius: 3, padding: "5px 14px", cursor: "pointer", fontFamily: "'Press Start 2P', monospace", fontSize: 5.5, color: "#f97316", letterSpacing: 1 }}
+              style={{ background: "rgba(249,115,22,0.12)", border: "1px solid #f97316", borderRadius: 3, padding: "5px 14px", cursor: "pointer", fontFamily: "'Press Start 2P', monospace", fontSize: 7.5, color: "#f97316", letterSpacing: 1 }}
             >
               📖  READ HANDALAH'S STORY
             </button>
           </div>
 
           {/* Character select */}
-          <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 6, color: "#9ca3af", marginBottom: 8, letterSpacing: 2 }}>CHOOSE YOUR CHARACTER</div>
+          <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 8, color: "#9ca3af", marginBottom: 8, letterSpacing: 2 }}>CHOOSE YOUR CHARACTER</div>
           <div style={{ display: "flex", gap: 10, marginBottom: 14, flexWrap: "wrap", justifyContent: "center" }}>
             {CHARACTERS.map((c, i) => (
               <button
@@ -125,28 +125,28 @@ export default function MenuPage({ onMusicStart }: MenuPageProps) {
                 }}
               >
                 <CharSVG charIndex={i} size={38} />
-                <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 6, color: selectedChar === i ? c.color : "#9ca3af", marginTop: 6, textAlign: "center" }}>{c.name}</div>
-                <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 4.5, color: "#6b7280", marginTop: 3, textAlign: "center" }}>HP:{c.maxHp}</div>
-                <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 4.5, color: "#6b7280", marginTop: 1, textAlign: "center" }}>SPD:{c.moveSpeed}</div>
+                <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 8, color: selectedChar === i ? c.color : "#9ca3af", marginTop: 6, textAlign: "center" }}>{c.name}</div>
+                <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 6, color: "#6b7280", marginTop: 3, textAlign: "center" }}>HP:{c.maxHp}</div>
+                <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 6, color: "#6b7280", marginTop: 1, textAlign: "center" }}>SPD:{c.moveSpeed}</div>
               </button>
             ))}
           </div>
 
           {/* Selected character info */}
           <div style={{ background: `${charDef.color}11`, border: `1px solid ${charDef.color}44`, borderRadius: 4, padding: "8px 16px", marginBottom: 14, maxWidth: 460, width: "100%", textAlign: "center" }}>
-            <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 7, color: charDef.color, marginBottom: 6 }}>{charDef.name}</div>
+            <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 9, color: charDef.color, marginBottom: 6 }}>{charDef.name}</div>
             <div style={{ display: "flex", gap: 16, justifyContent: "center" }}>
               {[["HP", charDef.maxHp, "#22c55e"], ["SPEED", charDef.moveSpeed, "#60a5fa"], ["ATK", charDef.attackDamage, "#f97316"]].map(([label, val, col]) => (
                 <div key={label as string} style={{ textAlign: "center" }}>
-                  <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 5, color: "#9ca3af" }}>{label}</div>
-                  <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 9, color: col as string }}>{val as number}</div>
+                  <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 7, color: "#9ca3af" }}>{label}</div>
+                  <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 11, color: col as string }}>{val as number}</div>
                 </div>
               ))}
             </div>
           </div>
 
           {/* Stage select */}
-          <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 6, color: "#9ca3af", marginBottom: 8, letterSpacing: 2 }}>STARTING AREA</div>
+          <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 8, color: "#9ca3af", marginBottom: 8, letterSpacing: 2 }}>STARTING AREA</div>
           <div style={{ display: "flex", gap: 8, marginBottom: 14, flexWrap: "wrap", justifyContent: "center" }}>
             {STAGE_DEFS.map((s, i) => (
               <button
@@ -163,15 +163,15 @@ export default function MenuPage({ onMusicStart }: MenuPageProps) {
                   minWidth: 90,
                 }}
               >
-                <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 6.5, color: selectedStage === i ? s.color : "#9ca3af", marginBottom: 3 }}>{s.name}</div>
-                <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 4.5, color: "#6b7280" }}>{s.subtitle}</div>
+                <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 8.5, color: selectedStage === i ? s.color : "#9ca3af", marginBottom: 3 }}>{s.name}</div>
+                <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 6.5, color: "#6b7280" }}>{s.subtitle}</div>
               </button>
             ))}
           </div>
 
           {/* Controls */}
           <div style={{ background: "rgba(0,0,0,0.6)", border: "1px solid #292524", borderRadius: 4, padding: "8px 14px", marginBottom: 14, maxWidth: 520, width: "100%" }}>
-            <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 5.5, color: "#9ca3af", marginBottom: 6, textAlign: "center" }}>CONTROLS</div>
+            <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 7.5, color: "#9ca3af", marginBottom: 6, textAlign: "center" }}>CONTROLS</div>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "3px 12px" }}>
               {[
                 ["ARROWS/WASD", "MOVE"],
@@ -185,8 +185,8 @@ export default function MenuPage({ onMusicStart }: MenuPageProps) {
                 ["1 / 2 / 3", "ALLY ABILITY"],
               ].map(([key, action]) => (
                 <div key={key} style={{ display: "flex", gap: 6, alignItems: "center" }}>
-                  <span style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 5, color: "#fbbf24", whiteSpace: "nowrap" }}>{key}</span>
-                  <span style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 5, color: "#6b7280", whiteSpace: "nowrap" }}>— {action}</span>
+                  <span style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 7, color: "#fbbf24", whiteSpace: "nowrap" }}>{key}</span>
+                  <span style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 7, color: "#6b7280", whiteSpace: "nowrap" }}>— {action}</span>
                 </div>
               ))}
             </div>
@@ -213,7 +213,7 @@ export default function MenuPage({ onMusicStart }: MenuPageProps) {
             ▶  START GAME
           </button>
 
-          <div style={{ marginTop: 8, fontFamily: "'Press Start 2P', monospace", fontSize: 5, color: "#44403c", textAlign: "center" }}>
+          <div style={{ marginTop: 8, fontFamily: "'Press Start 2P', monospace", fontSize: 7, color: "#44403c", textAlign: "center" }}>
             Stage: {stageDef.name} — {STAGE_DEFS.length} areas total
           </div>
         </div>

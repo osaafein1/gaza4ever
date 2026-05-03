@@ -860,7 +860,7 @@ export function drawPowerUp(ctx: CanvasRenderingContext2D, pu: PowerUp, frame: n
   ctx.fill();
   ctx.shadowBlur = 0;
   ctx.fillStyle = "#000";
-  ctx.font = "bold 8px 'Press Start 2P', monospace";
+  ctx.font = "bold 10px 'Press Start 2P', monospace";
   ctx.textAlign = "center";
   ctx.fillText(icons[pu.type] || "?", pu.x, pu.y + bob + 3);
   ctx.globalAlpha = 1;
@@ -878,7 +878,7 @@ export function drawCollectible(ctx: CanvasRenderingContext2D, c: Collectible, f
   ctx.fillRect(c.x - 20, c.y + bob - 20, 40, 40);
   ctx.shadowBlur = 0;
   ctx.fillStyle = "#fff";
-  ctx.font = "bold 8px 'Press Start 2P', monospace";
+  ctx.font = "bold 10px 'Press Start 2P', monospace";
   ctx.textAlign = "center";
   ctx.fillText(def.label.substring(0, 6).toUpperCase(), c.x, c.y + bob + 4);
   ctx.strokeStyle = "#fff";
@@ -996,7 +996,7 @@ export function drawProjectileWarnings(ctx: CanvasRenderingContext2D, projectile
       ctx.shadowBlur = 0;
       if (flash) {
         ctx.globalAlpha = 1; ctx.fillStyle = "#ef4444"; ctx.shadowColor = "#ef4444"; ctx.shadowBlur = 6;
-        ctx.font = "7px 'Press Start 2P', monospace"; ctx.textAlign = "center";
+        ctx.font = "9px 'Press Start 2P', monospace"; ctx.textAlign = "center";
         ctx.fillText("MISSILE LOCK!", pcx, pcy - rSize - 10);
       }
       ctx.shadowBlur = 0;
@@ -1018,19 +1018,19 @@ export function drawHUD(ctx: CanvasRenderingContext2D, gs: GameState) {
   ctx.strokeStyle = "#78716c"; ctx.lineWidth = 1;
   ctx.strokeRect(12, 12, 220, 22);
   ctx.fillStyle = "#fff";
-  ctx.font = "7px 'Press Start 2P', monospace"; ctx.textAlign = "left";
+  ctx.font = "9px 'Press Start 2P', monospace"; ctx.textAlign = "left";
   ctx.fillText(`${charDef.name}  HP: ${Math.max(0, p.hp)}/${p.maxHp}`, 18, 27);
 
   // Score
   ctx.fillStyle = "#fbbf24";
-  ctx.font = "9px 'Press Start 2P', monospace"; ctx.textAlign = "right";
+  ctx.font = "11px 'Press Start 2P', monospace"; ctx.textAlign = "right";
   ctx.fillText(`SCORE: ${gs.score}`, CANVAS_W - 12, 28);
 
   // Combo
   if (gs.combo >= 2) {
     ctx.globalAlpha = Math.min(1, gs.comboTimer / 40);
     ctx.fillStyle = gs.combo >= 5 ? "#f97316" : "#fbbf24";
-    ctx.font = `${Math.min(10 + gs.combo, 18)}px 'Press Start 2P', monospace`;
+    ctx.font = `${Math.min(12 + gs.combo, 22)}px 'Press Start 2P', monospace`;
     ctx.textAlign = "right";
     ctx.fillText(`${gs.combo}x COMBO`, CANVAS_W - 12, 50);
     ctx.globalAlpha = 1;
@@ -1046,7 +1046,7 @@ export function drawHUD(ctx: CanvasRenderingContext2D, gs: GameState) {
   ctx.strokeStyle = "#1d4ed8";
   ctx.strokeRect(12, 38, 120, 10);
   ctx.fillStyle = "#fff";
-  ctx.font = "5px 'Press Start 2P', monospace"; ctx.textAlign = "left";
+  ctx.font = "7px 'Press Start 2P', monospace"; ctx.textAlign = "left";
   ctx.fillText("SPIRIT BLAST", 14, 47);
 
   // Ally cooldown bars
@@ -1061,22 +1061,22 @@ export function drawHUD(ctx: CanvasRenderingContext2D, gs: GameState) {
     ctx.strokeStyle = allyColors[i];
     ctx.strokeRect(bx, by, 120, 10);
     ctx.fillStyle = "#fff";
-    ctx.font = "4.5px 'Press Start 2P', monospace"; ctx.textAlign = "left";
+    ctx.font = "6px 'Press Start 2P', monospace"; ctx.textAlign = "left";
     ctx.fillText(allyNames[i], bx + 3, by + 8);
   });
 
   // Buffs
   let bOff = 0;
   if (p.buffs.speedTimer > 0) {
-    ctx.fillStyle = "#60a5fa"; ctx.font = "6px 'Press Start 2P', monospace"; ctx.textAlign = "left";
-    ctx.fillText(">> FAST", 12, 100 + bOff); bOff += 14;
+    ctx.fillStyle = "#60a5fa"; ctx.font = "8px 'Press Start 2P', monospace"; ctx.textAlign = "left";
+    ctx.fillText(">> FAST", 12, 100 + bOff); bOff += 16;
   }
   if (p.buffs.powerTimer > 0) {
-    ctx.fillStyle = "#f59e0b"; ctx.font = "6px 'Press Start 2P', monospace"; ctx.textAlign = "left";
-    ctx.fillText("* POWER", 12, 100 + bOff); bOff += 14;
+    ctx.fillStyle = "#f59e0b"; ctx.font = "8px 'Press Start 2P', monospace"; ctx.textAlign = "left";
+    ctx.fillText("* POWER", 12, 100 + bOff); bOff += 16;
   }
   if (p.buffs.shielded) {
-    ctx.fillStyle = "#22d3ee"; ctx.font = "6px 'Press Start 2P', monospace"; ctx.textAlign = "left";
+    ctx.fillStyle = "#22d3ee"; ctx.font = "8px 'Press Start 2P', monospace"; ctx.textAlign = "left";
     ctx.fillText("O SHIELD", 12, 100 + bOff);
   }
 
@@ -1084,7 +1084,7 @@ export function drawHUD(ctx: CanvasRenderingContext2D, gs: GameState) {
   if (p.charSwitchTimer > 0) {
     ctx.fillStyle = charDef.color;
     ctx.shadowColor = charDef.color; ctx.shadowBlur = 10;
-    ctx.font = "12px 'Press Start 2P', monospace"; ctx.textAlign = "center";
+    ctx.font = "14px 'Press Start 2P', monospace"; ctx.textAlign = "center";
     ctx.fillText(`${charDef.name}!`, CANVAS_W / 2, 60);
     ctx.shadowBlur = 0;
   }
@@ -1093,6 +1093,6 @@ export function drawHUD(ctx: CanvasRenderingContext2D, gs: GameState) {
   ctx.fillStyle = "rgba(0,0,0,0.5)";
   ctx.fillRect(0, CANVAS_H - 18, CANVAS_W, 18);
   ctx.fillStyle = "#6b7280";
-  ctx.font = "5px 'Press Start 2P', monospace"; ctx.textAlign = "center";
-  ctx.fillText("ARROWS/WASD:MOVE  SPACE:JUMP  Z/J:ATTACK  X/K:BLAST  R:ROCKET  UP+Z:ROCK  V:SUMMON  C:SWITCH  1/2/3:ALLY", CANVAS_W / 2, CANVAS_H - 5);
+  ctx.font = "6.5px 'Press Start 2P', monospace"; ctx.textAlign = "center";
+  ctx.fillText("ARROWS/WASD:MOVE  SPACE:JUMP  Z/J:ATTACK  X/K:BLAST  R/UP:ROCKET  UP+Z:ROCK  V:SUMMON  C:SWITCH  1/2/3:ALLY", CANVAS_W / 2, CANVAS_H - 5);
 }

@@ -42,23 +42,23 @@ function HistoryCard({ stageIndex, stageColor }: { stageIndex: number; stageColo
     <div style={{ display: "flex", flexDirection: "column", gap: 10, maxWidth: 580, width: "100%" }}>
       {/* Area history */}
       <div style={{ background: "rgba(0,0,0,0.55)", border: `1px solid ${stageColor}44`, borderRadius: 6, padding: "12px 18px" }}>
-        <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 10, color: stageColor, marginBottom: 10 }}>{h.title}</div>
-        <p style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 8.5, color: "#d4d4d4", lineHeight: 2.2, margin: 0, marginBottom: 10 }}>{h.text}</p>
-        <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 7.5, color: "#6b7280", borderTop: `1px solid ${stageColor}30`, paddingTop: 8 }}>{h.fact}</div>
+        <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 12, color: stageColor, marginBottom: 10 }}>{h.title}</div>
+        <p style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 10.5, color: "#d4d4d4", lineHeight: 2.2, margin: 0, marginBottom: 10 }}>{h.text}</p>
+        <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 9, color: "#6b7280", borderTop: `1px solid ${stageColor}30`, paddingTop: 8 }}>{h.fact}</div>
       </div>
       {/* Destroyed landmark */}
       {lm && (
         <div style={{ background: "rgba(0,0,0,0.55)", border: "1px solid #7f1d1d88", borderRadius: 6, padding: "12px 18px" }}>
           <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 8, flexWrap: "wrap" }}>
-            <span style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 8, color: "#ef4444" }}>▶ DESTROYED</span>
-            <span style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 9, color: "#fca5a5" }}>{lm.name}</span>
+            <span style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 10, color: "#ef4444" }}>▶ DESTROYED</span>
+            <span style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 11, color: "#fca5a5" }}>{lm.name}</span>
           </div>
-          <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 7.5, color: "#f87171", marginBottom: 8, opacity: 0.85 }}>{lm.when}</div>
-          <p style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 8.5, color: "#c4b5b5", lineHeight: 2.2, margin: 0, marginBottom: lm.impact?.length ? 10 : 0 }}>{lm.desc}</p>
+          <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 9.5, color: "#f87171", marginBottom: 8, opacity: 0.85 }}>{lm.when}</div>
+          <p style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 10.5, color: "#c4b5b5", lineHeight: 2.2, margin: 0, marginBottom: lm.impact?.length ? 10 : 0 }}>{lm.desc}</p>
           {lm.impact && lm.impact.length > 0 && (
             <div style={{ borderTop: "1px solid #7f1d1d55", paddingTop: 8, display: "flex", flexDirection: "column", gap: 5 }}>
               {lm.impact.map((fact, i) => (
-                <div key={i} style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 7.5, color: "#fbbf24", lineHeight: 1.9 }}>
+                <div key={i} style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 9.5, color: "#fbbf24", lineHeight: 1.9 }}>
                   ◆ {fact}
                 </div>
               ))}
@@ -1306,7 +1306,7 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
               <div style={{ fontFamily: "'Noto Sans Arabic', 'Arial', sans-serif", fontSize: 18, color: stageData2.color, textShadow: `0 0 14px ${stageData2.color}90`, direction: "rtl", lineHeight: 1.1 }}>
                 {STAGE_ARABIC[stageIndex]}
               </div>
-              <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 10, color: stageData2.color, letterSpacing: 2 }}>{stageData2.name}</div>
+              <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 12, color: stageData2.color, letterSpacing: 2 }}>{stageData2.name}</div>
 
               {/* Wave pip indicators */}
               <div style={{ display: "flex", gap: 5, marginTop: 1 }}>
@@ -1331,7 +1331,7 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
               {/* Kill / checkpoint progress */}
               {checkpointActive ? (
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 3, marginTop: 2, background: "rgba(0,0,0,0.55)", borderRadius: 6, padding: "6px 14px", border: "1px solid #22c55e55" }}>
-                  <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 10, color: "#22c55e", textShadow: "0 0 12px #22c55e", letterSpacing: 1, animation: "blink 1s step-end infinite" }}>
+                  <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 12, color: "#22c55e", textShadow: "0 0 12px #22c55e", letterSpacing: 1, animation: "blink 1s step-end infinite" }}>
                     → REACH THE EXIT!
                   </div>
                 </div>
@@ -1341,13 +1341,13 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
                 const barColor = isBossWave ? "#ef4444" : stageData2.color;
                 return (
                   <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4, marginTop: 2, background: "rgba(0,0,0,0.5)", borderRadius: 6, padding: "6px 14px", border: `1px solid ${barColor}33` }}>
-                    <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 9, color: isBossWave ? "#ef4444" : "#d4d4d4", letterSpacing: 1, textShadow: isBossWave ? "0 0 10px #ef4444" : "none" }}>
+                    <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 11, color: isBossWave ? "#ef4444" : "#d4d4d4", letterSpacing: 1, textShadow: isBossWave ? "0 0 10px #ef4444" : "none" }}>
                       {isBossWave ? "★  BOSS  WAVE  ★" : `WAVE  ${waveNum + 1}  /  ${stageData2.waves + 1}`}
                     </div>
                     <div style={{ width: 180, height: 9, background: "rgba(255,255,255,0.08)", borderRadius: 4, overflow: "hidden", border: `1px solid ${barColor}44` }}>
                       <div style={{ width: `${pct * 100}%`, height: "100%", background: barColor, borderRadius: 4, transition: "width 0.18s", boxShadow: `0 0 6px ${barColor}` }} />
                     </div>
-                    <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 8, color: "#9ca3af", letterSpacing: 1 }}>
+                    <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 10, color: "#9ca3af", letterSpacing: 1 }}>
                       {waveKills} / {waveTarget} KILLS
                     </div>
                   </div>
@@ -1359,14 +1359,14 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
               <button
                 onClick={togglePause}
                 title="Pause (Esc)"
-                style={{ background: "rgba(0,0,0,0.65)", border: "1px solid #44403c", borderRadius: 3, padding: "4px 9px", cursor: "pointer", fontFamily: "'Press Start 2P', monospace", fontSize: 7, color: "#9ca3af" }}
+                style={{ background: "rgba(0,0,0,0.65)", border: "1px solid #44403c", borderRadius: 3, padding: "4px 9px", cursor: "pointer", fontFamily: "'Press Start 2P', monospace", fontSize: 9, color: "#9ca3af" }}
               >
                 {paused ? "▶" : "⏸"}
               </button>
               <button
                 onClick={() => { setPaused(true); pausedRef.current = true; setShowExitConfirm(true); }}
                 title="Exit to menu"
-                style={{ background: "rgba(0,0,0,0.65)", border: "1px solid #44403c", borderRadius: 3, padding: "4px 9px", cursor: "pointer", fontFamily: "'Press Start 2P', monospace", fontSize: 7, color: "#9ca3af" }}
+                style={{ background: "rgba(0,0,0,0.65)", border: "1px solid #44403c", borderRadius: 3, padding: "4px 9px", cursor: "pointer", fontFamily: "'Press Start 2P', monospace", fontSize: 9, color: "#9ca3af" }}
               >
                 ✕
               </button>
@@ -1384,37 +1384,37 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
                 <div style={{ display: "flex", flexDirection: "column", gap: 10, width: 240 }}>
                   <button
                     onClick={togglePause}
-                    style={{ background: "rgba(34,197,94,0.15)", border: "2px solid #22c55e", borderRadius: 4, padding: "12px 0", cursor: "pointer", fontFamily: "'Press Start 2P', monospace", fontSize: 9, color: "#fff", letterSpacing: 1 }}
+                    style={{ background: "rgba(34,197,94,0.15)", border: "2px solid #22c55e", borderRadius: 4, padding: "12px 0", cursor: "pointer", fontFamily: "'Press Start 2P', monospace", fontSize: 11, color: "#fff", letterSpacing: 1 }}
                   >
                     ▶  RESUME
                   </button>
                   <button
                     onClick={() => setShowExitConfirm(true)}
-                    style={{ background: "rgba(239,68,68,0.1)", border: "2px solid #6b7280", borderRadius: 4, padding: "12px 0", cursor: "pointer", fontFamily: "'Press Start 2P', monospace", fontSize: 9, color: "#9ca3af", letterSpacing: 1 }}
+                    style={{ background: "rgba(239,68,68,0.1)", border: "2px solid #6b7280", borderRadius: 4, padding: "12px 0", cursor: "pointer", fontFamily: "'Press Start 2P', monospace", fontSize: 11, color: "#9ca3af", letterSpacing: 1 }}
                   >
                     ✕  EXIT GAME
                   </button>
                 </div>
-                <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 5.5, color: "#44403c", marginTop: 4 }}>PRESS ESC TO RESUME</div>
+                <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 8, color: "#44403c", marginTop: 4 }}>PRESS ESC TO RESUME</div>
               </>
             ) : (
               <>
-                <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 13, color: "#ef4444", textShadow: "0 0 16px #ef444450", letterSpacing: 2, textAlign: "center" }}>EXIT GAME?</div>
+                <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 15, color: "#ef4444", textShadow: "0 0 16px #ef444450", letterSpacing: 2, textAlign: "center" }}>EXIT GAME?</div>
                 <div style={{ background: "rgba(0,0,0,0.6)", border: "1px solid #44403c", borderRadius: 4, padding: "14px 24px", maxWidth: 340, textAlign: "center" }}>
-                  <p style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 7, color: "#d4d4d4", lineHeight: 2.2, margin: 0 }}>
+                  <p style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 9, color: "#d4d4d4", lineHeight: 2.2, margin: 0 }}>
                     Your progress in this stage will be lost. {charName} is still waiting for you.
                   </p>
                 </div>
                 <div style={{ display: "flex", gap: 12 }}>
                   <button
                     onClick={() => navigate("/")}
-                    style={{ background: "rgba(239,68,68,0.15)", border: "2px solid #ef4444", borderRadius: 4, padding: "11px 24px", cursor: "pointer", fontFamily: "'Press Start 2P', monospace", fontSize: 8, color: "#ef4444" }}
+                    style={{ background: "rgba(239,68,68,0.15)", border: "2px solid #ef4444", borderRadius: 4, padding: "11px 24px", cursor: "pointer", fontFamily: "'Press Start 2P', monospace", fontSize: 10, color: "#ef4444" }}
                   >
                     YES, EXIT
                   </button>
                   <button
                     onClick={() => { setShowExitConfirm(false); togglePause(); }}
-                    style={{ background: "rgba(34,197,94,0.12)", border: "2px solid #22c55e", borderRadius: 4, padding: "11px 24px", cursor: "pointer", fontFamily: "'Press Start 2P', monospace", fontSize: 8, color: "#22c55e" }}
+                    style={{ background: "rgba(34,197,94,0.12)", border: "2px solid #22c55e", borderRadius: 4, padding: "11px 24px", cursor: "pointer", fontFamily: "'Press Start 2P', monospace", fontSize: 10, color: "#22c55e" }}
                   >
                     NO, CONTINUE
                   </button>
@@ -1439,27 +1439,27 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
                   <div style={{ fontFamily: "'Noto Sans Arabic', 'Arial', sans-serif", fontSize: 48, color: stageData2.color, textShadow: `0 0 28px ${stageData2.color}70`, lineHeight: 1.2, direction: "rtl", letterSpacing: 2 }}>
                     {STAGE_ARABIC[stageIndex]}
                   </div>
-                  <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 11, color: "#fff", letterSpacing: 3, marginTop: 4 }}>{stageData2.name}</div>
-                  <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 9, color: "#9ca3af", marginTop: 4, letterSpacing: 1 }}>{stageData2.subtitle}</div>
+                  <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 13, color: "#fff", letterSpacing: 3, marginTop: 4 }}>{stageData2.name}</div>
+                  <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 11, color: "#9ca3af", marginTop: 4, letterSpacing: 1 }}>{stageData2.subtitle}</div>
                 </div>
 
                 <HistoryCard stageIndex={stageIndex} stageColor={stageData2.color} />
 
                 <div style={{ background: "rgba(0,0,0,0.55)", border: `1px solid ${stageData2.color}70`, borderRadius: 4, padding: "14px 24px", maxWidth: 560, width: "100%", textAlign: "center", minHeight: 60, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <p style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 11, color: "#fff", lineHeight: 2.1, margin: 0 }}>
+                  <p style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 13, color: "#fff", lineHeight: 2.1, margin: 0 }}>
                     {storyLines[storyLine] || ""}
                   </p>
                 </div>
 
                 {inventory.length > 0 && (
                   <div style={{ textAlign: "center" }}>
-                    <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 8, color: "#9ca3af", marginBottom: 6 }}>CARRYING INTO THIS AREA:</div>
+                    <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 10, color: "#9ca3af", marginBottom: 6 }}>CARRYING INTO THIS AREA:</div>
                     <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "center" }}>
                       {inventory.map((type, i) => {
                         const def = COLLECTIBLE_DEFS[type];
                         return (
                           <div key={i} style={{ background: "rgba(0,0,0,0.5)", border: `1px solid ${def?.color || "#44403c"}`, borderRadius: 3, padding: "4px 8px" }}>
-                            <span style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 5, color: def?.color || "#fff" }}>{def?.label}</span>
+                            <span style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 7, color: def?.color || "#fff" }}>{def?.label}</span>
                           </div>
                         );
                       })}
@@ -1467,7 +1467,7 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
                   </div>
                 )}
 
-                <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 11, color: "#fbbf24", animation: "blink 1.1s step-end infinite" }}>
+                <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 13, color: "#fbbf24", animation: "blink 1.1s step-end infinite" }}>
                   {storyLine < storyLines.length - 1 ? "SPACE / ENTER  ▶  NEXT" : "SPACE / ENTER  ▶  BEGIN"}
                 </div>
 
@@ -1502,14 +1502,14 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
                   </div>
                   {/* Right — text */}
                   <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "36px 44px", gap: 22 }}>
-                    <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 6.5, color: "#ef444488", letterSpacing: 3, textTransform: "uppercase" }}>IN MEMORY OF</div>
+                    <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 9, color: "#ef444488", letterSpacing: 3, textTransform: "uppercase" }}>IN MEMORY OF</div>
                     <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 22, color: "#ef4444", textShadow: "0 0 32px #ef444460", lineHeight: 1.7, textAlign: "center" }}>
                       {pg.heading}
                     </div>
-                    <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 14, color: "#fca5a5", lineHeight: 2.1, textAlign: "center" }}>
+                    <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 16, color: "#fca5a5", lineHeight: 2.1, textAlign: "center" }}>
                       {pg.body}
                     </div>
-                    <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 7, color: "#9ca3af", marginTop: 8, lineHeight: 2 }}>
+                    <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 9, color: "#9ca3af", marginTop: 8, lineHeight: 2 }}>
                       January 29, 2024 · Gaza City, Palestine
                     </div>
                   </div>
@@ -1519,7 +1519,7 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
                 <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 20, padding: "20px 24px" }}>
                   <HindCarScene />
                   <div style={{ maxWidth: 560, textAlign: "center", padding: "0 8px" }}>
-                    <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 10, color: "#d4d4d4", lineHeight: 2.2 }}>
+                    <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 12, color: "#d4d4d4", lineHeight: 2.2 }}>
                       {pg.body}
                     </div>
                   </div>
@@ -1528,11 +1528,11 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
                 /* ── Text-only pages ── */
                 <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "36px 60px", gap: 28 }}>
                   {pg.heading && (
-                    <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 18, color: "#ef4444", textShadow: "0 0 24px #ef444450", lineHeight: 1.8, textAlign: "center" }}>
+                    <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 20, color: "#ef4444", textShadow: "0 0 24px #ef444450", lineHeight: 1.8, textAlign: "center" }}>
                       {pg.heading}
                     </div>
                   )}
-                  <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 11, color: "#fca5a5", lineHeight: 2.4, textAlign: "center", maxWidth: 680 }}>
+                  <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 13, color: "#fca5a5", lineHeight: 2.4, textAlign: "center", maxWidth: 680 }}>
                     {pg.body}
                   </div>
                 </div>
@@ -1546,7 +1546,7 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
                     <div key={i} style={{ width: 7, height: 7, borderRadius: "50%", background: i === hindPage ? "#ef4444" : i < hindPage ? "#7f1d1d" : "#2d1010", border: `1px solid ${i === hindPage ? "#ef4444" : "#3f1515"}`, transition: "all 0.2s" }} />
                   ))}
                 </div>
-                <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 10, color: "#ef444488", animation: "blink 1.1s step-end infinite" }}>
+                <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 12, color: "#ef444488", animation: "blink 1.1s step-end infinite" }}>
                   {isLast ? "SPACE / ENTER  ▶  BEGIN" : "SPACE / ENTER  ▶  CONTINUE"}
                 </div>
               </div>
@@ -1571,15 +1571,15 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
                   <div style={{ width: 270, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", borderRight: "1px solid #14532d", background: "rgba(20,83,45,0.08)", padding: "24px 16px", gap: 14 }}>
                     <KhalidPortrait />
                     <div style={{ fontFamily: "'Noto Sans Arabic', 'Arial', sans-serif", fontSize: 26, color: "#22c55e", direction: "rtl", opacity: 0.88 }}>خالد نبهان</div>
-                    <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 7, color: "#86efac", textAlign: "center", lineHeight: 1.8 }}>& Reem Nabhan</div>
+                    <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 9, color: "#86efac", textAlign: "center", lineHeight: 1.8 }}>& Reem Nabhan</div>
                   </div>
                   {/* Right — text */}
                   <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "36px 44px", gap: 22 }}>
-                    <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 6.5, color: "#22c55e88", letterSpacing: 3, textTransform: "uppercase" }}>IN MEMORY OF</div>
+                    <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 9, color: "#22c55e88", letterSpacing: 3, textTransform: "uppercase" }}>IN MEMORY OF</div>
                     <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 22, color: "#22c55e", textShadow: "0 0 32px #22c55e60", lineHeight: 1.7, textAlign: "center" }}>
                       {pg.heading}
                     </div>
-                    <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 14, color: "#bbf7d0", lineHeight: 2.1, textAlign: "center" }}>
+                    <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 16, color: "#bbf7d0", lineHeight: 2.1, textAlign: "center" }}>
                       {pg.body}
                     </div>
                     <div style={{ fontFamily: "'Noto Sans Arabic', 'Arial', sans-serif", fontSize: 32, color: "#dc2626", direction: "rtl", lineHeight: 1.6, textAlign: "center", opacity: 0.88, textShadow: "0 0 20px #dc262640" }}>
@@ -1592,7 +1592,7 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
                 <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 22, padding: "18px 24px" }}>
                   <KhalidGraveScene />
                   <div style={{ maxWidth: 580, textAlign: "center", padding: "0 8px" }}>
-                    <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 10, color: "#d4d4d4", lineHeight: 2.2 }}>
+                    <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 12, color: "#d4d4d4", lineHeight: 2.2 }}>
                       {pg.body}
                     </div>
                   </div>
@@ -1601,11 +1601,11 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
                 /* ── Text-only pages ── */
                 <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "36px 60px", gap: 28 }}>
                   {pg.heading && (
-                    <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 18, color: "#22c55e", textShadow: "0 0 24px #22c55e50", lineHeight: 1.8, textAlign: "center" }}>
+                    <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 20, color: "#22c55e", textShadow: "0 0 24px #22c55e50", lineHeight: 1.8, textAlign: "center" }}>
                       {pg.heading}
                     </div>
                   )}
-                  <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 11, color: "#bbf7d0", lineHeight: 2.4, textAlign: "center", maxWidth: 700 }}>
+                  <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 13, color: "#bbf7d0", lineHeight: 2.4, textAlign: "center", maxWidth: 700 }}>
                     {pg.body}
                   </div>
                 </div>
@@ -1618,7 +1618,7 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
                     <div key={i} style={{ width: 7, height: 7, borderRadius: "50%", background: i === khalidPage ? "#22c55e" : i < khalidPage ? "#14532d" : "#0a1f0a", border: `1px solid ${i === khalidPage ? "#22c55e" : "#14532d"}`, transition: "all 0.2s" }} />
                   ))}
                 </div>
-                <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 10, color: "#22c55e88", animation: "blink 1.1s step-end infinite" }}>
+                <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 12, color: "#22c55e88", animation: "blink 1.1s step-end infinite" }}>
                   {isLast ? "SPACE / ENTER  ▶  BEGIN" : "SPACE / ENTER  ▶  CONTINUE"}
                 </div>
               </div>
@@ -1645,17 +1645,17 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
                     <div style={{ fontFamily: "'Noto Sans Arabic', 'Arial', sans-serif", fontSize: 20, color: "#ef4444", direction: "rtl", opacity: 0.82, textAlign: "center", lineHeight: 1.6 }}>
                       مجمع ناصر الطبي
                     </div>
-                    <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 6.5, color: "#fca5a5", textAlign: "center", lineHeight: 1.9, opacity: 0.7 }}>
+                    <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 8.5, color: "#fca5a5", textAlign: "center", lineHeight: 1.9, opacity: 0.7 }}>
                       NASSER MEDICAL COMPLEX<br />KHAN YOUNIS
                     </div>
                   </div>
                   {/* Right — text */}
                   <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "36px 44px", gap: 24 }}>
-                    <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 6.5, color: "#ef444488", letterSpacing: 3, textTransform: "uppercase" }}>A TRUE STORY</div>
+                    <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 9, color: "#ef444488", letterSpacing: 3, textTransform: "uppercase" }}>A TRUE STORY</div>
                     <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 22, color: "#ef4444", textShadow: "0 0 32px #ef444460", lineHeight: 1.7, textAlign: "center" }}>
                       {pg.heading}
                     </div>
-                    <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 13, color: "#fca5a5", lineHeight: 2.2, textAlign: "center" }}>
+                    <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 15, color: "#fca5a5", lineHeight: 2.2, textAlign: "center" }}>
                       {pg.body}
                     </div>
                   </div>
@@ -1665,7 +1665,7 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
                 <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 22, padding: "18px 24px" }}>
                   <NasserHospitalScene />
                   <div style={{ maxWidth: 600, textAlign: "center", padding: "0 8px" }}>
-                    <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 10, color: "#d4d4d4", lineHeight: 2.2 }}>
+                    <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 12, color: "#d4d4d4", lineHeight: 2.2 }}>
                       {pg.body}
                     </div>
                   </div>
@@ -1674,11 +1674,11 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
                 /* ── Text-only pages ── */
                 <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "36px 60px", gap: 28 }}>
                   {pg.heading && (
-                    <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 18, color: "#ef4444", textShadow: "0 0 24px #ef444450", lineHeight: 1.8, textAlign: "center" }}>
+                    <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 20, color: "#ef4444", textShadow: "0 0 24px #ef444450", lineHeight: 1.8, textAlign: "center" }}>
                       {pg.heading}
                     </div>
                   )}
-                  <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 11, color: "#fca5a5", lineHeight: 2.4, textAlign: "center", maxWidth: 700 }}>
+                  <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 13, color: "#fca5a5", lineHeight: 2.4, textAlign: "center", maxWidth: 700 }}>
                     {pg.body}
                   </div>
                 </div>
@@ -1691,7 +1691,7 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
                     <div key={i} style={{ width: 7, height: 7, borderRadius: "50%", background: i === nasserPage ? "#ef4444" : i < nasserPage ? "#7f1d1d" : "#2d1010", border: `1px solid ${i === nasserPage ? "#ef4444" : "#3f1515"}`, transition: "all 0.2s" }} />
                   ))}
                 </div>
-                <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 10, color: "#ef444488", animation: "blink 1.1s step-end infinite" }}>
+                <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 12, color: "#ef444488", animation: "blink 1.1s step-end infinite" }}>
                   {isLast ? "SPACE / ENTER  ▶  BEGIN" : "SPACE / ENTER  ▶  CONTINUE"}
                 </div>
               </div>
@@ -1723,8 +1723,8 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
 
                 {stageIndex < STAGE_DEFS.length - 1 && (
                   <div style={{ textAlign: "center" }}>
-                    <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 9, color: "#9ca3af", marginBottom: 6 }}>HEADING TO:</div>
-                    <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 13, color: STAGE_DEFS[stageIndex + 1]?.color || "#fff" }}>
+                    <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 11, color: "#9ca3af", marginBottom: 6 }}>HEADING TO:</div>
+                    <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 15, color: STAGE_DEFS[stageIndex + 1]?.color || "#fff" }}>
                       {STAGE_DEFS[stageIndex + 1]?.name}
                     </div>
                   </div>
