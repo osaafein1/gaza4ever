@@ -11,17 +11,20 @@ export const CHARACTERS = [
 ];
 
 export const ENEMY_DEFS: Record<string, { hp: number; speed: number; w: number; h: number; dmg: number }> = {
-  patrol:    { hp: 45,  speed: 1.1,  w: 46,  h: 100, dmg: 10 },
-  soldier:   { hp: 90,  speed: 0.95, w: 46,  h: 105, dmg: 16 },
-  armored:   { hp: 180, speed: 0.8,  w: 52,  h: 110, dmg: 28 },
-  sniper:    { hp: 110, speed: 0.7,  w: 44,  h: 120, dmg: 30 },
-  marksman:  { hp: 120, speed: 0.85, w: 46,  h: 112, dmg: 22 },
-  drone:     { hp: 80,  speed: 2.8,  w: 80,  h: 70,  dmg: 18 },
-  tank:      { hp: 380, speed: 0.55, w: 150, h: 85,  dmg: 50 },
-  bulldozer: { hp: 450, speed: 0.5,  w: 155, h: 90,  dmg: 45 },
-  apc:       { hp: 280, speed: 0.9,  w: 130, h: 80,  dmg: 38 },
-  apache:    { hp: 700, speed: 1.8,  w: 180, h: 90,  dmg: 60 },
-  warplane:  { hp: 900, speed: 1.4,  w: 180, h: 80,  dmg: 70 },
+  patrol:          { hp: 45,   speed: 1.1,  w: 46,  h: 100, dmg: 10 },
+  soldier:         { hp: 90,   speed: 0.95, w: 46,  h: 105, dmg: 16 },
+  armored:         { hp: 180,  speed: 0.8,  w: 52,  h: 110, dmg: 28 },
+  sniper:          { hp: 110,  speed: 0.7,  w: 44,  h: 120, dmg: 30 },
+  marksman:        { hp: 120,  speed: 0.85, w: 46,  h: 112, dmg: 22 },
+  drone:           { hp: 80,   speed: 2.8,  w: 80,  h: 70,  dmg: 18 },
+  tank:            { hp: 380,  speed: 0.55, w: 150, h: 85,  dmg: 50 },
+  bulldozer:       { hp: 450,  speed: 0.5,  w: 155, h: 90,  dmg: 45 },
+  apc:             { hp: 280,  speed: 0.9,  w: 130, h: 80,  dmg: 38 },
+  apache:          { hp: 700,  speed: 1.8,  w: 180, h: 90,  dmg: 60 },
+  warplane:        { hp: 900,  speed: 1.4,  w: 180, h: 80,  dmg: 70 },
+  bomb_plane_mini: { hp: 600,  speed: 2.6,  w: 155, h: 65,  dmg: 50 },
+  bomb_plane_large:{ hp: 1400, speed: 1.6,  w: 260, h: 80,  dmg: 75 },
+  d9:              { hp: 2000, speed: 0.28, w: 190, h: 105, dmg: 70 },
 };
 
 export const STAGE_DEFS = [
@@ -52,8 +55,8 @@ export const STAGE_DEFS = [
     color: "#a855f7",
     desc: "Push through the heart of the camp — the most densely shelled ground",
     waves: 3,
-    enemyTier: ["armored", "soldier", "sniper", "apc"],
-    bossType: "bulldozer",
+    enemyTier: ["armored", "soldier", "sniper", "apc", "drone"],
+    bossType: "bomb_plane_mini",
   },
   {
     id: "khan-younis",
@@ -62,8 +65,8 @@ export const STAGE_DEFS = [
     color: "#fbbf24",
     desc: "Push through the southern districts toward safety",
     waves: 3,
-    enemyTier: ["armored", "sniper", "marksman", "apc"],
-    bossType: "bulldozer",
+    enemyTier: ["armored", "sniper", "marksman", "apc", "drone"],
+    bossType: "bomb_plane_large",
   },
   {
     id: "rafah",
@@ -72,8 +75,8 @@ export const STAGE_DEFS = [
     color: "#22c55e",
     desc: "Reach the crossing — freedom is within sight",
     waves: 1,
-    enemyTier: ["armored", "sniper", "soldier", "marksman", "apc"],
-    bossType: "apache",
+    enemyTier: ["armored", "sniper", "soldier", "marksman", "apc", "drone"],
+    bossType: "d9",
   },
 ];
 
@@ -83,9 +86,9 @@ export const SHOP_WEAPONS = [
   { id: "grenade",    label: "Grenade",          cost: 8,   damage: 65,  ammo: 3,  firerate: 60,  desc: "Area explosion — 3 grenades." },
   { id: "machinegun", label: "Machine Gun",      cost: 20,  damage: 12,  ammo: 60, firerate: 2,   desc: "Full-auto suppression — 60 rds." },
   { id: "sniper",     label: "Sniper Rifle",     cost: 15,  damage: 85,  ammo: 5,  firerate: 45,  desc: "Piercing, distance scales dmg — 5 rds." },
-  { id: "shotgun",    label: "AOE Shotgun",      cost: 15,  damage: 40,  ammo: 8,  firerate: 35,  desc: "Wide spread blast — 8 rounds." },
+  { id: "shotgun",    label: "AOE Shotgun",      cost: 15,  damage: 25,  ammo: 8,  firerate: 35,  desc: "Wide spread blast — 8 rounds." },
   { id: "rocket",     label: "Rocket Launcher",  cost: 18,  damage: 90,  ammo: 3,  firerate: 80,  desc: "Explosive AoE, auto-aims — 3 rds." },
-  { id: "missile",    label: "Missile Strike",   cost: 100, damage: 200, ammo: 1,  firerate: 120, desc: "Massive screen-wide explosion — 1 round." },
+  { id: "missile",    label: "Missile Strike",   cost: 50,  damage: 200, ammo: 1,  firerate: 120, desc: "Screen-wide mushroom cloud — 1 round." },
 ];
 
 export const COLLECTIBLE_DEFS: Record<string, { label: string; desc: string; color: string; icon: string }> = {

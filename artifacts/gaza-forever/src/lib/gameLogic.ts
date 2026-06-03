@@ -31,7 +31,7 @@ export function createPlayer(charIndex = 0): Player {
   };
 }
 
-const AERIAL_TYPES = new Set(["drone", "apache", "warplane"]);
+const AERIAL_TYPES = new Set(["drone", "apache", "warplane", "bomb_plane_mini", "bomb_plane_large"]);
 
 export function spawnEnemy(type: string): Enemy {
   const def = ENEMY_DEFS[type];
@@ -171,7 +171,7 @@ export function updateGame(gs: GameState, enemies: Enemy[], particles: Particle[
         if (e.hp <= 0) {
           e.state = "dead";
           e.stateTimer = 0;
-          callbacks.onEnemyDie(e);
+          callbacks.onEnemyDie(e, "melee");
           gs.combo++;
           gs.comboTimer = 160;
           callbacks.onComboChange(gs.combo);
@@ -201,7 +201,7 @@ export function updateGame(gs: GameState, enemies: Enemy[], particles: Particle[
           if (e.hp <= 0) {
             e.state = "dead";
             e.stateTimer = 0;
-            callbacks.onEnemyDie(e);
+            callbacks.onEnemyDie(e, "beam");
             gs.combo++;
             gs.comboTimer = 160;
             callbacks.onComboChange(gs.combo);
@@ -231,7 +231,7 @@ export function updateGame(gs: GameState, enemies: Enemy[], particles: Particle[
           if (e.hp <= 0) {
             e.state = "dead";
             e.stateTimer = 0;
-            callbacks.onEnemyDie(e);
+            callbacks.onEnemyDie(e, "summon");
           }
           s.life = 0;
           break;
@@ -339,6 +339,38 @@ export function updateGame(gs: GameState, enemies: Enemy[], particles: Particle[
           exploding: false, explodeTimer: 0, explodeX: 0, explodeY: 0,
         });
       }
+      if (e.type === "bomb_plane_mini" && dx < 480 && e.animTimer % 200 === 0) {
+        const wm2 = 60; const spd2 = 5.8;
+        const bddx = pCx - eCx; const bddy = p.y - p.height / 2 - e.y;
+        const bdist = Math.sqrt(bddx * bddx + bddy * bddy) || 1;
+        gs.projectiles.push({
+          id: String(Math.random()), type: "hellfire",
+          x: eCx, y: e.y + 20,
+          vx: bddx / bdist * spd2, vy: bddy / bdist * spd2,
+          targetX: pCx, targetY: p.y - p.height / 2,
+          damage: 35, trail: [], life: 380, maxLife: 380,
+          warned: false, warnTimer: wm2, warnMaxTimer: wm2,
+          exploding: false, explodeTimer: 0, explodeX: 0, explodeY: 0,
+        });
+      }
+      if (e.type === "bomb_plane_large" && dx < 650 && e.animTimer % 160 === 0) {
+        for (let bIdx = 0; bIdx < 2; bIdx++) {
+          const wm3 = 80; const spd3 = 5.2;
+          const offX = (bIdx - 0.5) * 80;
+          const tx = pCx + offX; const ty = p.y - p.height / 2;
+          const lddx = tx - eCx; const lddy = ty - e.y;
+          const ldist = Math.sqrt(lddx * lddx + lddy * lddy) || 1;
+          gs.projectiles.push({
+            id: String(Math.random()), type: "hellfire",
+            x: eCx + offX * 0.3, y: e.y + 24,
+            vx: lddx / ldist * spd3, vy: lddy / ldist * spd3,
+            targetX: tx, targetY: ty,
+            damage: 50, trail: [], life: 500, maxLife: 500,
+            warned: false, warnTimer: wm3, warnMaxTimer: wm3,
+            exploding: false, explodeTimer: 0, explodeX: 0, explodeY: 0,
+          });
+        }
+      }
     }
     if (!isAerial) {
       e.attackCooldown--;
@@ -384,6 +416,19 @@ export function updateGame(gs: GameState, enemies: Enemy[], particles: Particle[
           exploding: false, explodeTimer: 0, explodeX: 0, explodeY: 0,
         });
       }
+      // D9 bulldozer fires massive boulders
+      if (e.type === "d9" && dist < 700 && e.state !== "hurt" && e.animTimer > 80 && e.animTimer % 160 === 0) {
+        const d9dir = p.x + p.width / 2 > e.x + e.width / 2 ? 1 : -1;
+        gs.projectiles.push({
+          id: String(Math.random()), type: "rock",
+          x: d9dir > 0 ? e.x + e.width : e.x, y: e.y - 50,
+          vx: d9dir * 10, vy: -20,
+          targetX: 0, targetY: 0,
+          damage: 60, trail: [], life: 280, maxLife: 280,
+          warned: true, warnTimer: 0, warnMaxTimer: 0,
+          exploding: false, explodeTimer: 0, explodeX: 0, explodeY: 0,
+        });
+      }
     }
     e.x = Math.max(-e.width, e.x);
   }
@@ -415,7 +460,7 @@ export function updateGame(gs: GameState, enemies: Enemy[], particles: Particle[
           for (let j = 0; j < 8; j++) callbacks.onParticle({ x: pr.x, y: pr.y, vx: (Math.random() - 0.5) * 11, vy: -Math.random() * 7 - 2, life: 20, maxLife: 20, color: j < 4 ? "#78716c" : "#a8a29e", size: 3 + Math.random() * 5 });
           callbacks.onParticle({ x: e.x + e.width / 2, y: e.y - e.height / 2 - 24, vx: 0, vy: -1.4, life: 34, maxLife: 34, color: "#f97316", text: "SMASH!", size: 16 });
           if (e.hp <= 0) {
-            e.state = "dead"; e.stateTimer = 0; callbacks.onEnemyDie(e);
+            e.state = "dead"; e.stateTimer = 0; callbacks.onEnemyDie(e, "rock");
             gs.combo++; gs.comboTimer = 160; callbacks.onComboChange(gs.combo);
             gs.score += 150 * gs.scoreMultiplier; callbacks.onScoreChange(gs.score);
           }
@@ -447,7 +492,7 @@ export function updateGame(gs: GameState, enemies: Enemy[], particles: Particle[
           for (let j = 0; j < 6; j++) callbacks.onParticle({ x: pr.x, y: pr.y, vx: (Math.random() - 0.5) * 10, vy: -Math.random() * 6 - 2, life: 16, maxLife: 16, color: j < 3 ? "#ef4444" : "#fbbf24", size: 3 + Math.random() * 5 });
           callbacks.onParticle({ x: e.x + e.width / 2, y: e.y - e.height - 22, vx: 0, vy: -1.5, life: 28, maxLife: 28, color: "#fff", text: `-${actualDmg}`, size: 13 });
           if (e.hp <= 0) {
-            e.state = "dead"; e.stateTimer = 0; callbacks.onEnemyDie(e);
+            e.state = "dead"; e.stateTimer = 0; callbacks.onEnemyDie(e, pr.sourceWeapon);
             gs.combo++; gs.comboTimer = 160; callbacks.onComboChange(gs.combo);
             gs.score += (isPiercing ? 200 : 100) * gs.scoreMultiplier; callbacks.onScoreChange(gs.score);
           }
@@ -482,7 +527,7 @@ export function updateGame(gs: GameState, enemies: Enemy[], particles: Particle[
           if (Math.sqrt(tdx * tdx + tdy * tdy) < blastR) {
             t.hp -= pr.damage; t.state = "hurt"; t.stateTimer = 22; t.vx += (tdx / (Math.abs(tdx) || 1)) * 7;
             if (t.hp <= 0) {
-              t.state = "dead"; t.stateTimer = 0; callbacks.onEnemyDie(t);
+              t.state = "dead"; t.stateTimer = 0; callbacks.onEnemyDie(t, "grenade");
               gs.combo++; gs.comboTimer = 160; callbacks.onComboChange(gs.combo);
               gs.score += 200 * gs.scoreMultiplier; callbacks.onScoreChange(gs.score);
             }
@@ -571,7 +616,7 @@ export function updateGame(gs: GameState, enemies: Enemy[], particles: Particle[
             if (Math.sqrt(tdx * tdx + tdy * tdy) < blastR) {
               t.hp -= pr.damage; t.state = "hurt"; t.stateTimer = 20; t.vx += tdx / (Math.abs(tdx) || 1) * 8;
               if (t.hp <= 0) {
-                t.state = "dead"; t.stateTimer = 0; callbacks.onEnemyDie(t);
+                t.state = "dead"; t.stateTimer = 0; callbacks.onEnemyDie(t, "rocket");
                 gs.combo++; gs.comboTimer = 160; callbacks.onComboChange(gs.combo);
                 gs.score += 250 * gs.scoreMultiplier; callbacks.onScoreChange(gs.score);
               }
@@ -617,10 +662,20 @@ export function updateGame(gs: GameState, enemies: Enemy[], particles: Particle[
           if (Math.sqrt(tdx * tdx + tdy * tdy) < blastR) {
             t.hp -= pr.damage; t.state = "hurt"; t.stateTimer = 30; t.vx += (tdx / (Math.abs(tdx) || 1)) * 14;
             if (t.hp <= 0) {
-              t.state = "dead"; t.stateTimer = 0; callbacks.onEnemyDie(t);
+              t.state = "dead"; t.stateTimer = 0; callbacks.onEnemyDie(t, "missile");
               gs.combo++; gs.comboTimer = 180; callbacks.onComboChange(gs.combo);
               gs.score += 600 * gs.scoreMultiplier; callbacks.onScoreChange(gs.score);
             }
+          }
+        }
+        // Mushroom cloud: ground hit kills ALL non-boss enemies
+        if (pr.y >= FLOOR_Y - 30) {
+          for (const mt of enemies) {
+            if (mt.state === "dead" || mt.isBoss) continue;
+            mt.hp = 0; mt.state = "dead"; mt.stateTimer = 0;
+            callbacks.onEnemyDie(mt, "missile");
+            gs.combo++; gs.comboTimer = 180; callbacks.onComboChange(gs.combo);
+            gs.score += 200 * gs.scoreMultiplier; callbacks.onScoreChange(gs.score);
           }
         }
         gs.shake = Math.max(gs.shake, 45);

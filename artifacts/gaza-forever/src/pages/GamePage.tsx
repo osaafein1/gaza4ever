@@ -727,7 +727,9 @@ function buildInitialState(charIndex: number, stageIndex: number): GameState {
 function spawnWave(gs: GameState, stageIndex: number, waveIndex: number, isBoss: boolean): number {
   const stageDef = STAGE_DEFS[stageIndex];
   if (isBoss) {
-    gs.enemies.push(spawnEnemy(stageDef.bossType));
+    const bossEnemy = spawnEnemy(stageDef.bossType);
+    bossEnemy.isBoss = true;
+    gs.enemies.push(bossEnemy);
     return 1;
   }
   const tier = stageDef.enemyTier;
@@ -849,7 +851,7 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
     phaseRef.current = "dead";
   }, []);
 
-  const onEnemyDie = useCallback((e: Enemy) => {
+  const onEnemyDie = useCallback((e: Enemy, killedBy?: string) => {
     const gs = gsRef.current;
     if (!gs) return;
     spawnDeathParticles(gs, e, (p) => particlesRef.current.push(p));
@@ -857,6 +859,7 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
     const COIN_MAP: Record<string, number> = {
       patrol: 1, soldier: 1, armored: 1, sniper: 1, marksman: 1, apc: 1,
       drone: 3, tank: 5, bulldozer: 5, apache: 20, warplane: 20,
+      bomb_plane_mini: 10, bomb_plane_large: 20, d9: 50,
     };
     const earned = COIN_MAP[e.type] ?? 1;
     coinsRef.current += earned;
@@ -867,9 +870,9 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
       life: 52, maxLife: 52, color: "#fbbf24", text: `+${earned}c`, size: 12,
     });
 
-    // Soldier-type kills: +2 ammo to each currently-owned non-rocket weapon
-    const soldierDropTypes = ["patrol", "soldier", "armored", "sniper", "marksman", "apc"];
-    if (soldierDropTypes.includes(e.type)) {
+    // Pistol / M16 / Sniper kills only: +2 ammo to each owned gun
+    const gunKill = killedBy === "pistol" || killedBy === "m16" || killedBy === "sniper";
+    if (gunKill) {
       const inv = weaponInventoryRef.current;
       const nonRocketIds = ["pistol", "m16", "grenade", "machinegun", "sniper", "shotgun"];
       const ownedWeapons = nonRocketIds.filter(id => (inv[id] ?? 0) > 0);
@@ -1106,6 +1109,7 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
                 damage: wDef.damage, trail: [], life: 90, maxLife: 90,
                 warned: true, warnTimer: 0, warnMaxTimer: 0,
                 exploding: false, explodeTimer: 0, explodeX: 0, explodeY: 0,
+                sourceWeapon: p.activeWeapon,
               });
             } else if (p.activeWeapon === "sniper") {
               const svx = aimUp ? dir * 21.2 : dir * 30;
@@ -1118,6 +1122,7 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
                 damage: wDef.damage, trail: [], life: 70, maxLife: 70,
                 warned: true, warnTimer: 0, warnMaxTimer: 0,
                 exploding: false, explodeTimer: 0, explodeX: 0, explodeY: 0,
+                sourceWeapon: "sniper",
               });
             } else if (p.activeWeapon === "shotgun") {
               for (let sp = 0; sp < 6; sp++) {
@@ -1139,10 +1144,11 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
                   damage: wDef.damage, trail: [], life: 55, maxLife: 55,
                   warned: true, warnTimer: 0, warnMaxTimer: 0,
                   exploding: false, explodeTimer: 0, explodeX: 0, explodeY: 0,
+                  sourceWeapon: "shotgun",
                 });
               }
             } else if (p.activeWeapon === "missile") {
-              const AERIAL = ["drone", "apache", "warplane"];
+              const AERIAL = ["drone", "apache", "warplane", "bomb_plane_mini", "bomb_plane_large"];
               const aerials = gs.enemies.filter(en => AERIAL.includes(en.type) && en.state !== "dead");
               const liveEnemies = gs.enemies.filter(en => en.state !== "dead");
               const targets = aimUp
@@ -1169,6 +1175,7 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
                 damage: wDef.damage, trail: [], life: 320, maxLife: 320,
                 warned: true, warnTimer: 0, warnMaxTimer: 0,
                 exploding: false, explodeTimer: 0, explodeX: 0, explodeY: 0,
+                sourceWeapon: "missile",
               });
             } else if (p.activeWeapon === "grenade") {
               const gvx = aimUp ? dir * 4 : dir * 10;
@@ -1181,9 +1188,10 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
                 damage: wDef.damage, trail: [], life: 220, maxLife: 220,
                 warned: true, warnTimer: 0, warnMaxTimer: 0,
                 exploding: false, explodeTimer: 0, explodeX: 0, explodeY: 0,
+                sourceWeapon: "grenade",
               });
             } else if (p.activeWeapon === "rocket") {
-              const AERIAL = ["drone", "apache", "warplane"];
+              const AERIAL = ["drone", "apache", "warplane", "bomb_plane_mini", "bomb_plane_large"];
               const aerials = gs.enemies.filter(en => AERIAL.includes(en.type) && en.state !== "dead");
               const liveEnemies = gs.enemies.filter(en => en.state !== "dead");
               const targets = aerials.length > 0 ? aerials : liveEnemies;
@@ -1208,6 +1216,7 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
                 damage: wDef.damage, trail: [], life: 280, maxLife: 280,
                 warned: true, warnTimer: 0, warnMaxTimer: 0,
                 exploding: false, explodeTimer: 0, explodeX: 0, explodeY: 0,
+                sourceWeapon: "rocket",
               });
             }
             if ((p.weaponAmmo[p.activeWeapon] ?? 0) <= 0) {
@@ -2054,11 +2063,51 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
 
         {/* Dead screen */}
         {phase === "dead" && (
-          <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.93)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 16 }}>
+          <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.93)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 14 }}>
             <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 28, color: "#ef4444", textShadow: "0 0 30px #ef4444" }}>YOU FELL</div>
             <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 12, color: "#9ca3af", textAlign: "center", maxWidth: 420, lineHeight: 2 }}>
               Gaza remembers. The fight goes on.
             </div>
+            {/* Fallen child illustration */}
+            <svg width="180" height="160" viewBox="0 0 180 160" style={{ filter: "drop-shadow(0 0 18px rgba(239,68,68,0.35))" }}>
+              {/* Ground */}
+              <rect x="0" y="130" width="180" height="30" fill="#1c1917" rx="4"/>
+              {/* Rubble */}
+              <polygon points="10,130 28,110 46,130" fill="#374151"/>
+              <polygon points="134,130 152,108 170,130" fill="#374151"/>
+              <rect x="70" y="118" width="40" height="12" fill="#374151" rx="2"/>
+              {/* Palestinian flag draped over ground */}
+              <rect x="12" y="122" width="80" height="10" fill="#149954" opacity="0.7" rx="2"/>
+              <rect x="12" y="122" width="20" height="10" fill="#000" opacity="0.7" rx="2"/>
+              <polygon points="12,122 12,132 22,127" fill="#ef4444" opacity="0.9"/>
+              {/* Child lying down — silhouette in white */}
+              <ellipse cx="95" cy="127" rx="32" ry="10" fill="#f8fafc" opacity="0.15"/>
+              {/* Body */}
+              <rect x="62" y="112" width="60" height="20" fill="#f8fafc" rx="10" opacity="0.9"/>
+              {/* Head */}
+              <circle cx="115" cy="113" r="14" fill="#fcd5b0"/>
+              {/* Hair */}
+              <ellipse cx="115" cy="104" rx="13" ry="8" fill="#1a0a00"/>
+              {/* Closed eyes — peaceful */}
+              <path d="M109 112 Q112 115 115 112" stroke="#555" strokeWidth="1.5" fill="none"/>
+              <path d="M115 112 Q118 115 121 112" stroke="#555" strokeWidth="1.5" fill="none"/>
+              {/* Small hand reaching out */}
+              <ellipse cx="64" cy="120" rx="8" ry="5" fill="#fcd5b0" transform="rotate(-20 64 120)"/>
+              {/* Kite of hope — small kite floating up */}
+              <polygon points="140,30 150,50 140,65 130,50" fill="none" stroke="#22c55e" strokeWidth="1.5" opacity="0.7"/>
+              <line x1="140" y1="65" x2="142" y2="90" stroke="#22c55e" strokeWidth="1" strokeDasharray="3,3" opacity="0.5"/>
+              {/* Watermelon slice — small symbol */}
+              <path d="M26 75 A18 18 0 0 1 62 75 Z" fill="#16a34a"/>
+              <path d="M30 75 A14 14 0 0 1 58 75 Z" fill="#ef4444"/>
+              <circle cx="38" cy="70" r="1.5" fill="#1c1917"/>
+              <circle cx="44" cy="67" r="1.5" fill="#1c1917"/>
+              <circle cx="50" cy="70" r="1.5" fill="#1c1917"/>
+              {/* Stars */}
+              <circle cx="20" cy="20" r="1.5" fill="#fff" opacity="0.6"/>
+              <circle cx="160" cy="15" r="1" fill="#fff" opacity="0.5"/>
+              <circle cx="80" cy="8" r="1" fill="#fff" opacity="0.4"/>
+              <circle cx="140" cy="88" r="1" fill="#fff" opacity="0.3"/>
+            </svg>
             <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 16, color: "#fbbf24" }}>SCORE: {score.toLocaleString()}</div>
             <div style={{ display: "flex", gap: 12, marginTop: 8 }}>
               <button

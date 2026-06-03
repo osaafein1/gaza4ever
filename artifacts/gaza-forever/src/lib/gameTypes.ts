@@ -40,6 +40,7 @@ export interface Enemy {
   animTimer: number;
   phase: number;
   attackCooldown: number;
+  isBoss?: boolean;
 }
 
 export interface Particle {
@@ -95,6 +96,7 @@ export interface Projectile {
   explodeTimer: number;
   explodeX: number;
   explodeY: number;
+  sourceWeapon?: string;
 }
 
 export interface Beam {
@@ -155,7 +157,7 @@ export interface GameState {
 
 export interface GameCallbacks {
   onParticle: (p: Particle) => void;
-  onEnemyDie: (e: Enemy) => void;
+  onEnemyDie: (e: Enemy, killedBy?: string) => void;
   onPlayerDie: () => void;
   onWaveComplete: () => void;
   onComboChange: (n: number) => void;

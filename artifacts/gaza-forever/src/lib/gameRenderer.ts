@@ -470,8 +470,11 @@ export function drawEnemy(ctx: CanvasRenderingContext2D, e: Enemy, frame: number
     case "tank":     drawTank(ctx, e, frame, hurt); break;
     case "bulldozer": drawBulldozer(ctx, e, frame, hurt); break;
     case "apc":      drawAPC(ctx, e, frame, hurt); break;
-    case "apache":   drawApache(ctx, e, frame, hurt); break;
-    case "warplane": drawWarplane(ctx, e, frame, hurt); break;
+    case "apache":         drawApache(ctx, e, frame, hurt); break;
+    case "warplane":       drawWarplane(ctx, e, frame, hurt); break;
+    case "bomb_plane_mini":  drawBombPlaneMini(ctx, e, frame, hurt); break;
+    case "bomb_plane_large": drawBombPlaneLarge(ctx, e, frame, hurt); break;
+    case "d9":             drawD9(ctx, e, frame, hurt); break;
     default: drawSoldier(ctx, e, frame, hurt);
   }
   // Enemy HP bar
@@ -851,6 +854,207 @@ function drawWarplane(ctx: CanvasRenderingContext2D, e: Enemy, frame: number, hu
   ctx.beginPath(); ctx.ellipse(cx, e.y, 90, 10, 0, 0, Math.PI * 2); ctx.fill();
 }
 
+function drawBombPlaneMini(ctx: CanvasRenderingContext2D, e: Enemy, frame: number, hurt: boolean) {
+  const cx = e.x + e.width / 2;
+  const hover = Math.sin(frame * 0.065 + e.phase) * 10;
+  const dy = e.y - 185 + hover;
+  const F = hurt ? "#fbbf24" : null;
+  const facingRight = e.vx >= 0;
+  ctx.save();
+  if (!facingRight) { ctx.scale(-1, 1); ctx.translate(-2 * cx, 0); }
+  // Fuselage
+  ctx.fillStyle = F || "#94a3b8";
+  ctx.beginPath();
+  ctx.moveTo(cx - 55, dy);
+  ctx.lineTo(cx + 38, dy - 8);
+  ctx.lineTo(cx + 55, dy);
+  ctx.lineTo(cx + 38, dy + 8);
+  ctx.lineTo(cx - 55, dy + 6);
+  ctx.closePath();
+  ctx.fill();
+  // Cockpit
+  ctx.fillStyle = F || "rgba(56,189,248,0.35)";
+  ctx.beginPath();
+  ctx.ellipse(cx + 28, dy - 2, 14, 8, 0, 0, Math.PI * 2);
+  ctx.fill();
+  // Wings (swept)
+  ctx.fillStyle = F || "#64748b";
+  ctx.beginPath();
+  ctx.moveTo(cx, dy + 2);
+  ctx.lineTo(cx - 20, dy + 2);
+  ctx.lineTo(cx - 50, dy + 32);
+  ctx.lineTo(cx - 38, dy + 32);
+  ctx.lineTo(cx + 10, dy + 4);
+  ctx.closePath();
+  ctx.fill();
+  // Tail fin
+  ctx.fillStyle = F || "#64748b";
+  ctx.beginPath();
+  ctx.moveTo(cx - 42, dy - 4);
+  ctx.lineTo(cx - 55, dy - 22);
+  ctx.lineTo(cx - 52, dy - 22);
+  ctx.lineTo(cx - 38, dy - 2);
+  ctx.closePath();
+  ctx.fill();
+  // Engine under wing
+  ctx.fillStyle = F || "#374151";
+  ctx.beginPath();
+  ctx.ellipse(cx - 22, dy + 20, 8, 5, -0.2, 0, Math.PI * 2);
+  ctx.fill();
+  // Engine exhaust glow
+  ctx.fillStyle = F || "#f97316";
+  ctx.globalAlpha = 0.6 + Math.sin(frame * 0.4) * 0.3;
+  ctx.beginPath();
+  ctx.arc(cx - 30, dy + 20, 4, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.globalAlpha = 1;
+  ctx.restore();
+  // Ground shadow
+  const sg = ctx.createRadialGradient(cx, e.y, 0, cx, e.y, 70);
+  sg.addColorStop(0, "rgba(0,0,0,0.08)");
+  sg.addColorStop(1, "rgba(0,0,0,0)");
+  ctx.fillStyle = sg;
+  ctx.beginPath(); ctx.ellipse(cx, e.y, 70, 8, 0, 0, Math.PI * 2); ctx.fill();
+}
+
+function drawBombPlaneLarge(ctx: CanvasRenderingContext2D, e: Enemy, frame: number, hurt: boolean) {
+  const cx = e.x + e.width / 2;
+  const hover = Math.sin(frame * 0.048 + e.phase) * 13;
+  const dy = e.y - 170 + hover;
+  const F = hurt ? "#fbbf24" : null;
+  const facingRight = e.vx >= 0;
+  ctx.save();
+  if (!facingRight) { ctx.scale(-1, 1); ctx.translate(-2 * cx, 0); }
+  // Main fuselage — thick barrel
+  ctx.fillStyle = F || "#475569";
+  ctx.beginPath();
+  ctx.moveTo(cx - 90, dy - 2);
+  ctx.lineTo(cx + 50, dy - 10);
+  ctx.lineTo(cx + 90, dy);
+  ctx.lineTo(cx + 50, dy + 12);
+  ctx.lineTo(cx - 90, dy + 10);
+  ctx.closePath();
+  ctx.fill();
+  // Cockpit glass
+  ctx.fillStyle = F || "rgba(56,189,248,0.3)";
+  ctx.beginPath();
+  ctx.ellipse(cx + 62, dy, 18, 9, 0, 0, Math.PI * 2);
+  ctx.fill();
+  // Wide swept wings
+  ctx.fillStyle = F || "#334155";
+  ctx.beginPath();
+  ctx.moveTo(cx - 10, dy + 4);
+  ctx.lineTo(cx - 40, dy + 4);
+  ctx.lineTo(cx - 110, dy + 52);
+  ctx.lineTo(cx - 92, dy + 52);
+  ctx.lineTo(cx + 20, dy + 8);
+  ctx.closePath();
+  ctx.fill();
+  // Rear stabilizer
+  ctx.fillStyle = F || "#334155";
+  ctx.beginPath();
+  ctx.moveTo(cx - 68, dy - 6);
+  ctx.lineTo(cx - 90, dy - 30);
+  ctx.lineTo(cx - 80, dy - 30);
+  ctx.lineTo(cx - 62, dy - 4);
+  ctx.closePath();
+  ctx.fill();
+  // 4 engines under wings
+  for (let ei = 0; ei < 4; ei++) {
+    const ex2 = cx - 30 - ei * 18;
+    const ey2 = dy + 22 + ei * 8;
+    ctx.fillStyle = F || "#1e293b";
+    ctx.beginPath(); ctx.ellipse(ex2, ey2, 10, 6, -0.15, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = F || "#f97316";
+    ctx.globalAlpha = 0.5 + Math.sin(frame * 0.38 + ei * 1.4) * 0.3;
+    ctx.beginPath(); ctx.arc(ex2 - 8, ey2, 4, 0, Math.PI * 2); ctx.fill();
+    ctx.globalAlpha = 1;
+  }
+  // Bomb bay doors (slightly open)
+  ctx.fillStyle = F || "#1e293b";
+  ctx.fillRect(cx - 30, dy + 8, 50, 6);
+  ctx.restore();
+  // Ground shadow
+  const sg2 = ctx.createRadialGradient(cx, e.y, 0, cx, e.y, 120);
+  sg2.addColorStop(0, "rgba(0,0,0,0.1)");
+  sg2.addColorStop(1, "rgba(0,0,0,0)");
+  ctx.fillStyle = sg2;
+  ctx.beginPath(); ctx.ellipse(cx, e.y, 120, 10, 0, 0, Math.PI * 2); ctx.fill();
+}
+
+function drawD9(ctx: CanvasRenderingContext2D, e: Enemy, frame: number, hurt: boolean) {
+  const cx = e.x + e.width / 2;
+  const F = hurt ? "#fbbf24" : null;
+  const facingRight = e.vx >= 0;
+  ctx.save();
+  if (!facingRight) { ctx.scale(-1, 1); ctx.translate(-2 * cx, 0); }
+  // Tracks
+  ctx.fillStyle = F || "#1a1a1a";
+  ctx.beginPath();
+  ctx.roundRect(e.x + 4, e.y - 28, e.width - 8, 28, 8);
+  ctx.fill();
+  ctx.strokeStyle = F || "#333";
+  ctx.lineWidth = 2;
+  for (let ti = 0; ti < 7; ti++) {
+    const tx2 = e.x + 16 + ti * ((e.width - 32) / 6);
+    ctx.beginPath();
+    ctx.moveTo(tx2, e.y - 28);
+    ctx.lineTo(tx2, e.y);
+    ctx.stroke();
+  }
+  // Track wheels
+  ctx.fillStyle = F || "#2d2d2d";
+  for (let wi = 0; wi < 3; wi++) {
+    const wx2 = e.x + 24 + wi * ((e.width - 48) / 2);
+    ctx.beginPath(); ctx.arc(wx2, e.y - 12, 11, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = F || "#111";
+    ctx.beginPath(); ctx.arc(wx2, e.y - 12, 5, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = F || "#2d2d2d";
+  }
+  // Main hull body
+  ctx.fillStyle = F || "#3d4a1a";
+  ctx.fillRect(e.x + 10, e.y - 90, e.width - 20, 62);
+  // Armored cab
+  ctx.fillStyle = F || "#2d3a12";
+  ctx.fillRect(e.x + 20, e.y - 108, e.width - 40, 24);
+  // Cab windows / slit
+  ctx.fillStyle = F || "#0d0d0d";
+  ctx.fillRect(e.x + 28, e.y - 102, e.width - 56, 8);
+  // Massive front blade
+  ctx.fillStyle = F || "#4a5568";
+  ctx.beginPath();
+  ctx.moveTo(e.x + e.width - 8, e.y - 80);
+  ctx.lineTo(e.x + e.width + 28, e.y - 66);
+  ctx.lineTo(e.x + e.width + 30, e.y - 20);
+  ctx.lineTo(e.x + e.width - 8, e.y - 28);
+  ctx.closePath();
+  ctx.fill();
+  // Blade edge shine
+  ctx.fillStyle = F || "#9ca3af";
+  ctx.beginPath();
+  ctx.moveTo(e.x + e.width + 26, e.y - 66);
+  ctx.lineTo(e.x + e.width + 32, e.y - 20);
+  ctx.lineTo(e.x + e.width + 28, e.y - 20);
+  ctx.lineTo(e.x + e.width + 24, e.y - 66);
+  ctx.closePath();
+  ctx.fill();
+  // IDF star of David marking
+  ctx.fillStyle = F || "#fbbf24";
+  ctx.globalAlpha = 0.4;
+  ctx.font = "bold 18px serif";
+  ctx.textAlign = "center";
+  ctx.fillText("✡", cx - 10, e.y - 68);
+  ctx.globalAlpha = 1;
+  // Exhaust smoke
+  if (frame % 3 === 0) {
+    ctx.fillStyle = "rgba(80,80,80,0.4)";
+    ctx.beginPath();
+    ctx.arc(e.x + 22, e.y - 110 - (frame % 20) * 2, 6 + (frame % 20) * 0.4, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.restore();
+}
+
 // ─── Particles / PowerUps / Collectibles / Projectiles ───────────────────────
 
 export function drawParticle(ctx: CanvasRenderingContext2D, pt: Particle) {
@@ -911,6 +1115,53 @@ export function drawCollectible(ctx: CanvasRenderingContext2D, c: Collectible, f
 
 export function drawProjectile(ctx: CanvasRenderingContext2D, pr: Projectile, frame: number) {
   if (pr.exploding) {
+    // Missile: red mushroom cloud
+    if (pr.type === "missile") {
+      const maxT = 70;
+      const t = Math.max(0, 1 - pr.explodeTimer / maxT);
+      const stemH = t * 230;
+      const capR = t * 165;
+      ctx.save();
+      const baseAlpha = Math.max(0, 1 - t * 0.75);
+      // Stem
+      ctx.globalAlpha = baseAlpha;
+      const stemGrad = ctx.createLinearGradient(pr.explodeX - 24, 0, pr.explodeX + 24, 0);
+      stemGrad.addColorStop(0, "#7f1d1d");
+      stemGrad.addColorStop(0.5, "#dc2626");
+      stemGrad.addColorStop(1, "#7f1d1d");
+      ctx.fillStyle = stemGrad;
+      ctx.fillRect(pr.explodeX - 22, pr.explodeY - stemH, 44, stemH);
+      ctx.globalAlpha = baseAlpha * 0.35;
+      ctx.fillStyle = "#f97316";
+      ctx.fillRect(pr.explodeX - 34, pr.explodeY - stemH, 68, stemH);
+      // Mushroom cap outer dark ring
+      ctx.globalAlpha = baseAlpha * 0.9;
+      ctx.shadowColor = "#ef4444"; ctx.shadowBlur = 40;
+      ctx.fillStyle = "#450a0a";
+      ctx.beginPath();
+      ctx.ellipse(pr.explodeX, pr.explodeY - stemH, capR * 1.1, capR * 0.58, 0, 0, Math.PI * 2);
+      ctx.fill();
+      // Cap main body
+      ctx.fillStyle = "#dc2626";
+      ctx.beginPath();
+      ctx.ellipse(pr.explodeX, pr.explodeY - stemH + capR * 0.1, capR, capR * 0.52, 0, 0, Math.PI * 2);
+      ctx.fill();
+      // Bright orange core
+      ctx.globalAlpha = baseAlpha * 0.65;
+      ctx.fillStyle = "#fb923c";
+      ctx.beginPath();
+      ctx.ellipse(pr.explodeX, pr.explodeY - stemH + capR * 0.16, capR * 0.6, capR * 0.3, 0, 0, Math.PI * 2);
+      ctx.fill();
+      // Top smoke ring
+      ctx.globalAlpha = baseAlpha * 0.7;
+      ctx.fillStyle = "#1c1917";
+      ctx.beginPath();
+      ctx.ellipse(pr.explodeX, pr.explodeY - stemH - capR * 0.15, capR * 0.82, capR * 0.26, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+      ctx.restore();
+      return;
+    }
     const maxTimer = pr.type === "rocket" ? 40 : 32;
     const t = Math.max(0, 1 - pr.explodeTimer / maxTimer);
     ctx.save();
