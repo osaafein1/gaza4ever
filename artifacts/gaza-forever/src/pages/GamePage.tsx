@@ -1032,25 +1032,32 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
       // Rocket (R key or ArrowUp)
       if ((e.code === "KeyR" || e.code === "ArrowUp") && p.rocketCooldown <= 0) {
         p.rocketCooldown = 240;
-        // Auto-aim toward nearest aerial enemy
         const AERIAL = ["drone", "apache", "warplane"];
         const aerials = gs.enemies.filter(en => AERIAL.includes(en.type) && en.state !== "dead");
-        let aimVx = 0;
-        if (aerials.length > 0) {
-          const px = p.x + p.width / 2;
-          const nearest = aerials.reduce((best, en) => {
-            const d = Math.abs(en.x + en.width / 2 - px);
-            return d < Math.abs(best.x + best.width / 2 - px) ? en : best;
+        const liveEnemies = gs.enemies.filter(en => en.state !== "dead");
+        const targets = aerials.length > 0 ? aerials : liveEnemies;
+        const launchX = p.x + p.width / 2;
+        const launchY = p.y - p.height - 4;
+        let aimVx = p.facingRight ? 10 : -10;
+        let aimVy = aerials.length > 0 ? -16 : 0;
+        if (targets.length > 0) {
+          const nearest = targets.reduce((best, en) => {
+            const ex = en.x + en.width / 2, ey = en.y - en.height / 2;
+            const d = Math.hypot(ex - launchX, ey - launchY);
+            const bd = Math.hypot(best.x + best.width / 2 - launchX, best.y - best.height / 2 - launchY);
+            return d < bd ? en : best;
           });
-          const dx = (nearest.x + nearest.width / 2) - px;
-          const dy = (nearest.y - nearest.height / 2) - (p.y - p.height);
-          const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-          aimVx = Math.max(-8, Math.min(8, (dx / dist) * 10));
+          const dx = (nearest.x + nearest.width / 2) - launchX;
+          const dy = (nearest.y - nearest.height / 2) - launchY;
+          const dist = Math.hypot(dx, dy) || 1;
+          const speed = aerials.length > 0 ? 16 : 18;
+          aimVx = (dx / dist) * speed;
+          aimVy = (dy / dist) * speed;
         }
         gs.projectiles.push({
           id: String(Math.random()), type: "rocket",
-          x: p.x + p.width / 2 - 4, y: p.y - p.height - 4,
-          vx: aimVx, vy: -16,
+          x: launchX - 4, y: launchY,
+          vx: aimVx, vy: aimVy,
           targetX: 0, targetY: 0,
           damage: 90, trail: [], life: 280, maxLife: 280,
           warned: true, warnTimer: 0, warnMaxTimer: 0,

@@ -3,6 +3,46 @@ import { CANVAS_W, CANVAS_H, FLOOR_Y } from "./gameConstants";
 
 const rnd = (a: number, b: number) => a + Math.random() * (b - a);
 
+// ── Palestinian flag on a pole ────────────────────────────────────────────────
+// px/py = top-left of flag, fw/fh = flag size, alpha = opacity
+function drawPalestineFlag(ctx: CanvasRenderingContext2D, px: number, py: number, fw: number, fh: number, alpha = 0.72) {
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  const fh3 = fh / 3;
+  const tri = fw * 0.38;   // width of red triangle
+
+  // Three horizontal stripes clipped to flag rect
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(px, py, fw, fh);
+  ctx.clip();
+  ctx.fillStyle = "#111";   ctx.fillRect(px, py,           fw, fh3);           // black
+  ctx.fillStyle = "#fff";   ctx.fillRect(px, py + fh3,     fw, fh3);           // white
+  ctx.fillStyle = "#15803d"; ctx.fillRect(px, py + fh3 * 2, fw, fh3);          // green
+  // Red triangle
+  ctx.fillStyle = "#dc2626";
+  ctx.beginPath();
+  ctx.moveTo(px,       py);
+  ctx.lineTo(px + tri, py + fh / 2);
+  ctx.lineTo(px,       py + fh);
+  ctx.closePath();
+  ctx.fill();
+  ctx.restore();
+
+  // Flag outline
+  ctx.strokeStyle = "rgba(0,0,0,0.4)"; ctx.lineWidth = 0.6;
+  ctx.strokeRect(px, py, fw, fh);
+
+  // Pole
+  ctx.strokeStyle = "#6b7280"; ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(px - 1, py);
+  ctx.lineTo(px - 1, py + fh + 44);
+  ctx.stroke();
+
+  ctx.restore();
+}
+
 export function createBgData(type: string): BgData {
   return {
     offset: 0,
@@ -153,6 +193,9 @@ function drawLandmark_School(ctx: CanvasRenderingContext2D, bg: BgData) {
   ctx.font = "bold 11px monospace";
   ctx.fillText("AL-FAKHOURA SCHOOL", x + 4, base - 262);
 
+  // Palestinian flag above rubble
+  drawPalestineFlag(ctx, x + 168, base - 296, 26, 16);
+
   ctx.restore();
 }
 
@@ -234,6 +277,9 @@ function drawLandmark_Shifa(ctx: CanvasRenderingContext2D, bg: BgData) {
   ctx.fillStyle = "#fca5a5";
   ctx.font = "bold 11px monospace";
   ctx.fillText("AL-SHIFA HOSPITAL", x + 4, base - 322);
+
+  // Palestinian flag above main block
+  drawPalestineFlag(ctx, x + 228, base - 340, 28, 17);
 
   ctx.restore();
 }
@@ -329,6 +375,9 @@ function drawLandmark_NuseiratMosque(ctx: CanvasRenderingContext2D, bg: BgData) 
   ctx.fillStyle = "#c4b5fd";
   ctx.font = "bold 11px monospace";
   ctx.fillText("AL-HUDA MOSQUE  ·  NUSEIRAT", x - 20, base - 372);
+
+  // Palestinian flag on minaret top
+  drawPalestineFlag(ctx, x + 212, base - 380, 26, 16);
 
   ctx.restore();
 }
@@ -429,6 +478,9 @@ function drawLandmark_KhanYouniscastle(ctx: CanvasRenderingContext2D, bg: BgData
   ctx.font = "bold 11px monospace";
   ctx.fillText("KHAN YOUNIS CASTLE  (14th C.)", x - 30, base - 310);
 
+  // Palestinian flag on left tower
+  drawPalestineFlag(ctx, x - 24, base - 306, 26, 16);
+
   ctx.restore();
 }
 
@@ -516,6 +568,9 @@ function drawLandmark_RafahCrossing(ctx: CanvasRenderingContext2D, bg: BgData) {
   ctx.fillStyle = "#6ee7b7";
   ctx.font = "bold 11px monospace";
   ctx.fillText("RAFAH CROSSING", x + 60, base - 325);
+
+  // Palestinian flag on control tower
+  drawPalestineFlag(ctx, x - 26, base - 338, 26, 16);
 
   ctx.restore();
 }

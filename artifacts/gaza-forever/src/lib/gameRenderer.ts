@@ -100,6 +100,28 @@ export function drawPlayer(ctx: CanvasRenderingContext2D, gs: GameState, frame: 
   ctx.fillStyle = "rgba(0,0,0,0.12)";
   rRect(ctx, cx - 11, torsoTop, 22, 6, 3);
 
+  // ── Palestinian flag badge on chest ──────────────────────────────────────
+  if (!hurt) {
+    const bx = cx + 1, by = torsoTop + 8, bw = 13, bh = 8;
+    const bh3 = bh / 3;
+    const bTri = bw * 0.36;
+    ctx.save();
+    ctx.globalAlpha = 0.82;
+    ctx.save();
+    ctx.beginPath(); ctx.rect(bx, by, bw, bh); ctx.clip();
+    ctx.fillStyle = "#111";    ctx.fillRect(bx, by,          bw, bh3);
+    ctx.fillStyle = "#f0ede6"; ctx.fillRect(bx, by + bh3,    bw, bh3);
+    ctx.fillStyle = "#15803d"; ctx.fillRect(bx, by + bh3 * 2, bw, bh3);
+    ctx.fillStyle = "#dc2626";
+    ctx.beginPath();
+    ctx.moveTo(bx, by); ctx.lineTo(bx + bTri, by + bh / 2); ctx.lineTo(bx, by + bh);
+    ctx.closePath(); ctx.fill();
+    ctx.restore();
+    ctx.strokeStyle = "rgba(0,0,0,0.35)"; ctx.lineWidth = 0.5;
+    ctx.strokeRect(bx, by, bw, bh);
+    ctx.restore();
+  }
+
   // ─── ARMS ────────────────────────────────────────────────────────────────
   const armSwing = walk * 0.28;
   const shoulderY = groundY - 62;
