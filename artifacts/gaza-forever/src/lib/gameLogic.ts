@@ -357,6 +357,19 @@ export function updateGame(gs: GameState, enemies: Enemy[], particles: Particle[
           callbacks.onParticle({ x: p.x + p.width / 2, y: p.y - p.height / 2, vx: 0, vy: -2, life: 30, maxLife: 30, color: "#22d3ee", text: "BLOCKED!", size: 16 });
         }
       }
+      // Soldiers and marksmen fire bullets every 6 seconds (360 frames)
+      if ((e.type === "soldier" || e.type === "marksman" || e.type === "armored") && dist < 520 && e.state !== "hurt" && e.animTimer > 120 && e.animTimer % 360 === 0) {
+        const dir = p.x + p.width / 2 > e.x + e.width / 2 ? 1 : -1;
+        gs.projectiles.push({
+          id: String(Math.random()), type: "soldier_bullet",
+          x: dir > 0 ? e.x + e.width : e.x, y: e.y - e.height * 0.65,
+          vx: dir * 11, vy: (Math.random() - 0.5) * 0.8,
+          targetX: 0, targetY: 0,
+          damage: Math.round(e.damage * 0.55), trail: [], life: 110, maxLife: 110,
+          warned: true, warnTimer: 0, warnMaxTimer: 0,
+          exploding: false, explodeTimer: 0, explodeX: 0, explodeY: 0,
+        });
+      }
       // Tank and bulldozer fire ground rockets
       if ((e.type === "tank" || e.type === "bulldozer") && dist < 660 && e.state !== "hurt" && e.animTimer > 80 && e.animTimer % 240 === 0) {
         const dir = p.x + p.width / 2 > e.x + e.width / 2 ? 1 : -1;
@@ -426,10 +439,13 @@ export function updateGame(gs: GameState, enemies: Enemy[], particles: Particle[
       for (const e of enemies) {
         if (e.state === "dead") continue;
         if (pr.x > e.x - 14 && pr.x < e.x + e.width + 14 && pr.y > e.y - e.height - 14 && pr.y < e.y + 14) {
-          e.hp -= pr.damage; e.state = "hurt"; e.stateTimer = 14; e.vx += pr.vx * 0.15;
+          // Sniper scales damage with distance (targetX = launch X)
+          const travelDist = isPiercing ? Math.abs(pr.x - pr.targetX) : 0;
+          const actualDmg = isPiercing ? Math.round(pr.damage * (1 + travelDist / 280)) : pr.damage;
+          e.hp -= actualDmg; e.state = "hurt"; e.stateTimer = 14; e.vx += pr.vx * 0.15;
           gs.shake = Math.max(gs.shake, isPiercing ? 14 : 6);
           for (let j = 0; j < 6; j++) callbacks.onParticle({ x: pr.x, y: pr.y, vx: (Math.random() - 0.5) * 10, vy: -Math.random() * 6 - 2, life: 16, maxLife: 16, color: j < 3 ? "#ef4444" : "#fbbf24", size: 3 + Math.random() * 5 });
-          callbacks.onParticle({ x: e.x + e.width / 2, y: e.y - e.height - 22, vx: 0, vy: -1.5, life: 28, maxLife: 28, color: "#fff", text: `-${pr.damage}`, size: 13 });
+          callbacks.onParticle({ x: e.x + e.width / 2, y: e.y - e.height - 22, vx: 0, vy: -1.5, life: 28, maxLife: 28, color: "#fff", text: `-${actualDmg}`, size: 13 });
           if (e.hp <= 0) {
             e.state = "dead"; e.stateTimer = 0; callbacks.onEnemyDie(e);
             gs.combo++; gs.comboTimer = 160; callbacks.onComboChange(gs.combo);
@@ -518,6 +534,26 @@ export function updateGame(gs: GameState, enemies: Enemy[], particles: Particle[
       continue;
     }
 
+    // Soldier bullet (enemy — damages player on contact)
+    if (pr.type === "soldier_bullet") {
+      pr.x += pr.vx; pr.y += pr.vy;
+      const pHitSB = pr.x > p.x - 10 && pr.x < p.x + p.width + 10 && pr.y > p.y - p.height - 10 && pr.y < p.y + 8;
+      if (pHitSB) {
+        if (!p.buffs.shielded) {
+          p.hp -= pr.damage; p.hurtTimer = 22; gs.shake = Math.max(gs.shake, 10);
+          for (let j = 0; j < 6; j++) callbacks.onParticle({ x: p.x + p.width / 2, y: p.y - p.height / 2, vx: (Math.random() - 0.5) * 10, vy: -Math.random() * 7 - 2, life: 18, maxLife: 18, color: "#ef4444", size: 4 + Math.random() * 4 });
+          if (p.hp <= 0) callbacks.onPlayerDie();
+        } else {
+          p.buffs.shielded = false;
+          callbacks.onParticle({ x: p.x + p.width / 2, y: p.y - p.height / 2, vx: 0, vy: -2, life: 30, maxLife: 30, color: "#22d3ee", text: "BLOCKED!", size: 16 });
+        }
+        gs.projectiles.splice(i, 1);
+        continue;
+      }
+      if (pr.x < -40 || pr.x > CANVAS_W + 40) gs.projectiles.splice(i, 1);
+      continue;
+    }
+
     if (pr.type === "rocket") {
       pr.trail.push({ x: pr.x, y: pr.y });
       if (pr.trail.length > 14) pr.trail.shift();
@@ -554,6 +590,46 @@ export function updateGame(gs: GameState, enemies: Enemy[], particles: Particle[
         }
         callbacks.onParticle({ x: ex, y: ey - 50, vx: 0, vy: -2, life: 60, maxLife: 60, color: "#ef4444", text: "BOOM!", size: 28 });
         pr.exploding = true; pr.explodeTimer = 40; pr.explodeX = ex; pr.explodeY = ey;
+      }
+      continue;
+    }
+
+    // Missile (player — massive AoE)
+    if (pr.type === "missile") {
+      pr.trail.push({ x: pr.x, y: pr.y });
+      if (pr.trail.length > 20) pr.trail.shift();
+      pr.x += pr.vx; pr.y += pr.vy;
+      let missileHit = false;
+      for (const e of enemies) {
+        if (e.state === "dead") continue;
+        const hm = 32;
+        if (pr.x > e.x - hm && pr.x < e.x + e.width + hm && pr.y > e.y - e.height - hm && pr.y < e.y + hm) {
+          missileHit = true; break;
+        }
+      }
+      if (!missileHit && (pr.x < -20 || pr.x > CANVAS_W + 20 || pr.y >= FLOOR_Y || pr.y < -50)) missileHit = true;
+      if (missileHit) {
+        const ex = pr.x, ey = Math.min(pr.y, FLOOR_Y);
+        const blastR = 290;
+        for (const t of enemies) {
+          if (t.state === "dead") continue;
+          const tdx = t.x + t.width / 2 - ex; const tdy = t.y - t.height / 2 - ey;
+          if (Math.sqrt(tdx * tdx + tdy * tdy) < blastR) {
+            t.hp -= pr.damage; t.state = "hurt"; t.stateTimer = 30; t.vx += (tdx / (Math.abs(tdx) || 1)) * 14;
+            if (t.hp <= 0) {
+              t.state = "dead"; t.stateTimer = 0; callbacks.onEnemyDie(t);
+              gs.combo++; gs.comboTimer = 180; callbacks.onComboChange(gs.combo);
+              gs.score += 600 * gs.scoreMultiplier; callbacks.onScoreChange(gs.score);
+            }
+          }
+        }
+        gs.shake = Math.max(gs.shake, 45);
+        for (let j = 0; j < 60; j++) {
+          const col = j < 20 ? "#f97316" : j < 38 ? "#fbbf24" : j < 52 ? "#ef4444" : "#1c1917";
+          callbacks.onParticle({ x: ex + (Math.random() - 0.5) * blastR * 0.7, y: ey + (Math.random() - 0.5) * 50, vx: (Math.random() - 0.5) * 30, vy: -Math.random() * 24 - 4, life: 45 + Math.random() * 55, maxLife: 100, color: col, size: 10 + Math.random() * 22 });
+        }
+        callbacks.onParticle({ x: ex, y: ey - 90, vx: 0, vy: -3, life: 80, maxLife: 80, color: "#ef4444", text: "💥 MISSILE!", size: 38 });
+        pr.exploding = true; pr.explodeTimer = 70; pr.explodeX = ex; pr.explodeY = ey;
       }
       continue;
     }

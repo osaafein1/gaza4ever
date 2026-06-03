@@ -926,6 +926,44 @@ export function drawProjectile(ctx: CanvasRenderingContext2D, pr: Projectile, fr
   }
   if (!pr.warned && pr.warnTimer > 0) return;
 
+  // Soldier bullet (enemy, red tracer)
+  if (pr.type === "soldier_bullet") {
+    ctx.globalAlpha = 0.75;
+    ctx.fillStyle = "#ef4444";
+    ctx.shadowColor = "#ef4444"; ctx.shadowBlur = 5;
+    ctx.fillRect(pr.x - 5, pr.y - 2, 10, 4);
+    ctx.shadowBlur = 0; ctx.globalAlpha = 1;
+    return;
+  }
+  // Missile (large, fiery)
+  if (pr.type === "missile") {
+    pr.trail.forEach((pt, i) => {
+      ctx.globalAlpha = (i / pr.trail.length) * 0.7;
+      const col = i > pr.trail.length * 0.5 ? "#f97316" : "#fbbf24";
+      ctx.fillStyle = col;
+      const s = 6 + (i / pr.trail.length) * 20;
+      ctx.beginPath(); ctx.arc(pt.x, pt.y, s / 2, 0, Math.PI * 2); ctx.fill();
+    });
+    ctx.globalAlpha = 1;
+    ctx.save();
+    const mAngle = Math.atan2(pr.vy, pr.vx);
+    ctx.translate(pr.x, pr.y); ctx.rotate(mAngle);
+    // Body
+    ctx.fillStyle = "#ef4444"; ctx.shadowColor = "#ef4444"; ctx.shadowBlur = 16;
+    ctx.fillRect(-22, -6, 44, 12);
+    // Nose
+    ctx.fillStyle = "#fbbf24";
+    ctx.beginPath(); ctx.moveTo(22, 0); ctx.lineTo(38, -5); ctx.lineTo(38, 5); ctx.closePath(); ctx.fill();
+    // Fins
+    ctx.fillStyle = "#dc2626";
+    ctx.beginPath(); ctx.moveTo(-22, 0); ctx.lineTo(-38, -14); ctx.lineTo(-28, 0); ctx.closePath(); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(-22, 0); ctx.lineTo(-38, 14); ctx.lineTo(-28, 0); ctx.closePath(); ctx.fill();
+    // Flame jet
+    ctx.fillStyle = "#fbbf24";
+    ctx.beginPath(); ctx.arc(-28, 0, 7, 0, Math.PI * 2); ctx.fill();
+    ctx.shadowBlur = 0; ctx.restore();
+    return;
+  }
   // Bullet
   if (pr.type === "bullet") {
     pr.trail.forEach((pt, i) => {

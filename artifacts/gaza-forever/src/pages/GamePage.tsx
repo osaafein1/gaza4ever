@@ -866,6 +866,38 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
       x: e.x + e.width / 2, y: e.y - e.height - 30, vx: 0.4, vy: -2.5,
       life: 52, maxLife: 52, color: "#fbbf24", text: `+${earned}c`, size: 12,
     });
+
+    // Soldier-type kills: +2 ammo to each currently-owned non-rocket weapon
+    const soldierDropTypes = ["patrol", "soldier", "armored", "sniper", "marksman", "apc"];
+    if (soldierDropTypes.includes(e.type)) {
+      const inv = weaponInventoryRef.current;
+      const nonRocketIds = ["pistol", "m16", "grenade", "machinegun", "sniper", "shotgun"];
+      const ownedWeapons = nonRocketIds.filter(id => (inv[id] ?? 0) > 0);
+      if (ownedWeapons.length > 0) {
+        const updated = { ...inv };
+        ownedWeapons.forEach(id => { updated[id] = (updated[id] ?? 0) + 2; });
+        weaponInventoryRef.current = updated;
+        setWeaponInventory({ ...updated });
+        gs.player.weaponAmmo = { ...updated };
+        particlesRef.current.push({
+          x: e.x + e.width / 2, y: e.y - e.height - 52, vx: 0, vy: -1.6,
+          life: 55, maxLife: 55, color: "#22c55e", text: "+2 AMMO", size: 10,
+        });
+      }
+    }
+
+    // Tank/bulldozer kills: +1 rocket ammo (accumulates even without launcher)
+    if (e.type === "tank" || e.type === "bulldozer") {
+      const updated = { ...weaponInventoryRef.current };
+      updated["rocket"] = (updated["rocket"] ?? 0) + 1;
+      weaponInventoryRef.current = updated;
+      setWeaponInventory({ ...updated });
+      gs.player.weaponAmmo = { ...updated };
+      particlesRef.current.push({
+        x: e.x + e.width / 2, y: e.y - e.height - 55, vx: 0, vy: -1.8,
+        life: 58, maxLife: 58, color: "#f97316", text: "+ROCKET", size: 11,
+      });
+    }
   }, []);
 
   const onCollectItem = useCallback((type: string) => {
@@ -1075,8 +1107,47 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
                 id: String(Math.random()), type: "sniper_shot",
                 x: launchX, y: launchY,
                 vx: dir * 30, vy: 0,
-                targetX: 0, targetY: 0,
+                targetX: launchX, targetY: 0,
                 damage: wDef.damage, trail: [], life: 70, maxLife: 70,
+                warned: true, warnTimer: 0, warnMaxTimer: 0,
+                exploding: false, explodeTimer: 0, explodeX: 0, explodeY: 0,
+              });
+            } else if (p.activeWeapon === "shotgun") {
+              for (let sp = 0; sp < 6; sp++) {
+                const spreadVy = (sp - 2.5) * 1.8;
+                gs.projectiles.push({
+                  id: String(Math.random()), type: "bullet",
+                  x: launchX, y: launchY,
+                  vx: dir * 18, vy: spreadVy,
+                  targetX: 0, targetY: 0,
+                  damage: wDef.damage, trail: [], life: 55, maxLife: 55,
+                  warned: true, warnTimer: 0, warnMaxTimer: 0,
+                  exploding: false, explodeTimer: 0, explodeX: 0, explodeY: 0,
+                });
+              }
+            } else if (p.activeWeapon === "missile") {
+              const AERIAL = ["drone", "apache", "warplane"];
+              const aerials = gs.enemies.filter(en => AERIAL.includes(en.type) && en.state !== "dead");
+              const liveEnemies = gs.enemies.filter(en => en.state !== "dead");
+              const targets = aerials.length > 0 ? aerials : liveEnemies;
+              let aimVx = dir * 14, aimVy = 0;
+              if (targets.length > 0) {
+                const nearest = targets.reduce((best, en) => {
+                  const d = Math.hypot(en.x + en.width / 2 - launchX, en.y - en.height / 2 - launchY);
+                  const bd = Math.hypot(best.x + best.width / 2 - launchX, best.y - best.height / 2 - launchY);
+                  return d < bd ? en : best;
+                });
+                const dx = nearest.x + nearest.width / 2 - launchX;
+                const dy = nearest.y - nearest.height / 2 - launchY;
+                const dist = Math.hypot(dx, dy) || 1;
+                aimVx = (dx / dist) * 18; aimVy = (dy / dist) * 18;
+              }
+              gs.projectiles.push({
+                id: String(Math.random()), type: "missile",
+                x: launchX, y: launchY,
+                vx: aimVx, vy: aimVy,
+                targetX: 0, targetY: 0,
+                damage: wDef.damage, trail: [], life: 320, maxLife: 320,
                 warned: true, warnTimer: 0, warnMaxTimer: 0,
                 exploding: false, explodeTimer: 0, explodeX: 0, explodeY: 0,
               });

@@ -43,6 +43,93 @@ function drawPalestineFlag(ctx: CanvasRenderingContext2D, px: number, py: number
   ctx.restore();
 }
 
+// ── War damage overlay for a rectangular building ─────────────────────────
+// Call after drawing the base building rect.  bx/by = top-left, bw/bh = size
+// seed = any integer that stays constant for this building (e.g. index)
+function drawWarDamageOverlay(
+  ctx: CanvasRenderingContext2D,
+  bx: number, by: number, bw: number, bh: number,
+  seed: number, frame: number
+) {
+  const rng = (s: number) => {
+    const x = Math.sin(seed * 127.1 + s * 311.7) * 43758.5453;
+    return x - Math.floor(x);
+  };
+  ctx.save();
+
+  // Scorch marks / explosion holes
+  const numHoles = 2 + Math.floor(rng(0) * 3);
+  for (let h = 0; h < numHoles; h++) {
+    const hx = bx + 8 + rng(h + 10) * (bw - 16);
+    const hy = by + 10 + rng(h + 20) * (bh - 20);
+    const hr = 8 + rng(h + 30) * 18;
+    const scorch = ctx.createRadialGradient(hx, hy, 0, hx, hy, hr);
+    scorch.addColorStop(0, "rgba(0,0,0,0.85)");
+    scorch.addColorStop(0.55, "rgba(60,20,0,0.55)");
+    scorch.addColorStop(1, "rgba(0,0,0,0)");
+    ctx.globalAlpha = 0.78;
+    ctx.fillStyle = scorch;
+    ctx.beginPath(); ctx.arc(hx, hy, hr, 0, Math.PI * 2); ctx.fill();
+  }
+
+  // Jagged missing top-corner
+  if (rng(1) > 0.4) {
+    ctx.globalAlpha = 0.9;
+    ctx.fillStyle = "rgba(0,0,0,0.85)";
+    const cw = 12 + rng(2) * 28;
+    const ch = 10 + rng(3) * 30;
+    const fromLeft = rng(4) > 0.5;
+    const cx = fromLeft ? bx : bx + bw - cw;
+    ctx.beginPath();
+    ctx.moveTo(cx, by);
+    ctx.lineTo(cx + (fromLeft ? cw * 0.4 : cw * 0.6), by + ch * 0.4);
+    ctx.lineTo(cx + (fromLeft ? cw * 0.7 : cw * 0.3), by);
+    ctx.lineTo(cx + cw, by);
+    ctx.lineTo(cx + cw, by + ch);
+    ctx.lineTo(cx, by + ch * 0.7);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  // Crack lines
+  const numCracks = 2 + Math.floor(rng(5) * 3);
+  ctx.strokeStyle = "rgba(0,0,0,0.55)"; ctx.lineWidth = 1.2;
+  for (let c = 0; c < numCracks; c++) {
+    const csx = bx + rng(c + 40) * bw;
+    const csy = by + rng(c + 50) * bh;
+    const cex = csx + (rng(c + 60) - 0.5) * 30;
+    const cey = csy + rng(c + 70) * 40;
+    ctx.globalAlpha = 0.55;
+    ctx.beginPath(); ctx.moveTo(csx, csy); ctx.lineTo(cex, cey); ctx.stroke();
+  }
+
+  // Broken window: some windows replaced with dark holes
+  const wHoles = Math.floor(rng(6) * 4);
+  ctx.fillStyle = "#050302";
+  for (let w = 0; w < wHoles; w++) {
+    const wx = bx + 4 + rng(w + 80) * (bw - 20);
+    const wy = by + 8 + rng(w + 90) * (bh - 16);
+    ctx.globalAlpha = 0.9;
+    ctx.fillRect(wx, wy, 14 + rng(w + 95) * 10, 10 + rng(w + 96) * 8);
+  }
+
+  // Small ember glow (animated)
+  if (rng(7) > 0.5) {
+    const ex2 = bx + 6 + rng(8) * (bw - 12);
+    const ey2 = by + bh - 20;
+    const pulse = Math.sin(frame * 0.06 + seed) * 0.07 + 0.12;
+    ctx.globalAlpha = pulse;
+    const ember = ctx.createRadialGradient(ex2, ey2, 0, ex2, ey2, 22);
+    ember.addColorStop(0, "#f97316");
+    ember.addColorStop(1, "rgba(0,0,0,0)");
+    ctx.fillStyle = ember;
+    ctx.beginPath(); ctx.arc(ex2, ey2, 22, 0, Math.PI * 2); ctx.fill();
+  }
+
+  ctx.globalAlpha = 1;
+  ctx.restore();
+}
+
 export function createBgData(type: string): BgData {
   return {
     offset: 0,
@@ -667,7 +754,7 @@ function drawGazaCity(ctx: CanvasRenderingContext2D, bg: BgData, frame: number) 
   });
   ctx.globalAlpha = 1;
 
-  // City skyline (dark background buildings)
+  // City skyline (dark background buildings — war-torn)
   const heights = [240, 180, 280, 160, 220, 300, 190, 250, 170, 210];
   heights.forEach((h, i) => {
     const bx = (i * 140 - bg.offset * 0.5) % (CANVAS_W + 140) - 70;
@@ -683,6 +770,7 @@ function drawGazaCity(ctx: CanvasRenderingContext2D, bg: BgData, frame: number) 
         ctx.fillRect(bx + wx, FLOOR_Y - h + wy + 6, 12, 14);
       }
     }
+    drawWarDamageOverlay(ctx, bx, FLOOR_Y - h, 100, h, i + 100, frame);
   });
 
   // Landmark: Al-Shifa Hospital
@@ -854,7 +942,7 @@ function drawNuseirat(ctx: CanvasRenderingContext2D, bg: BgData, frame: number) 
   ctx.fillStyle = dustGrad;
   ctx.fillRect(0, 0, CANVAS_W, FLOOR_Y);
 
-  // Dense low-rise camp buildings scrolling
+  // Dense low-rise camp buildings scrolling (war-torn)
   const campHeights = [120, 100, 140, 90, 130, 110, 150, 95, 125, 115, 138, 105, 145, 98];
   campHeights.forEach((h, i) => {
     const bx = (i * 95 - bg.offset * 0.45) % (CANVAS_W + 150) - 75;
@@ -863,7 +951,6 @@ function drawNuseirat(ctx: CanvasRenderingContext2D, bg: BgData, frame: number) 
     ctx.strokeStyle = "#1c1006";
     ctx.lineWidth = 1;
     ctx.strokeRect(bx, FLOOR_Y - h, 75, h);
-    // Windows
     for (let wy = 0; wy < h - 16; wy += 28) {
       for (let wx = 6; wx < 65; wx += 20) {
         const lit = Math.sin(frame * 0.015 + i * 7 + wy) > 0.6;
@@ -871,6 +958,7 @@ function drawNuseirat(ctx: CanvasRenderingContext2D, bg: BgData, frame: number) 
         ctx.fillRect(bx + wx, FLOOR_Y - h + wy + 8, 12, 16);
       }
     }
+    drawWarDamageOverlay(ctx, bx, FLOOR_Y - h, 75, h, i + 200, frame);
   });
 
   // Landmark: Al-Huda Mosque
@@ -920,7 +1008,7 @@ function drawKhanYounis(ctx: CanvasRenderingContext2D, bg: BgData, frame: number
   ctx.fillStyle = dustGrad;
   ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
 
-  bg.ruins.forEach((r) => {
+  bg.ruins.forEach((r, i) => {
     const h2 = r.h * 0.6;
     const px = (r.x - bg.offset * 0.4) % (CANVAS_W + r.w * 2) - r.w;
     ctx.fillStyle = "#78716c";
@@ -930,6 +1018,7 @@ function drawKhanYounis(ctx: CanvasRenderingContext2D, bg: BgData, frame: number
     ctx.strokeRect(px, FLOOR_Y - h2, r.w, h2);
     ctx.fillStyle = "#292524";
     ctx.fillRect(px + 8, FLOOR_Y - h2 + 14, 14, 12);
+    drawWarDamageOverlay(ctx, px, FLOOR_Y - h2, r.w, h2, i + 300, frame);
   });
 
   // Landmark: Khan Younis Castle
