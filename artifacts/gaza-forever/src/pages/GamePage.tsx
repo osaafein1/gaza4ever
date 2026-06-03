@@ -1092,21 +1092,28 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
             const launchX = p.x + p.width / 2;
             const launchY = p.y - p.height / 2;
             const dir = p.facingRight ? 1 : -1;
+            // Hold ↑ or W while pressing F to shoot upward
+            const aimUp = gs.keys["ArrowUp"] || gs.keys["KeyW"];
             if (p.activeWeapon === "pistol" || p.activeWeapon === "m16" || p.activeWeapon === "machinegun") {
+              // Upward: 45° diagonally up-forward; horizontal: straight
+              const bvx = aimUp ? dir * 14.14 : dir * 20;
+              const bvy = aimUp ? -14.14 : 0;
               gs.projectiles.push({
                 id: String(Math.random()), type: "bullet",
                 x: launchX, y: launchY,
-                vx: dir * 20, vy: 0,
+                vx: bvx, vy: bvy,
                 targetX: 0, targetY: 0,
                 damage: wDef.damage, trail: [], life: 90, maxLife: 90,
                 warned: true, warnTimer: 0, warnMaxTimer: 0,
                 exploding: false, explodeTimer: 0, explodeX: 0, explodeY: 0,
               });
             } else if (p.activeWeapon === "sniper") {
+              const svx = aimUp ? dir * 21.2 : dir * 30;
+              const svy = aimUp ? -21.2 : 0;
               gs.projectiles.push({
                 id: String(Math.random()), type: "sniper_shot",
                 x: launchX, y: launchY,
-                vx: dir * 30, vy: 0,
+                vx: svx, vy: svy,
                 targetX: launchX, targetY: 0,
                 damage: wDef.damage, trail: [], life: 70, maxLife: 70,
                 warned: true, warnTimer: 0, warnMaxTimer: 0,
@@ -1114,11 +1121,20 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
               });
             } else if (p.activeWeapon === "shotgun") {
               for (let sp = 0; sp < 6; sp++) {
-                const spreadVy = (sp - 2.5) * 1.8;
+                let sgvx: number, sgvy: number;
+                if (aimUp) {
+                  // Fan pointing straight up: angles from -60° to +60° around straight-up
+                  const angle = -Math.PI / 2 + (sp - 2.5) * (Math.PI / 7.5);
+                  sgvx = Math.cos(angle) * 18;
+                  sgvy = Math.sin(angle) * 18;
+                } else {
+                  sgvx = dir * 18;
+                  sgvy = (sp - 2.5) * 1.8;
+                }
                 gs.projectiles.push({
                   id: String(Math.random()), type: "bullet",
                   x: launchX, y: launchY,
-                  vx: dir * 18, vy: spreadVy,
+                  vx: sgvx, vy: sgvy,
                   targetX: 0, targetY: 0,
                   damage: wDef.damage, trail: [], life: 55, maxLife: 55,
                   warned: true, warnTimer: 0, warnMaxTimer: 0,
@@ -1129,8 +1145,11 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
               const AERIAL = ["drone", "apache", "warplane"];
               const aerials = gs.enemies.filter(en => AERIAL.includes(en.type) && en.state !== "dead");
               const liveEnemies = gs.enemies.filter(en => en.state !== "dead");
-              const targets = aerials.length > 0 ? aerials : liveEnemies;
-              let aimVx = dir * 14, aimVy = 0;
+              const targets = aimUp
+                ? (aerials.length > 0 ? aerials : liveEnemies)
+                : (aerials.length > 0 ? aerials : liveEnemies);
+              let aimVx = aimUp ? 0 : dir * 14;
+              let aimVy = aimUp ? -18 : 0;
               if (targets.length > 0) {
                 const nearest = targets.reduce((best, en) => {
                   const d = Math.hypot(en.x + en.width / 2 - launchX, en.y - en.height / 2 - launchY);
@@ -1152,10 +1171,12 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
                 exploding: false, explodeTimer: 0, explodeX: 0, explodeY: 0,
               });
             } else if (p.activeWeapon === "grenade") {
+              const gvx = aimUp ? dir * 4 : dir * 10;
+              const gvy = aimUp ? -18 : -12;
               gs.projectiles.push({
                 id: String(Math.random()), type: "grenade_player",
                 x: launchX, y: launchY,
-                vx: dir * 10, vy: -12,
+                vx: gvx, vy: gvy,
                 targetX: 0, targetY: 0,
                 damage: wDef.damage, trail: [], life: 220, maxLife: 220,
                 warned: true, warnTimer: 0, warnMaxTimer: 0,
@@ -1166,7 +1187,8 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
               const aerials = gs.enemies.filter(en => AERIAL.includes(en.type) && en.state !== "dead");
               const liveEnemies = gs.enemies.filter(en => en.state !== "dead");
               const targets = aerials.length > 0 ? aerials : liveEnemies;
-              let aimVx = dir * 10, aimVy = -16;
+              let aimVx = aimUp ? 0 : dir * 10;
+              let aimVy = -16;
               if (targets.length > 0) {
                 const nearest = targets.reduce((best, en) => {
                   const d = Math.hypot(en.x + en.width / 2 - launchX, en.y - en.height / 2 - launchY);
