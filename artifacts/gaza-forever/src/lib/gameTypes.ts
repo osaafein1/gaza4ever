@@ -20,6 +20,9 @@ export interface Player {
   rockCooldown: number;
   rocketCooldown: number;
   canDoubleJump: boolean;
+  activeWeapon: string;
+  weaponAmmo: Record<string, number>;
+  weaponCooldown: number;
 }
 
 export interface Enemy {
@@ -147,6 +150,7 @@ export interface GameState {
   bgData: BgData;
   scoreMultiplier: number;
   regenTimer: number;
+  coins: number;
 }
 
 export interface GameCallbacks {

@@ -3,7 +3,7 @@ import { useLocation } from "wouter";
 import GazaMap from "../components/GazaMap";
 import {
   CANVAS_W, CANVAS_H, FLOOR_Y,
-  CHARACTERS, STAGE_DEFS, STAGE_COLLECTIBLES, getStageStories, STAGE_ARABIC, STAGE_HISTORY, STAGE_LANDMARKS, COLLECTIBLE_DEFS,
+  CHARACTERS, STAGE_DEFS, STAGE_COLLECTIBLES, getStageStories, STAGE_ARABIC, STAGE_HISTORY, STAGE_LANDMARKS, COLLECTIBLE_DEFS, SHOP_WEAPONS,
 } from "../lib/gameConstants";
 import {
   createPlayer, spawnEnemy, spawnDeathParticles, updateGame,
@@ -720,6 +720,7 @@ function buildInitialState(charIndex: number, stageIndex: number): GameState {
     bgData: createBgData(stageDef.id),
     scoreMultiplier: 1,
     regenTimer: 0,
+    coins: 0,
   };
 }
 
@@ -786,6 +787,10 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
     spawnStageCollectibles(gs, sIdx);
     // Apply document multiplier
     if (inventoryRef.current.includes("documents")) gs.scoreMultiplier = 2;
+    // Carry coins and weapons across stages
+    gs.coins = coinsRef.current;
+    gs.player.activeWeapon = activeWeaponRef.current;
+    gs.player.weaponAmmo = { ...weaponInventoryRef.current };
     gsRef.current = gs;
     enemiesRef.current = gs.enemies;
     particlesRef.current = gs.particles;
@@ -848,12 +853,35 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
     const gs = gsRef.current;
     if (!gs) return;
     spawnDeathParticles(gs, e, (p) => particlesRef.current.push(p));
+    // Award coins based on enemy type
+    const COIN_MAP: Record<string, number> = {
+      patrol: 1, soldier: 1, armored: 1, sniper: 1, marksman: 1, apc: 1,
+      drone: 3, tank: 5, bulldozer: 5, apache: 20, warplane: 20,
+    };
+    const earned = COIN_MAP[e.type] ?? 1;
+    coinsRef.current += earned;
+    gs.coins = coinsRef.current;
+    setCoins(coinsRef.current);
+    particlesRef.current.push({
+      x: e.x + e.width / 2, y: e.y - e.height - 30, vx: 0.4, vy: -2.5,
+      life: 52, maxLife: 52, color: "#fbbf24", text: `+${earned}c`, size: 12,
+    });
   }, []);
 
   const onCollectItem = useCallback((type: string) => {
     inventoryRef.current = [...inventoryRef.current, type];
     setInventory([...inventoryRef.current]);
   }, []);
+
+  // ─── Coins + weapon shop state ───────────────────────────────────────────
+  const [coins, setCoins] = useState(0);
+  const coinsRef = useRef(0);
+  const [weaponInventory, setWeaponInventory] = useState<Record<string, number>>({});
+  const weaponInventoryRef = useRef<Record<string, number>>({});
+  const [activeWeapon, setActiveWeapon] = useState<string>("");
+  const activeWeaponRef = useRef<string>("");
+  const [shopOpen, setShopOpen] = useState(false);
+  const shopOpenRef = useRef(false);
 
   const [score, setScore] = useState(0);
   const [combo, setCombo] = useState(0);
@@ -998,71 +1026,117 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
         p.canDoubleJump = true;
       }
 
-      // Attack
+      // Attack / melee
       if ((e.code === "KeyZ" || e.code === "KeyJ") && !p.isAttacking) {
-        // Rock throw if pressing up
-        if (gs.keys["ArrowUp"] && p.rockCooldown <= 0) {
-          p.rockCooldown = 120;
-          const vx = p.facingRight ? 12 : -12;
-          gs.projectiles.push({
-            id: String(Math.random()), type: "rock",
-            x: p.x + p.width / 2, y: p.y - p.height + 10,
-            vx, vy: -10,
-            targetX: p.x + vx * 20, targetY: FLOOR_Y,
-            damage: 45, trail: [], life: 220, maxLife: 220,
-            warned: true, warnTimer: 0, warnMaxTimer: 0,
-            exploding: false, explodeTimer: 0, explodeX: 0, explodeY: 0,
-          });
-        } else {
-          p.isAttacking = true;
-          p.attackTimer = 22;
-        }
+        p.isAttacking = true;
+        p.attackTimer = 22;
       }
 
-      // Spirit Blast
-      if ((e.code === "KeyX" || e.code === "KeyK") && p.specialCooldown <= 0) {
-        const charDef = CHARACTERS[p.activeChar];
-        p.specialCooldown = charDef.blastCost;
-        gs.beam = { active: true, x: p.x + p.width / 2, y: p.y - p.height / 2, progress: 0, facingRight: p.facingRight };
-        for (let i = 0; i < 12; i++) {
-          particlesRef.current.push({ x: p.x + p.width / 2, y: p.y - p.height / 2, vx: (Math.random() - 0.5) * 12, vy: -Math.random() * 8 - 2, life: 24, maxLife: 24, color: charDef.color, size: 4 + Math.random() * 6 });
-        }
-      }
-
-      // Rocket (R key or ArrowUp)
-      if ((e.code === "KeyR" || e.code === "ArrowUp") && p.rocketCooldown <= 0) {
-        p.rocketCooldown = 240;
-        const AERIAL = ["drone", "apache", "warplane"];
-        const aerials = gs.enemies.filter(en => AERIAL.includes(en.type) && en.state !== "dead");
-        const liveEnemies = gs.enemies.filter(en => en.state !== "dead");
-        const targets = aerials.length > 0 ? aerials : liveEnemies;
-        const launchX = p.x + p.width / 2;
-        const launchY = p.y - p.height - 4;
-        let aimVx = p.facingRight ? 10 : -10;
-        let aimVy = aerials.length > 0 ? -16 : 0;
-        if (targets.length > 0) {
-          const nearest = targets.reduce((best, en) => {
-            const ex = en.x + en.width / 2, ey = en.y - en.height / 2;
-            const d = Math.hypot(ex - launchX, ey - launchY);
-            const bd = Math.hypot(best.x + best.width / 2 - launchX, best.y - best.height / 2 - launchY);
-            return d < bd ? en : best;
-          });
-          const dx = (nearest.x + nearest.width / 2) - launchX;
-          const dy = (nearest.y - nearest.height / 2) - launchY;
-          const dist = Math.hypot(dx, dy) || 1;
-          const speed = aerials.length > 0 ? 16 : 18;
-          aimVx = (dx / dist) * speed;
-          aimVy = (dy / dist) * speed;
-        }
+      // Rock throw (X / K)
+      if ((e.code === "KeyX" || e.code === "KeyK") && p.rockCooldown <= 0) {
+        p.rockCooldown = 120;
+        const vx = p.facingRight ? 12 : -12;
         gs.projectiles.push({
-          id: String(Math.random()), type: "rocket",
-          x: launchX - 4, y: launchY,
-          vx: aimVx, vy: aimVy,
-          targetX: 0, targetY: 0,
-          damage: 90, trail: [], life: 280, maxLife: 280,
+          id: String(Math.random()), type: "rock",
+          x: p.x + p.width / 2, y: p.y - p.height + 10,
+          vx, vy: -10,
+          targetX: p.x + vx * 20, targetY: FLOOR_Y,
+          damage: 45, trail: [], life: 220, maxLife: 220,
           warned: true, warnTimer: 0, warnMaxTimer: 0,
           exploding: false, explodeTimer: 0, explodeX: 0, explodeY: 0,
         });
+      }
+
+      // Fire equipped weapon (F key)
+      if (e.code === "KeyF" && p.weaponCooldown <= 0 && p.activeWeapon) {
+        const wDef = SHOP_WEAPONS.find(w => w.id === p.activeWeapon);
+        if (wDef) {
+          const curAmmo = p.weaponAmmo[p.activeWeapon] ?? 0;
+          if (curAmmo > 0) {
+            p.weaponAmmo[p.activeWeapon]--;
+            weaponInventoryRef.current = { ...p.weaponAmmo };
+            setWeaponInventory({ ...p.weaponAmmo });
+            p.weaponCooldown = wDef.firerate;
+            const launchX = p.x + p.width / 2;
+            const launchY = p.y - p.height / 2;
+            const dir = p.facingRight ? 1 : -1;
+            if (p.activeWeapon === "pistol" || p.activeWeapon === "m16" || p.activeWeapon === "machinegun") {
+              gs.projectiles.push({
+                id: String(Math.random()), type: "bullet",
+                x: launchX, y: launchY,
+                vx: dir * 20, vy: 0,
+                targetX: 0, targetY: 0,
+                damage: wDef.damage, trail: [], life: 90, maxLife: 90,
+                warned: true, warnTimer: 0, warnMaxTimer: 0,
+                exploding: false, explodeTimer: 0, explodeX: 0, explodeY: 0,
+              });
+            } else if (p.activeWeapon === "sniper") {
+              gs.projectiles.push({
+                id: String(Math.random()), type: "sniper_shot",
+                x: launchX, y: launchY,
+                vx: dir * 30, vy: 0,
+                targetX: 0, targetY: 0,
+                damage: wDef.damage, trail: [], life: 70, maxLife: 70,
+                warned: true, warnTimer: 0, warnMaxTimer: 0,
+                exploding: false, explodeTimer: 0, explodeX: 0, explodeY: 0,
+              });
+            } else if (p.activeWeapon === "grenade") {
+              gs.projectiles.push({
+                id: String(Math.random()), type: "grenade_player",
+                x: launchX, y: launchY,
+                vx: dir * 10, vy: -12,
+                targetX: 0, targetY: 0,
+                damage: wDef.damage, trail: [], life: 220, maxLife: 220,
+                warned: true, warnTimer: 0, warnMaxTimer: 0,
+                exploding: false, explodeTimer: 0, explodeX: 0, explodeY: 0,
+              });
+            } else if (p.activeWeapon === "rocket") {
+              const AERIAL = ["drone", "apache", "warplane"];
+              const aerials = gs.enemies.filter(en => AERIAL.includes(en.type) && en.state !== "dead");
+              const liveEnemies = gs.enemies.filter(en => en.state !== "dead");
+              const targets = aerials.length > 0 ? aerials : liveEnemies;
+              let aimVx = dir * 10, aimVy = -16;
+              if (targets.length > 0) {
+                const nearest = targets.reduce((best, en) => {
+                  const d = Math.hypot(en.x + en.width / 2 - launchX, en.y - en.height / 2 - launchY);
+                  const bd = Math.hypot(best.x + best.width / 2 - launchX, best.y - best.height / 2 - launchY);
+                  return d < bd ? en : best;
+                });
+                const dx = nearest.x + nearest.width / 2 - launchX;
+                const dy = nearest.y - nearest.height / 2 - launchY;
+                const dist = Math.hypot(dx, dy) || 1;
+                aimVx = (dx / dist) * 16; aimVy = (dy / dist) * 16;
+              }
+              gs.projectiles.push({
+                id: String(Math.random()), type: "rocket",
+                x: launchX, y: launchY,
+                vx: aimVx, vy: aimVy,
+                targetX: 0, targetY: 0,
+                damage: wDef.damage, trail: [], life: 280, maxLife: 280,
+                warned: true, warnTimer: 0, warnMaxTimer: 0,
+                exploding: false, explodeTimer: 0, explodeX: 0, explodeY: 0,
+              });
+            }
+            if ((p.weaponAmmo[p.activeWeapon] ?? 0) <= 0) {
+              delete p.weaponAmmo[p.activeWeapon];
+              delete weaponInventoryRef.current[p.activeWeapon];
+              p.activeWeapon = "";
+              activeWeaponRef.current = "";
+              setActiveWeapon("");
+              setWeaponInventory({ ...weaponInventoryRef.current });
+            }
+          }
+        }
+      }
+
+      // Shop toggle (B)
+      if (e.code === "KeyB") {
+        e.preventDefault();
+        const nowOpen = !shopOpenRef.current;
+        shopOpenRef.current = nowOpen;
+        setShopOpen(nowOpen);
+        pausedRef.current = nowOpen;
+        setPaused(nowOpen);
       }
 
       // Summon
@@ -1090,8 +1164,8 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
         p.charSwitchTimer = 80;
       }
 
-      // Ally abilities (1/2/3)
-      const allyKeys: Record<string, number> = { Digit1: 0, Digit2: 1, Digit3: 2, Numpad1: 0, Numpad2: 1, Numpad3: 2 };
+      // (Ally abilities removed — use shop weapons instead)
+      const allyKeys: Record<string, number> = {};
       const allyIdx = allyKeys[e.code];
       if (allyIdx !== undefined && p.allyCD[allyIdx] <= 0) {
         p.allyCD[allyIdx] = 600;
@@ -1381,8 +1455,99 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
           </>
         )}
 
+        {/* ── SHOP OVERLAY ──────────────────────────────────────────────── */}
+        {phase === "playing" && shopOpen && (
+          <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.92)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 14, backdropFilter: "blur(3px)", zIndex: 20 }}>
+            <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 18, color: "#fbbf24", textShadow: "0 0 20px #fbbf2470", letterSpacing: 3 }}>WEAPON SHOP</div>
+            <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 11, color: "#fbbf24", letterSpacing: 2 }}>
+              {"\uD83E\uDE99"} COINS: {coins}
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8, width: 420, maxHeight: 380, overflowY: "auto" }}>
+              {SHOP_WEAPONS.map((w) => {
+                const owned = (weaponInventory[w.id] ?? 0) > 0;
+                const equipped = activeWeapon === w.id;
+                const canAfford = coins >= w.cost;
+                return (
+                  <div key={w.id} style={{
+                    background: equipped ? "rgba(34,197,94,0.12)" : "rgba(0,0,0,0.5)",
+                    border: `1px solid ${equipped ? "#22c55e" : owned ? "#fbbf24" : "#44403c"}`,
+                    borderRadius: 5, padding: "10px 14px",
+                    display: "flex", flexDirection: "column", gap: 5,
+                  }}>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                      <div>
+                        <span style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 9, color: equipped ? "#22c55e" : "#fff" }}>
+                          {equipped ? "► " : ""}{w.label}
+                        </span>
+                        {owned && (
+                          <span style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 7, color: "#fbbf24", marginLeft: 8 }}>
+                            x{weaponInventory[w.id]}
+                          </span>
+                        )}
+                      </div>
+                      <span style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 8, color: canAfford ? "#fbbf24" : "#6b7280" }}>
+                        {w.cost}{"\uD83E\uDE99"}
+                      </span>
+                    </div>
+                    <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 6, color: "#9ca3af" }}>{w.desc}</div>
+                    <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 6, color: "#6b7280" }}>
+                      DMG:{w.damage}  RATE:{60 / w.firerate}ps
+                    </div>
+                    <div style={{ display: "flex", gap: 6 }}>
+                      <button
+                        onClick={() => {
+                          if (coins < w.cost) return;
+                          const newCoins = coins - w.cost;
+                          const newInv = { ...weaponInventoryRef.current, [w.id]: (weaponInventoryRef.current[w.id] ?? 0) + w.ammo };
+                          coinsRef.current = newCoins;
+                          setCoins(newCoins);
+                          const gs = gsRef.current;
+                          if (gs) gs.coins = newCoins;
+                          weaponInventoryRef.current = newInv;
+                          setWeaponInventory({ ...newInv });
+                          if (gs) gs.player.weaponAmmo = { ...newInv };
+                        }}
+                        disabled={!canAfford}
+                        style={{ background: canAfford ? "rgba(251,191,36,0.15)" : "rgba(0,0,0,0.3)", border: `1px solid ${canAfford ? "#fbbf24" : "#44403c"}`, borderRadius: 3, padding: "5px 10px", cursor: canAfford ? "pointer" : "not-allowed", fontFamily: "'Press Start 2P', monospace", fontSize: 7, color: canAfford ? "#fbbf24" : "#6b7280" }}
+                      >
+                        BUY +{w.ammo}
+                      </button>
+                      {owned && (
+                        <button
+                          onClick={() => {
+                            const newWeapon = equipped ? "" : w.id;
+                            activeWeaponRef.current = newWeapon;
+                            setActiveWeapon(newWeapon);
+                            const gs = gsRef.current;
+                            if (gs) gs.player.activeWeapon = newWeapon;
+                          }}
+                          style={{ background: equipped ? "rgba(34,197,94,0.2)" : "rgba(34,197,94,0.08)", border: `1px solid ${equipped ? "#22c55e" : "#16a34a"}`, borderRadius: 3, padding: "5px 10px", cursor: "pointer", fontFamily: "'Press Start 2P', monospace", fontSize: 7, color: equipped ? "#22c55e" : "#86efac" }}
+                        >
+                          {equipped ? "UNEQUIP" : "EQUIP"}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            <button
+              onClick={() => {
+                shopOpenRef.current = false;
+                setShopOpen(false);
+                pausedRef.current = false;
+                setPaused(false);
+              }}
+              style={{ background: "rgba(239,68,68,0.12)", border: "2px solid #ef4444", borderRadius: 4, padding: "10px 28px", cursor: "pointer", fontFamily: "'Press Start 2P', monospace", fontSize: 10, color: "#ef4444", marginTop: 4 }}
+            >
+              CLOSE  [B]
+            </button>
+            <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 7, color: "#44403c" }}>PRESS B TO CLOSE</div>
+          </div>
+        )}
+
         {/* ── PAUSE OVERLAY ─────────────────────────────────────────────── */}
-        {phase === "playing" && paused && (
+        {phase === "playing" && paused && !shopOpen && (
           <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.82)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 20, backdropFilter: "blur(2px)" }}>
             {!showExitConfirm ? (
               <>

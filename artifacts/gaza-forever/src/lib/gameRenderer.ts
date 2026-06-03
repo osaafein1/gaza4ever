@@ -1,5 +1,5 @@
 import type { GameState, Enemy, Particle, PowerUp, Collectible, Projectile, Summon } from "./gameTypes";
-import { CANVAS_W, CANVAS_H, FLOOR_Y, CHARACTERS, COLLECTIBLE_DEFS } from "./gameConstants";
+import { CANVAS_W, CANVAS_H, FLOOR_Y, CHARACTERS, COLLECTIBLE_DEFS, SHOP_WEAPONS } from "./gameConstants";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -926,6 +926,66 @@ export function drawProjectile(ctx: CanvasRenderingContext2D, pr: Projectile, fr
   }
   if (!pr.warned && pr.warnTimer > 0) return;
 
+  // Bullet
+  if (pr.type === "bullet") {
+    pr.trail.forEach((pt, i) => {
+      ctx.globalAlpha = (i / pr.trail.length) * 0.5;
+      ctx.fillStyle = "#fbbf24";
+      ctx.fillRect(pt.x - 2, pt.y - 2, 4, 4);
+    });
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = "#fbbf24";
+    ctx.shadowColor = "#fbbf24"; ctx.shadowBlur = 6;
+    ctx.fillRect(pr.x - 4, pr.y - 2, 8, 4);
+    ctx.shadowBlur = 0;
+    return;
+  }
+  // Sniper shot
+  if (pr.type === "sniper_shot") {
+    ctx.save();
+    ctx.strokeStyle = "#a78bfa"; ctx.lineWidth = 2.5; ctx.shadowColor = "#a78bfa"; ctx.shadowBlur = 12;
+    ctx.globalAlpha = 0.85;
+    const sx = pr.x - pr.vx * 2, sy = pr.y - pr.vy * 2;
+    ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(pr.x, pr.y); ctx.stroke();
+    ctx.shadowBlur = 0; ctx.restore();
+    return;
+  }
+  // Grenade (player)
+  if (pr.type === "grenade_player") {
+    pr.trail.forEach((pt, i) => {
+      ctx.globalAlpha = (i / pr.trail.length) * 0.35;
+      ctx.fillStyle = "#22c55e";
+      ctx.beginPath(); ctx.arc(pt.x, pt.y, 4, 0, Math.PI * 2); ctx.fill();
+    });
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = "#16a34a"; ctx.strokeStyle = "#86efac"; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.arc(pr.x, pr.y, 8, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = "#dcfce7";
+    ctx.beginPath(); ctx.arc(pr.x - 2, pr.y - 2, 3, 0, Math.PI * 2); ctx.fill();
+    return;
+  }
+  // Tank rocket
+  if (pr.type === "tank_rocket") {
+    pr.trail.forEach((pt, i) => {
+      ctx.globalAlpha = (i / pr.trail.length) * 0.6;
+      const col = i > pr.trail.length * 0.6 ? "#f97316" : "#fbbf24";
+      ctx.fillStyle = col;
+      const s = 3 + (i / pr.trail.length) * 7;
+      ctx.beginPath(); ctx.arc(pt.x, pt.y, s / 2, 0, Math.PI * 2); ctx.fill();
+    });
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = "#ef4444";
+    ctx.save();
+    const tankAngle = Math.atan2(pr.vy, pr.vx);
+    ctx.translate(pr.x, pr.y); ctx.rotate(tankAngle);
+    ctx.fillRect(-14, -4, 28, 8);
+    ctx.fillStyle = "#dc2626";
+    ctx.fillRect(-18, -3, 7, 6);
+    ctx.fillStyle = "#f97316";
+    ctx.beginPath(); ctx.arc(14, 0, 5, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+    return;
+  }
   if (pr.type === "rock") {
     // Trail
     pr.trail.forEach((pt, i) => {
@@ -999,6 +1059,19 @@ export function drawProjectileWarnings(ctx: CanvasRenderingContext2D, projectile
       ctx.font = "bold 14px 'Press Start 2P', monospace"; ctx.textAlign = "center";
       ctx.fillText("!", pcx, player.y - player.height - 18);
       ctx.shadowBlur = 0;
+    } else if (pr.type === "tank_rocket") {
+      // Horizontal rocket warning — flash at origin side
+      const flash = Math.floor(pr.warnTimer / 5) % 2 === 0;
+      ctx.globalAlpha = flash ? 0.9 : 0.5;
+      ctx.fillStyle = "#ef4444";
+      ctx.font = "bold 18px sans-serif"; ctx.textAlign = "center";
+      const arrowDir = pr.vx > 0 ? "►" : "◄";
+      ctx.fillText(arrowDir, pr.x, pr.y - 20 + Math.sin(frame * 0.2) * 4);
+      ctx.globalAlpha = flash ? 1 : 0.35;
+      ctx.fillStyle = "#ef4444"; ctx.shadowColor = "#ef4444"; ctx.shadowBlur = 8;
+      ctx.font = "8px 'Press Start 2P', monospace"; ctx.textAlign = "center";
+      ctx.fillText("ROCKET!", pr.x, pr.y - 38);
+      ctx.shadowBlur = 0;
     } else if (pr.type === "hellfire") {
       const pcx = player.x + player.width / 2;
       const pcy = player.y - player.height / 2;
@@ -1058,48 +1131,56 @@ export function drawHUD(ctx: CanvasRenderingContext2D, gs: GameState) {
     ctx.globalAlpha = 1;
   }
 
-  // Spirit blast bar
-  const charCD = charDef.blastCost;
-  const blastRatio = 1 - p.specialCooldown / charCD;
+  // Rock cooldown bar
+  const rockRatio = 1 - Math.min(1, p.rockCooldown / 120);
   ctx.fillStyle = "rgba(0,0,0,0.6)";
   ctx.fillRect(12, 38, 120, 10);
-  ctx.fillStyle = blastRatio >= 1 ? "#60a5fa" : "#1d4ed8";
-  ctx.fillRect(12, 38, 120 * blastRatio, 10);
-  ctx.strokeStyle = "#1d4ed8";
+  ctx.fillStyle = rockRatio >= 1 ? "#9ca3af" : "#6b7280";
+  ctx.fillRect(12, 38, 120 * rockRatio, 10);
+  ctx.strokeStyle = "#6b7280";
   ctx.strokeRect(12, 38, 120, 10);
   ctx.fillStyle = "#fff";
   ctx.font = "7px 'Press Start 2P', monospace"; ctx.textAlign = "left";
-  ctx.fillText("SPIRIT BLAST", 14, 47);
+  ctx.fillText(rockRatio >= 1 ? "ROCK READY" : "ROCK COOL", 14, 47);
 
-  // Ally cooldown bars
-  const allyNames = ["1:KAREEM", "2:MARIAM", "3:SAMIR"];
-  const allyColors = ["#22c55e", "#f97316", "#a78bfa"];
-  p.allyCD.forEach((cd, i) => {
-    const bx = 12, by = 54 + i * 14;
-    ctx.fillStyle = "rgba(0,0,0,0.6)";
-    ctx.fillRect(bx, by, 120, 10);
-    ctx.fillStyle = allyColors[i];
-    ctx.fillRect(bx, by, 120 * (1 - cd / 600), 10);
-    ctx.strokeStyle = allyColors[i];
-    ctx.strokeRect(bx, by, 120, 10);
-    ctx.fillStyle = "#fff";
-    ctx.font = "6px 'Press Start 2P', monospace"; ctx.textAlign = "left";
-    ctx.fillText(allyNames[i], bx + 3, by + 8);
-  });
+  // Coin counter
+  ctx.fillStyle = "rgba(0,0,0,0.6)";
+  ctx.fillRect(12, 52, 120, 18);
+  ctx.strokeStyle = "#92400e"; ctx.lineWidth = 1;
+  ctx.strokeRect(12, 52, 120, 18);
+  ctx.fillStyle = "#fbbf24";
+  ctx.font = "9px 'Press Start 2P', monospace"; ctx.textAlign = "left";
+  ctx.fillText(`\u{1FA99} ${gs.coins}`, 16, 65);
+
+  // Weapon slot
+  const wId = p.activeWeapon;
+  const wDef = wId ? SHOP_WEAPONS.find(w => w.id === wId) : null;
+  ctx.fillStyle = "rgba(0,0,0,0.6)";
+  ctx.fillRect(12, 74, 120, 18);
+  ctx.strokeStyle = wDef ? "#22c55e" : "#44403c"; ctx.lineWidth = 1;
+  ctx.strokeRect(12, 74, 120, 18);
+  ctx.fillStyle = wDef ? "#22c55e" : "#6b7280";
+  ctx.font = "7px 'Press Start 2P', monospace"; ctx.textAlign = "left";
+  if (wDef) {
+    const ammo = p.weaponAmmo[wId] ?? 0;
+    ctx.fillText(`F:${wDef.label.substring(0, 8)} x${ammo}`, 16, 87);
+  } else {
+    ctx.fillText("F: NO WEAPON", 16, 87);
+  }
 
   // Buffs
   let bOff = 0;
   if (p.buffs.speedTimer > 0) {
     ctx.fillStyle = "#60a5fa"; ctx.font = "8px 'Press Start 2P', monospace"; ctx.textAlign = "left";
-    ctx.fillText(">> FAST", 12, 100 + bOff); bOff += 16;
+    ctx.fillText(">> FAST", 12, 98 + bOff); bOff += 15;
   }
   if (p.buffs.powerTimer > 0) {
     ctx.fillStyle = "#f59e0b"; ctx.font = "8px 'Press Start 2P', monospace"; ctx.textAlign = "left";
-    ctx.fillText("* POWER", 12, 100 + bOff); bOff += 16;
+    ctx.fillText("* POWER", 12, 98 + bOff); bOff += 15;
   }
   if (p.buffs.shielded) {
     ctx.fillStyle = "#22d3ee"; ctx.font = "8px 'Press Start 2P', monospace"; ctx.textAlign = "left";
-    ctx.fillText("O SHIELD", 12, 100 + bOff);
+    ctx.fillText("O SHIELD", 12, 98 + bOff);
   }
 
   // Char switch flash
@@ -1116,5 +1197,5 @@ export function drawHUD(ctx: CanvasRenderingContext2D, gs: GameState) {
   ctx.fillRect(0, CANVAS_H - 18, CANVAS_W, 18);
   ctx.fillStyle = "#6b7280";
   ctx.font = "6.5px 'Press Start 2P', monospace"; ctx.textAlign = "center";
-  ctx.fillText("ARROWS/WASD:MOVE  SPACE:JUMP  Z/J:ATTACK  X/K:BLAST  R/UP:ROCKET  UP+Z:ROCK  V:SUMMON  C:SWITCH  1/2/3:ALLY", CANVAS_W / 2, CANVAS_H - 5);
+  ctx.fillText("ARROWS/WASD:MOVE  SPACE/UP:JUMP  Z/J:PUNCH  X/K:THROW ROCK  F:FIRE WEAPON  B:SHOP  V:SUMMON  C:SWITCH CHAR", CANVAS_W / 2, CANVAS_H - 5);
 }

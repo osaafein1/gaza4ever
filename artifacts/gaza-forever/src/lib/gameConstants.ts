@@ -32,7 +32,7 @@ export const STAGE_DEFS = [
     color: "#f97316",
     desc: "Start your journey south through the ruins of the refugee camp",
     waves: 3,
-    enemyTier: ["patrol", "soldier", "drone"],
+    enemyTier: ["patrol", "soldier"],
     bossType: "tank",
   },
   {
@@ -52,7 +52,7 @@ export const STAGE_DEFS = [
     color: "#a855f7",
     desc: "Push through the heart of the camp — the most densely shelled ground",
     waves: 3,
-    enemyTier: ["armored", "soldier", "sniper", "drone", "apc"],
+    enemyTier: ["armored", "soldier", "sniper", "apc"],
     bossType: "bulldozer",
   },
   {
@@ -62,7 +62,7 @@ export const STAGE_DEFS = [
     color: "#fbbf24",
     desc: "Push through the southern districts toward safety",
     waves: 3,
-    enemyTier: ["armored", "sniper", "marksman", "drone", "apc"],
+    enemyTier: ["armored", "sniper", "marksman", "apc"],
     bossType: "bulldozer",
   },
   {
@@ -72,9 +72,18 @@ export const STAGE_DEFS = [
     color: "#22c55e",
     desc: "Reach the crossing — freedom is within sight",
     waves: 1,
-    enemyTier: ["armored", "sniper", "soldier", "marksman", "drone", "apc"],
+    enemyTier: ["armored", "sniper", "soldier", "marksman", "apc"],
     bossType: "apache",
   },
+];
+
+export const SHOP_WEAPONS = [
+  { id: "pistol",     label: "Pistol",          cost: 5,  damage: 25, ammo: 20, firerate: 18, desc: "Light sidearm — 20 rounds." },
+  { id: "m16",        label: "M16 Rifle",        cost: 12, damage: 20, ammo: 30, firerate: 8,  desc: "Rapid semi-auto — 30 rounds." },
+  { id: "grenade",    label: "Grenade",          cost: 8,  damage: 65, ammo: 3,  firerate: 60, desc: "Area explosion — 3 grenades." },
+  { id: "machinegun", label: "Machine Gun",      cost: 20, damage: 12, ammo: 60, firerate: 4,  desc: "Full-auto suppression — 60 rds." },
+  { id: "sniper",     label: "Sniper Rifle",     cost: 15, damage: 85, ammo: 10, firerate: 45, desc: "Piercing high-damage — 10 rds." },
+  { id: "rocket",     label: "Rocket Launcher",  cost: 18, damage: 90, ammo: 3,  firerate: 80, desc: "Explosive AoE, auto-aims — 3 rds." },
 ];
 
 export const COLLECTIBLE_DEFS: Record<string, { label: string; desc: string; color: string; icon: string }> = {

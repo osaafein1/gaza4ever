@@ -1,0 +1,1 @@
+- [Gaza Forever game architecture](gaza-forever-arch.md) — key design decisions for the canvas beat-em-up RPG

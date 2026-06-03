@@ -25,6 +25,9 @@ export function createPlayer(charIndex = 0): Player {
     rockCooldown: 0,
     rocketCooldown: 0,
     canDoubleJump: true,
+    activeWeapon: "",
+    weaponAmmo: {},
+    weaponCooldown: 0,
   };
 }
 
@@ -97,6 +100,7 @@ export function updateGame(gs: GameState, enemies: Enemy[], particles: Particle[
   if (p.summonCooldown > 0) p.summonCooldown--;
   if (p.rockCooldown > 0) p.rockCooldown--;
   if (p.rocketCooldown > 0) p.rocketCooldown--;
+  if (p.weaponCooldown > 0) p.weaponCooldown--;
   for (let i = 0; i < 3; i++) { if (p.allyCD[i] > 0) p.allyCD[i]--; }
   callbacks.onAllyCD([p.allyCD[0], p.allyCD[1], p.allyCD[2]]);
 
@@ -353,6 +357,20 @@ export function updateGame(gs: GameState, enemies: Enemy[], particles: Particle[
           callbacks.onParticle({ x: p.x + p.width / 2, y: p.y - p.height / 2, vx: 0, vy: -2, life: 30, maxLife: 30, color: "#22d3ee", text: "BLOCKED!", size: 16 });
         }
       }
+      // Tank and bulldozer fire ground rockets
+      if ((e.type === "tank" || e.type === "bulldozer") && dist < 660 && e.state !== "hurt" && e.animTimer > 80 && e.animTimer % 240 === 0) {
+        const dir = p.x + p.width / 2 > e.x + e.width / 2 ? 1 : -1;
+        const wm = 18;
+        gs.projectiles.push({
+          id: String(Math.random()), type: "tank_rocket",
+          x: dir > 0 ? e.x + e.width : e.x, y: e.y - 32,
+          vx: dir * 9, vy: 0,
+          targetX: 0, targetY: 0,
+          damage: 40, trail: [], life: 200, maxLife: 200,
+          warned: false, warnTimer: wm, warnMaxTimer: wm,
+          exploding: false, explodeTimer: 0, explodeX: 0, explodeY: 0,
+        });
+      }
     }
     e.x = Math.max(-e.width, e.x);
   }
@@ -394,6 +412,108 @@ export function updateGame(gs: GameState, enemies: Enemy[], particles: Particle[
       if (rockHit || pr.y >= FLOOR_Y || pr.x < -60 || pr.x > CANVAS_W + 60) {
         if (pr.y >= FLOOR_Y) for (let j = 0; j < 5; j++) callbacks.onParticle({ x: pr.x, y: FLOOR_Y, vx: (Math.random() - 0.5) * 9, vy: -2 - Math.random() * 4, life: 14, maxLife: 14, color: "#78716c", size: 2 + Math.random() * 4 });
         gs.projectiles.splice(i, 1);
+      }
+      continue;
+    }
+
+    // Bullet / sniper shot (player weapons — hit enemies)
+    if (pr.type === "bullet" || pr.type === "sniper_shot") {
+      pr.trail.push({ x: pr.x, y: pr.y });
+      if (pr.trail.length > 8) pr.trail.shift();
+      pr.x += pr.vx; pr.y += pr.vy;
+      const isPiercing = pr.type === "sniper_shot";
+      let bulletHit = false;
+      for (const e of enemies) {
+        if (e.state === "dead") continue;
+        if (pr.x > e.x - 14 && pr.x < e.x + e.width + 14 && pr.y > e.y - e.height - 14 && pr.y < e.y + 14) {
+          e.hp -= pr.damage; e.state = "hurt"; e.stateTimer = 14; e.vx += pr.vx * 0.15;
+          gs.shake = Math.max(gs.shake, isPiercing ? 14 : 6);
+          for (let j = 0; j < 6; j++) callbacks.onParticle({ x: pr.x, y: pr.y, vx: (Math.random() - 0.5) * 10, vy: -Math.random() * 6 - 2, life: 16, maxLife: 16, color: j < 3 ? "#ef4444" : "#fbbf24", size: 3 + Math.random() * 5 });
+          callbacks.onParticle({ x: e.x + e.width / 2, y: e.y - e.height - 22, vx: 0, vy: -1.5, life: 28, maxLife: 28, color: "#fff", text: `-${pr.damage}`, size: 13 });
+          if (e.hp <= 0) {
+            e.state = "dead"; e.stateTimer = 0; callbacks.onEnemyDie(e);
+            gs.combo++; gs.comboTimer = 160; callbacks.onComboChange(gs.combo);
+            gs.score += (isPiercing ? 200 : 100) * gs.scoreMultiplier; callbacks.onScoreChange(gs.score);
+          }
+          if (!isPiercing) { bulletHit = true; break; }
+        }
+      }
+      if (bulletHit || pr.x < -30 || pr.x > CANVAS_W + 30 || pr.y < -30 || pr.y > FLOOR_Y + 20) {
+        gs.projectiles.splice(i, 1);
+      }
+      continue;
+    }
+
+    // Grenade (player — AoE on impact)
+    if (pr.type === "grenade_player") {
+      pr.trail.push({ x: pr.x, y: pr.y });
+      if (pr.trail.length > 10) pr.trail.shift();
+      pr.vy += 0.58;
+      pr.x += pr.vx; pr.y += pr.vy;
+      let grenHit = false;
+      for (const e of enemies) {
+        if (e.state === "dead") continue;
+        if (pr.x > e.x - 14 && pr.x < e.x + e.width + 14 && pr.y > e.y - e.height - 14 && pr.y < e.y + 14) {
+          grenHit = true; break;
+        }
+      }
+      if (grenHit || pr.y >= FLOOR_Y) {
+        const ex = pr.x, ey = Math.min(pr.y, FLOOR_Y);
+        const blastR = 110;
+        for (const t of enemies) {
+          if (t.state === "dead") continue;
+          const tdx = t.x + t.width / 2 - ex; const tdy = t.y - t.height / 2 - ey;
+          if (Math.sqrt(tdx * tdx + tdy * tdy) < blastR) {
+            t.hp -= pr.damage; t.state = "hurt"; t.stateTimer = 22; t.vx += (tdx / (Math.abs(tdx) || 1)) * 7;
+            if (t.hp <= 0) {
+              t.state = "dead"; t.stateTimer = 0; callbacks.onEnemyDie(t);
+              gs.combo++; gs.comboTimer = 160; callbacks.onComboChange(gs.combo);
+              gs.score += 200 * gs.scoreMultiplier; callbacks.onScoreChange(gs.score);
+            }
+          }
+        }
+        gs.shake = Math.max(gs.shake, 22);
+        for (let j = 0; j < 24; j++) {
+          const col = j < 9 ? "#f97316" : j < 16 ? "#fbbf24" : j < 22 ? "#ef4444" : "#4b5563";
+          callbacks.onParticle({ x: ex, y: ey, vx: (Math.random() - 0.5) * 20, vy: -Math.random() * 16 - 3, life: 28 + Math.random() * 32, maxLife: 60, color: col, size: 6 + Math.random() * 12 });
+        }
+        callbacks.onParticle({ x: ex, y: ey - 50, vx: 0, vy: -2, life: 56, maxLife: 56, color: "#ef4444", text: "BOOM!", size: 26 });
+        pr.exploding = true; pr.explodeTimer = 34; pr.explodeX = ex; pr.explodeY = ey;
+      } else if (pr.x < -80 || pr.x > CANVAS_W + 80) {
+        gs.projectiles.splice(i, 1);
+      }
+      continue;
+    }
+
+    // Tank rocket (enemy — horizontal, hits player on ground)
+    if (pr.type === "tank_rocket") {
+      if (!pr.warned) {
+        pr.warnTimer--;
+        if (pr.warnTimer <= 0) pr.warned = true;
+        continue;
+      }
+      pr.trail.push({ x: pr.x, y: pr.y });
+      if (pr.trail.length > 12) pr.trail.shift();
+      pr.x += pr.vx; pr.y += pr.vy;
+      const pHit = pr.x > p.x - 14 && pr.x < p.x + p.width + 14 && pr.y > p.y - p.height - 10 && pr.y < p.y + 8;
+      if (pHit) {
+        if (!p.buffs.shielded) {
+          p.hp -= pr.damage; p.hurtTimer = 26; gs.shake = Math.max(gs.shake, 20);
+          for (let j = 0; j < 8; j++) callbacks.onParticle({ x: p.x + p.width / 2, y: p.y - p.height / 2, vx: (Math.random() - 0.5) * 12, vy: -Math.random() * 9 - 2, life: 22, maxLife: 22, color: "#ef4444", size: 5 + Math.random() * 5 });
+          if (p.hp <= 0) callbacks.onPlayerDie();
+        } else {
+          p.buffs.shielded = false;
+          callbacks.onParticle({ x: p.x + p.width / 2, y: p.y - p.height / 2, vx: 0, vy: -2, life: 30, maxLife: 30, color: "#22d3ee", text: "BLOCKED!", size: 16 });
+        }
+      }
+      if (pHit || pr.x < -30 || pr.x > CANVAS_W + 30) {
+        const ex = pr.x, ey = pr.y;
+        gs.shake = Math.max(gs.shake, 16);
+        for (let j = 0; j < 18; j++) {
+          const col = j < 7 ? "#f97316" : j < 13 ? "#fbbf24" : "#ef4444";
+          callbacks.onParticle({ x: ex, y: ey, vx: (Math.random() - 0.5) * 16, vy: -Math.random() * 12 - 2, life: 24 + Math.random() * 28, maxLife: 52, color: col, size: 5 + Math.random() * 10 });
+        }
+        pr.exploding = true; pr.explodeTimer = 28; pr.explodeX = ex; pr.explodeY = ey;
       }
       continue;
     }
