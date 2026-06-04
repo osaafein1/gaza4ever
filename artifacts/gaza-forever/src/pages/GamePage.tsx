@@ -874,7 +874,7 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
     const gunKill = killedBy === "pistol" || killedBy === "m16" || killedBy === "sniper";
     if (gunKill) {
       const inv = weaponInventoryRef.current;
-      const nonRocketIds = ["pistol", "m16", "grenade", "machinegun", "sniper", "shotgun"];
+      const nonRocketIds = ["pistol", "m16", "grenade", "machinegun", "shotgun"];
       const ownedWeapons = nonRocketIds.filter(id => (inv[id] ?? 0) > 0);
       if (ownedWeapons.length > 0) {
         const updated = { ...inv };
@@ -1148,31 +1148,13 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
                 });
               }
             } else if (p.activeWeapon === "missile") {
-              const AERIAL = ["drone", "apache", "warplane", "bomb_plane_mini", "bomb_plane_large"];
-              const aerials = gs.enemies.filter(en => AERIAL.includes(en.type) && en.state !== "dead");
-              const liveEnemies = gs.enemies.filter(en => en.state !== "dead");
-              const targets = aimUp
-                ? (aerials.length > 0 ? aerials : liveEnemies)
-                : (aerials.length > 0 ? aerials : liveEnemies);
-              let aimVx = aimUp ? 0 : dir * 14;
-              let aimVy = aimUp ? -18 : 0;
-              if (targets.length > 0) {
-                const nearest = targets.reduce((best, en) => {
-                  const d = Math.hypot(en.x + en.width / 2 - launchX, en.y - en.height / 2 - launchY);
-                  const bd = Math.hypot(best.x + best.width / 2 - launchX, best.y - best.height / 2 - launchY);
-                  return d < bd ? en : best;
-                });
-                const dx = nearest.x + nearest.width / 2 - launchX;
-                const dy = nearest.y - nearest.height / 2 - launchY;
-                const dist = Math.hypot(dx, dy) || 1;
-                aimVx = (dx / dist) * 18; aimVy = (dy / dist) * 18;
-              }
+              // Missile drops from center-top of screen straight down — kills all non-boss enemies on impact
               gs.projectiles.push({
                 id: String(Math.random()), type: "missile",
-                x: launchX, y: launchY,
-                vx: aimVx, vy: aimVy,
+                x: 640, y: -80,
+                vx: 0, vy: 16,
                 targetX: 0, targetY: 0,
-                damage: wDef.damage, trail: [], life: 320, maxLife: 320,
+                damage: wDef.damage, trail: [], life: 500, maxLife: 500,
                 warned: true, warnTimer: 0, warnMaxTimer: 0,
                 exploding: false, explodeTimer: 0, explodeX: 0, explodeY: 0,
                 sourceWeapon: "missile",
@@ -2068,45 +2050,70 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
             <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 12, color: "#9ca3af", textAlign: "center", maxWidth: 420, lineHeight: 2 }}>
               Gaza remembers. The fight goes on.
             </div>
-            {/* Fallen child illustration */}
-            <svg width="180" height="160" viewBox="0 0 180 160" style={{ filter: "drop-shadow(0 0 18px rgba(239,68,68,0.35))" }}>
-              {/* Ground */}
-              <rect x="0" y="130" width="180" height="30" fill="#1c1917" rx="4"/>
-              {/* Rubble */}
-              <polygon points="10,130 28,110 46,130" fill="#374151"/>
-              <polygon points="134,130 152,108 170,130" fill="#374151"/>
-              <rect x="70" y="118" width="40" height="12" fill="#374151" rx="2"/>
-              {/* Palestinian flag draped over ground */}
-              <rect x="12" y="122" width="80" height="10" fill="#149954" opacity="0.7" rx="2"/>
-              <rect x="12" y="122" width="20" height="10" fill="#000" opacity="0.7" rx="2"/>
-              <polygon points="12,122 12,132 22,127" fill="#ef4444" opacity="0.9"/>
-              {/* Child lying down — silhouette in white */}
-              <ellipse cx="95" cy="127" rx="32" ry="10" fill="#f8fafc" opacity="0.15"/>
-              {/* Body */}
-              <rect x="62" y="112" width="60" height="20" fill="#f8fafc" rx="10" opacity="0.9"/>
-              {/* Head */}
-              <circle cx="115" cy="113" r="14" fill="#fcd5b0"/>
-              {/* Hair */}
-              <ellipse cx="115" cy="104" rx="13" ry="8" fill="#1a0a00"/>
-              {/* Closed eyes — peaceful */}
-              <path d="M109 112 Q112 115 115 112" stroke="#555" strokeWidth="1.5" fill="none"/>
-              <path d="M115 112 Q118 115 121 112" stroke="#555" strokeWidth="1.5" fill="none"/>
-              {/* Small hand reaching out */}
-              <ellipse cx="64" cy="120" rx="8" ry="5" fill="#fcd5b0" transform="rotate(-20 64 120)"/>
-              {/* Kite of hope — small kite floating up */}
-              <polygon points="140,30 150,50 140,65 130,50" fill="none" stroke="#22c55e" strokeWidth="1.5" opacity="0.7"/>
-              <line x1="140" y1="65" x2="142" y2="90" stroke="#22c55e" strokeWidth="1" strokeDasharray="3,3" opacity="0.5"/>
-              {/* Watermelon slice — small symbol */}
-              <path d="M26 75 A18 18 0 0 1 62 75 Z" fill="#16a34a"/>
-              <path d="M30 75 A14 14 0 0 1 58 75 Z" fill="#ef4444"/>
-              <circle cx="38" cy="70" r="1.5" fill="#1c1917"/>
-              <circle cx="44" cy="67" r="1.5" fill="#1c1917"/>
-              <circle cx="50" cy="70" r="1.5" fill="#1c1917"/>
-              {/* Stars */}
-              <circle cx="20" cy="20" r="1.5" fill="#fff" opacity="0.6"/>
-              <circle cx="160" cy="15" r="1" fill="#fff" opacity="0.5"/>
-              <circle cx="80" cy="8" r="1" fill="#fff" opacity="0.4"/>
-              <circle cx="140" cy="88" r="1" fill="#fff" opacity="0.3"/>
+            {/* Fallen child — no face, rubble scene */}
+            <svg width="260" height="200" viewBox="0 0 260 200" style={{ filter: "drop-shadow(0 0 22px rgba(200,0,0,0.4))" }}>
+              {/* Night sky */}
+              <rect x="0" y="0" width="260" height="200" fill="#0a0a0a"/>
+              {/* Smoke / dust haze */}
+              <ellipse cx="130" cy="80" rx="120" ry="55" fill="#1c1917" opacity="0.7"/>
+              <ellipse cx="80" cy="60" rx="70" ry="35" fill="#292524" opacity="0.5"/>
+              <ellipse cx="190" cy="70" rx="60" ry="30" fill="#292524" opacity="0.4"/>
+              {/* Destroyed building silhouette — left */}
+              <polygon points="0,160 0,60 18,60 18,45 30,45 30,30 42,30 42,55 55,55 55,70 65,70 65,160" fill="#111"/>
+              {/* Destroyed building silhouette — right */}
+              <polygon points="260,160 260,50 245,50 245,38 232,38 232,25 220,25 220,52 208,52 208,68 195,68 195,160" fill="#111"/>
+              {/* Rubble mound — center */}
+              <polygon points="30,160 55,130 75,138 95,120 115,132 140,118 160,130 182,122 200,135 220,125 240,160" fill="#292524"/>
+              <polygon points="60,160 80,140 100,148 120,135 145,145 170,138 190,150 220,160" fill="#1c1917"/>
+              {/* Concrete slabs */}
+              <rect x="48" y="148" width="55" height="8" fill="#374151" transform="rotate(-8 48 148)"/>
+              <rect x="130" y="145" width="60" height="7" fill="#374151" transform="rotate(5 130 145)"/>
+              <rect x="90" y="155" width="40" height="6" fill="#3f3f46" transform="rotate(-3 90 155)"/>
+              {/* Rebar sticking up */}
+              <line x1="70" y1="148" x2="66" y2="118" stroke="#6b7280" strokeWidth="2"/>
+              <line x1="165" y1="145" x2="162" y2="112" stroke="#6b7280" strokeWidth="2"/>
+              <line x1="112" y1="152" x2="116" y2="124" stroke="#6b7280" strokeWidth="1.5"/>
+              {/* Small body under rubble — only outline, no face */}
+              <ellipse cx="118" cy="153" rx="30" ry="9" fill="#e7c8a0" opacity="0.55"/>
+              {/* Arm/hand reaching out from under slab */}
+              <path d="M80 152 Q72 148 68 154 Q65 158 70 160 Q76 162 82 157 Z" fill="#d4a574"/>
+              {/* Fingers barely visible */}
+              <line x1="68" y1="155" x2="63" y2="153" stroke="#c4956a" strokeWidth="1.5" strokeLinecap="round"/>
+              <line x1="68" y1="157" x2="63" y2="157" stroke="#c4956a" strokeWidth="1.5" strokeLinecap="round"/>
+              <line x1="69" y1="159" x2="64" y2="160" stroke="#c4956a" strokeWidth="1.5" strokeLinecap="round"/>
+              {/* Blood pooling on the ground */}
+              <ellipse cx="75" cy="163" rx="22" ry="5" fill="#7f1d1d" opacity="0.7"/>
+              <ellipse cx="62" cy="161" rx="10" ry="3" fill="#991b1b" opacity="0.6"/>
+              {/* Torn Palestinian flag — draped over rubble */}
+              <path d="M130 148 Q150 140 170 143 Q185 145 190 150 Q170 152 150 150 Q138 150 130 148 Z" fill="#149954" opacity="0.65"/>
+              <path d="M130 148 Q135 142 142 144 Q138 150 130 148 Z" fill="#ef4444" opacity="0.8"/>
+              <path d="M142 144 Q150 140 162 142 Q150 148 142 148 Q142 146 142 144 Z" fill="#fff" opacity="0.45"/>
+              {/* Torn flag end */}
+              <path d="M188 148 Q200 144 205 150 Q198 154 188 152 Z" fill="#149954" opacity="0.4"/>
+              {/* Kite string drifting — no one holding it */}
+              <path d="M155 90 Q148 110 152 130 Q154 140 150 150" stroke="#22c55e" strokeWidth="1" fill="none" strokeDasharray="4,3" opacity="0.45"/>
+              {/* Kite high up — abandoned */}
+              <polygon points="155,90 163,75 155,60 147,75" fill="none" stroke="#22c55e" strokeWidth="1.2" opacity="0.4"/>
+              <line x1="155" y1="90" x2="158" y2="82" stroke="#22c55e" strokeWidth="0.8" opacity="0.3"/>
+              {/* Watermelon broken on ground */}
+              <path d="M195 158 A12 12 0 0 1 219 158 Z" fill="#15803d" opacity="0.8"/>
+              <path d="M198 158 A9 9 0 0 1 216 158 Z" fill="#ef4444" opacity="0.9"/>
+              <circle cx="204" cy="155" r="1.2" fill="#1c1917"/>
+              <circle cx="208" cy="154" r="1.2" fill="#1c1917"/>
+              <circle cx="212" cy="155" r="1.2" fill="#1c1917"/>
+              {/* Scattered juice from broken watermelon */}
+              <ellipse cx="207" cy="160" rx="14" ry="3" fill="#dc2626" opacity="0.25"/>
+              {/* Dim stars through smoke */}
+              <circle cx="22" cy="15" r="1.2" fill="#fff" opacity="0.35"/>
+              <circle cx="50" cy="8" r="0.9" fill="#fff" opacity="0.3"/>
+              <circle cx="100" cy="12" r="0.8" fill="#fff" opacity="0.25"/>
+              <circle cx="210" cy="10" r="1" fill="#fff" opacity="0.3"/>
+              <circle cx="240" cy="22" r="0.8" fill="#fff" opacity="0.25"/>
+              {/* Crescent moon barely visible through smoke */}
+              <path d="M130 18 A10 10 0 1 1 130 38 A7 7 0 1 0 130 18 Z" fill="#fbbf24" opacity="0.2"/>
+              {/* "17,000+" text — small, tragic counter */}
+              <text x="130" y="105" textAnchor="middle" fontFamily="serif" fontSize="11" fill="#ef4444" opacity="0.6">17,000+ children</text>
+              <text x="130" y="118" textAnchor="middle" fontFamily="serif" fontSize="9" fill="#9ca3af" opacity="0.5">killed since Oct 2023</text>
             </svg>
             <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 16, color: "#fbbf24" }}>SCORE: {score.toLocaleString()}</div>
             <div style={{ display: "flex", gap: 12, marginTop: 8 }}>

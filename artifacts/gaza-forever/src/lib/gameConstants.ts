@@ -85,7 +85,7 @@ export const SHOP_WEAPONS = [
   { id: "m16",        label: "M16 Rifle",        cost: 12,  damage: 20,  ammo: 30, firerate: 8,   desc: "Rapid semi-auto — 30 rounds." },
   { id: "grenade",    label: "Grenade",          cost: 8,   damage: 65,  ammo: 3,  firerate: 60,  desc: "Area explosion — 3 grenades." },
   { id: "machinegun", label: "Machine Gun",      cost: 20,  damage: 12,  ammo: 60, firerate: 2,   desc: "Full-auto suppression — 60 rds." },
-  { id: "sniper",     label: "Sniper Rifle",     cost: 15,  damage: 85,  ammo: 5,  firerate: 45,  desc: "Piercing, distance scales dmg — 5 rds." },
+  { id: "sniper",     label: "Sniper Rifle",     cost: 15,  damage: 50,  ammo: 5,  firerate: 45,  desc: "Piercing, distance scales dmg — 5 rds." },
   { id: "shotgun",    label: "AOE Shotgun",      cost: 15,  damage: 25,  ammo: 8,  firerate: 35,  desc: "Wide spread blast — 8 rounds." },
   { id: "rocket",     label: "Rocket Launcher",  cost: 18,  damage: 90,  ammo: 3,  firerate: 80,  desc: "Explosive AoE, auto-aims — 3 rds." },
   { id: "missile",    label: "Missile Strike",   cost: 50,  damage: 200, ammo: 1,  firerate: 120, desc: "Screen-wide mushroom cloud — 1 round." },
