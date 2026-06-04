@@ -180,6 +180,23 @@ export function updateGame(gs: GameState, enemies: Enemy[], particles: Particle[
         }
       }
     }
+    // Shatter incoming D9 boulders with melee punch
+    for (let prI = gs.projectiles.length - 1; prI >= 0; prI--) {
+      const pr2 = gs.projectiles[prI];
+      if (pr2.type !== "d9_rock") continue;
+      const punchX = p.facingRight ? p.x + p.width + reach * 0.6 : p.x - reach * 0.6;
+      const punchY = p.y - p.height * 0.5;
+      if (Math.hypot(pr2.x - punchX, pr2.y - punchY) < 80) {
+        for (let j = 0; j < 8; j++) {
+          callbacks.onParticle({ x: pr2.x, y: pr2.y, vx: (Math.random()-0.5)*12, vy: -Math.random()*8-2, life: 22, maxLife: 22, color: j < 4 ? "#78716c" : "#a8a29e", size: 4 + Math.random()*6 });
+        }
+        callbacks.onParticle({ x: pr2.x, y: pr2.y - 24, vx: 0, vy: -2, life: 36, maxLife: 36, color: "#22c55e", text: "SHATTER!", size: 16 });
+        gs.projectiles.splice(prI, 1);
+        gs.shake = Math.max(gs.shake, 8);
+        gs.score += 50 * gs.scoreMultiplier;
+        callbacks.onScoreChange(gs.score);
+      }
+    }
   }
 
   // Beam attack
@@ -420,7 +437,7 @@ export function updateGame(gs: GameState, enemies: Enemy[], particles: Particle[
       if (e.type === "d9" && dist < 700 && e.state !== "hurt" && e.animTimer > 80 && e.animTimer % 160 === 0) {
         const d9dir = p.x + p.width / 2 > e.x + e.width / 2 ? 1 : -1;
         gs.projectiles.push({
-          id: String(Math.random()), type: "rock",
+          id: String(Math.random()), type: "d9_rock",
           x: d9dir > 0 ? e.x + e.width : e.x, y: e.y - 50,
           vx: d9dir * 10, vy: -20,
           targetX: 0, targetY: 0,
@@ -469,6 +486,35 @@ export function updateGame(gs: GameState, enemies: Enemy[], particles: Particle[
       }
       if (rockHit || pr.y >= FLOOR_Y || pr.x < -60 || pr.x > CANVAS_W + 60) {
         if (pr.y >= FLOOR_Y) for (let j = 0; j < 5; j++) callbacks.onParticle({ x: pr.x, y: FLOOR_Y, vx: (Math.random() - 0.5) * 9, vy: -2 - Math.random() * 4, life: 14, maxLife: 14, color: "#78716c", size: 2 + Math.random() * 4 });
+        gs.projectiles.splice(i, 1);
+      }
+      continue;
+    }
+
+    if (pr.type === "d9_rock") {
+      pr.trail.push({ x: pr.x, y: pr.y });
+      if (pr.trail.length > 6) pr.trail.shift();
+      pr.vy += 0.75;
+      pr.x += pr.vx; pr.y += pr.vy;
+      // Hit the player
+      if (!p.buffs.shielded && p.hurtTimer <= 0 &&
+          pr.x > p.x - 16 && pr.x < p.x + p.width + 16 &&
+          pr.y > p.y - p.height - 12 && pr.y < p.y + 12) {
+        p.hp -= pr.damage; p.hurtTimer = 38; gs.shake = Math.max(gs.shake, 16);
+        for (let j = 0; j < 10; j++) {
+          callbacks.onParticle({ x: pr.x, y: pr.y, vx: (Math.random()-0.5)*14, vy: -Math.random()*9-2, life: 24, maxLife: 24, color: j < 5 ? "#78716c" : "#a8a29e", size: 5 + Math.random()*7 });
+        }
+        callbacks.onParticle({ x: p.x + p.width/2, y: p.y - p.height - 22, vx: 0, vy: -2, life: 30, maxLife: 30, color: "#ef4444", text: `-${pr.damage}`, size: 14 });
+        if (p.hp <= 0) callbacks.onPlayerDie();
+        gs.projectiles.splice(i, 1);
+        continue;
+      }
+      if (pr.y >= FLOOR_Y || pr.x < -80 || pr.x > CANVAS_W + 80) {
+        if (pr.y >= FLOOR_Y) {
+          for (let j = 0; j < 8; j++) {
+            callbacks.onParticle({ x: pr.x, y: FLOOR_Y, vx: (Math.random()-0.5)*12, vy: -3-Math.random()*5, life: 18, maxLife: 18, color: j < 4 ? "#78716c" : "#a8a29e", size: 3 + Math.random()*5 });
+          }
+        }
         gs.projectiles.splice(i, 1);
       }
       continue;

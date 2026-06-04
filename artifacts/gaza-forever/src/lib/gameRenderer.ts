@@ -291,109 +291,74 @@ export function drawPlayer(ctx: CanvasRenderingContext2D, gs: GameState, frame: 
   ctx.quadraticCurveTo(cx, ey + 15.5, cx + 4.5, ey + 13.5);
   ctx.stroke();
 
-  // ─── KEFFIYEH ─────────────────────────────────────────────────────────────
-  // Worn properly: dome over top of head, face fully visible.
-  // Folded band at hairline; one end drapes down the left side.
-  const kR       = hr + 2;                           // fabric radius
-  const kA1      = Math.PI * 1.18;                   // left start angle
-  const kA2      = Math.PI * 1.82;                   // right end angle
-  // Chord y: where the dome meets the forehead (above eyebrows)
-  const kChordY  = hcy + kR * Math.sin(kA1);        // ≈ hcy - 11.8
-  const kChordHW = Math.abs(kR * Math.cos(kA1));    // ≈ 18.6
-
-  // --- White dome (top of head only, above hairline) ----
-  ctx.globalAlpha = 0.94;
+  // ─── KEFFIYEH ON SHOULDER ────────────────────────────────────────────────
+  // Folded keffiyeh cloth draped over the left shoulder
+  const kSx = cx - 10;
+  const kSy = shoulderY - 2;
+  // Main cloth body
+  ctx.globalAlpha = 0.93;
   ctx.fillStyle = kCloth;
   ctx.beginPath();
-  ctx.arc(cx, hcy, kR, kA1, kA2);
-  ctx.closePath();  // straight chord across forehead
+  ctx.moveTo(kSx + 2, kSy);
+  ctx.lineTo(kSx + 22, kSy + 1);
+  ctx.lineTo(kSx + 24, kSy + 12);
+  ctx.lineTo(kSx + 18, kSy + 28);
+  ctx.lineTo(kSx + 7, kSy + 33);
+  ctx.lineTo(kSx - 2, kSy + 20);
+  ctx.lineTo(kSx - 3, kSy + 8);
+  ctx.closePath();
   ctx.fill();
-
-  // --- Charcoal check grid on dome ----------------------
-  ctx.globalAlpha = 0.11;
+  // Checkered grid (clipped to cloth shape)
+  ctx.save();
+  ctx.beginPath();
+  ctx.moveTo(kSx + 2, kSy);
+  ctx.lineTo(kSx + 22, kSy + 1);
+  ctx.lineTo(kSx + 24, kSy + 12);
+  ctx.lineTo(kSx + 18, kSy + 28);
+  ctx.lineTo(kSx + 7, kSy + 33);
+  ctx.lineTo(kSx - 2, kSy + 20);
+  ctx.lineTo(kSx - 3, kSy + 8);
+  ctx.closePath();
+  ctx.clip();
+  ctx.globalAlpha = 0.16;
   ctx.strokeStyle = "#2a1a0a";
   ctx.lineWidth = 0.9;
-  for (let dy = -kR + 2; dy < kChordY - hcy + 1; dy += 5) {
-    const hw = Math.sqrt(Math.max(0, kR * kR - dy * dy));
-    ctx.beginPath();
-    ctx.moveTo(cx - hw, hcy + dy);
-    ctx.lineTo(cx + hw, hcy + dy);
-    ctx.stroke();
+  for (let ky = 0; ky < 36; ky += 5) {
+    ctx.beginPath(); ctx.moveTo(kSx - 6, kSy + ky); ctx.lineTo(kSx + 28, kSy + ky); ctx.stroke();
   }
-  for (let dx = -kChordHW; dx <= kChordHW; dx += 5) {
-    const topY = hcy - Math.sqrt(Math.max(0, kR * kR - dx * dx));
-    ctx.beginPath();
-    ctx.moveTo(cx + dx, kChordY);
-    ctx.lineTo(cx + dx, topY);
-    ctx.stroke();
+  for (let kx2 = 0; kx2 < 32; kx2 += 5) {
+    ctx.beginPath(); ctx.moveTo(kSx - 4 + kx2, kSy - 4); ctx.lineTo(kSx - 4 + kx2, kSy + 36); ctx.stroke();
   }
-
-  // --- Colour pattern tint (character-coloured diamonds) ---
-  ctx.globalAlpha = 0.16;
+  ctx.restore();
+  // Character colour tint
+  ctx.globalAlpha = 0.14;
   ctx.fillStyle = charDef.color;
   ctx.beginPath();
-  ctx.arc(cx, hcy, kR, kA1, kA2);
+  ctx.moveTo(kSx + 2, kSy);
+  ctx.lineTo(kSx + 22, kSy + 1);
+  ctx.lineTo(kSx + 24, kSy + 12);
+  ctx.lineTo(kSx + 18, kSy + 28);
+  ctx.lineTo(kSx + 7, kSy + 33);
+  ctx.lineTo(kSx - 2, kSy + 20);
+  ctx.lineTo(kSx - 3, kSy + 8);
   ctx.closePath();
   ctx.fill();
-  ctx.globalAlpha = 1;
-
-  // --- Folded forehead band (hem of fabric) -------------
-  ctx.fillStyle = "#d4ccb5";
-  ctx.beginPath();
-  ctx.moveTo(cx - kChordHW, kChordY);
-  ctx.lineTo(cx + kChordHW, kChordY);
-  ctx.lineTo(cx + kChordHW - 1, kChordY + 5);
-  ctx.lineTo(cx - kChordHW + 1, kChordY + 5);
-  ctx.closePath();
-  ctx.fill();
-  // Drop shadow under band
-  ctx.fillStyle = "rgba(0,0,0,0.18)";
-  ctx.fillRect(cx - kChordHW + 1, kChordY + 4, kChordHW * 2 - 2, 3);
-
-  // --- Fringe tassels along bottom of band --------------
+  // Fold crease
+  ctx.globalAlpha = 0.28;
   ctx.strokeStyle = "#988860";
-  ctx.lineWidth = 0.8;
-  ctx.globalAlpha = 0.65;
-  const nTassels = 8;
-  for (let i = 0; i < nTassels; i++) {
-    const tx = cx - kChordHW + 2 + i * ((kChordHW * 2 - 4) / (nTassels - 1));
-    ctx.beginPath();
-    ctx.moveTo(tx, kChordY + 5);
-    ctx.lineTo(tx, kChordY + 9.5);
-    ctx.stroke();
+  ctx.lineWidth = 1;
+  ctx.lineCap = "round";
+  ctx.beginPath();
+  ctx.moveTo(kSx + 1, kSy + 7);
+  ctx.quadraticCurveTo(kSx + 12, kSy + 10, kSx + 21, kSy + 6);
+  ctx.stroke();
+  // Fringe tassels at bottom edge
+  ctx.lineWidth = 0.7;
+  for (let fi = 0; fi < 6; fi++) {
+    const ffx = kSx + 3 + fi * (14 / 5);
+    ctx.beginPath(); ctx.moveTo(ffx, kSy + 30); ctx.lineTo(ffx - 1, kSy + 35); ctx.stroke();
   }
   ctx.globalAlpha = 1;
-
-  // --- Left-side drape (hangs from temple to shoulder) --
-  ctx.fillStyle = kCloth;
-  ctx.globalAlpha = 0.91;
-  ctx.beginPath();
-  ctx.moveTo(cx - kChordHW + 1, kChordY + 3);
-  ctx.quadraticCurveTo(cx - hr - 5, hcy + 10, cx - 20, groundY - 62);
-  ctx.lineTo(cx - 13, groundY - 58);
-  ctx.quadraticCurveTo(cx - 9, hcy + 16, cx - hr + 2, hcy + 4);
-  ctx.lineTo(cx - kChordHW + 4, kChordY + 1);
-  ctx.closePath();
-  ctx.fill();
-  // Colour tint on drape
-  ctx.globalAlpha = 0.17;
-  ctx.fillStyle = charDef.color;
-  ctx.beginPath();
-  ctx.moveTo(cx - kChordHW + 1, kChordY + 3);
-  ctx.quadraticCurveTo(cx - hr - 5, hcy + 10, cx - 20, groundY - 62);
-  ctx.lineTo(cx - 13, groundY - 58);
-  ctx.quadraticCurveTo(cx - 9, hcy + 16, cx - hr + 2, hcy + 4);
-  ctx.lineTo(cx - kChordHW + 4, kChordY + 1);
-  ctx.closePath();
-  ctx.fill();
-  ctx.globalAlpha = 1;
-
-  // --- Dome edge stitching ------------------------------
-  ctx.strokeStyle = "rgba(155,145,125,0.5)";
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  ctx.arc(cx, hcy, kR + 0.5, kA1, kA2);
-  ctx.stroke();
 
   // ─── BEAM / BLAST ─────────────────────────────────────────────────────────
   if (gs.beam && gs.beam.active) {
@@ -1038,13 +1003,6 @@ function drawD9(ctx: CanvasRenderingContext2D, e: Enemy, frame: number, hurt: bo
   ctx.lineTo(e.x + e.width + 24, e.y - 66);
   ctx.closePath();
   ctx.fill();
-  // IDF star of David marking
-  ctx.fillStyle = F || "#fbbf24";
-  ctx.globalAlpha = 0.4;
-  ctx.font = "bold 18px serif";
-  ctx.textAlign = "center";
-  ctx.fillText("✡", cx - 10, e.y - 68);
-  ctx.globalAlpha = 1;
   // Exhaust smoke
   if (frame % 3 === 0) {
     ctx.fillStyle = "rgba(80,80,80,0.4)";
@@ -1272,6 +1230,36 @@ export function drawProjectile(ctx: CanvasRenderingContext2D, pr: Projectile, fr
     ctx.fillRect(-18, -3, 7, 6);
     ctx.fillStyle = "#f97316";
     ctx.beginPath(); ctx.arc(14, 0, 5, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+    return;
+  }
+  if (pr.type === "d9_rock") {
+    // Dust trail
+    pr.trail.forEach((pt, idx) => {
+      ctx.globalAlpha = (idx / pr.trail.length) * 0.4;
+      ctx.fillStyle = "#78716c";
+      const ts = 6 + (idx / pr.trail.length) * 10;
+      ctx.beginPath();
+      ctx.ellipse(pt.x, pt.y, ts / 2, ts * 0.4, 0, 0, Math.PI * 2);
+      ctx.fill();
+    });
+    ctx.globalAlpha = 1;
+    // Spinning boulder
+    ctx.save();
+    ctx.translate(pr.x, pr.y);
+    ctx.rotate((pr.maxLife - pr.life) * 0.05);
+    ctx.fillStyle = "#4b5563";
+    ctx.beginPath(); ctx.ellipse(0, 0, 18, 15, 0.2, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "#374151";
+    ctx.beginPath(); ctx.ellipse(-4, 3, 12, 9, 0.4, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "#1f2937";
+    ctx.beginPath(); ctx.ellipse(-6, 5, 6, 4, 0.6, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "#9ca3af"; ctx.globalAlpha = 0.45;
+    ctx.beginPath(); ctx.ellipse(-5, -6, 7, 4, -0.5, 0, Math.PI * 2); ctx.fill();
+    ctx.globalAlpha = 1;
+    ctx.strokeStyle = "#111827"; ctx.lineWidth = 1.5; ctx.lineCap = "round";
+    ctx.beginPath(); ctx.moveTo(-6, -10); ctx.lineTo(-2, 2); ctx.lineTo(5, 7); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(7, -6); ctx.lineTo(4, -2); ctx.stroke();
     ctx.restore();
     return;
   }

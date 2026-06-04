@@ -148,25 +148,32 @@ export default function MenuPage({ onMusicStart }: MenuPageProps) {
           {/* Stage select */}
           <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 8, color: "#9ca3af", marginBottom: 8, letterSpacing: 2 }}>STARTING AREA</div>
           <div style={{ display: "flex", gap: 8, marginBottom: 14, flexWrap: "wrap", justifyContent: "center" }}>
-            {STAGE_DEFS.map((s, i) => (
-              <button
-                key={i}
-                onClick={() => setSelectedStage(i)}
-                style={{
-                  background: selectedStage === i ? `${s.color}22` : "rgba(0,0,0,0.5)",
-                  border: `2px solid ${selectedStage === i ? s.color : "#44403c"}`,
-                  borderRadius: 4,
-                  padding: "8px 12px",
-                  cursor: "pointer",
-                  transition: "all 0.12s",
-                  boxShadow: selectedStage === i ? `0 0 12px ${s.color}50` : "none",
-                  minWidth: 90,
-                }}
-              >
-                <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 8.5, color: selectedStage === i ? s.color : "#9ca3af", marginBottom: 3 }}>{s.name}</div>
-                <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 6.5, color: "#6b7280" }}>{s.subtitle}</div>
-              </button>
-            ))}
+            {STAGE_DEFS.map((s, i) => {
+              const locked = i > 0;
+              return (
+                <button
+                  key={i}
+                  onClick={() => { if (!locked) setSelectedStage(i); }}
+                  style={{
+                    background: selectedStage === i ? `${s.color}22` : "rgba(0,0,0,0.5)",
+                    border: `2px solid ${selectedStage === i ? s.color : locked ? "#2d2d2d" : "#44403c"}`,
+                    borderRadius: 4,
+                    padding: "8px 12px",
+                    cursor: locked ? "not-allowed" : "pointer",
+                    transition: "all 0.12s",
+                    boxShadow: selectedStage === i ? `0 0 12px ${s.color}50` : "none",
+                    minWidth: 90,
+                    opacity: locked ? 0.4 : 1,
+                  }}
+                >
+                  <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 8.5, color: selectedStage === i ? s.color : locked ? "#4b5563" : "#9ca3af", marginBottom: 3 }}>{s.name}</div>
+                  {locked
+                    ? <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 6.5, color: "#4b5563" }}>LOCKED</div>
+                    : <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 6.5, color: "#6b7280" }}>{s.subtitle}</div>
+                  }
+                </button>
+              );
+            })}
           </div>
 
           {/* Controls */}
@@ -180,7 +187,6 @@ export default function MenuPage({ onMusicStart }: MenuPageProps) {
                 ["X / K", "SPIRIT BLAST"],
                 ["R", "ROCKET"],
                 ["UP+Z", "THROW ROCK"],
-                ["V", "SUMMON ALLY"],
                 ["C", "SWITCH CHAR"],
                 ["1 / 2 / 3", "ALLY ABILITY"],
               ].map(([key, action]) => (

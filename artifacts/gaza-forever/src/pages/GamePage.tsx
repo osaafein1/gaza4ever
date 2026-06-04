@@ -1223,20 +1223,6 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
         setPaused(nowOpen);
       }
 
-      // Summon
-      if (e.code === "KeyV" && p.summonCooldown <= 0) {
-        p.summonCooldown = 360;
-        const dir = p.facingRight ? 1 : -1;
-        gs.summons.push({
-          id: String(Math.random()),
-          x: p.x + p.width / 2, y: FLOOR_Y,
-          vx: dir * 7,
-          life: 180, maxLife: 180,
-          dir,
-        });
-        particlesRef.current.push({ x: p.x + p.width / 2, y: p.y - p.height, vx: 0, vy: -2, life: 40, maxLife: 40, color: "#a78bfa", text: "ALLY!", size: 14 });
-      }
-
       // Switch character
       if (e.code === "KeyC") {
         const next = (p.activeChar + 1) % CHARACTERS.length;

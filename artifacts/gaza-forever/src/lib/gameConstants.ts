@@ -88,7 +88,7 @@ export const SHOP_WEAPONS = [
   { id: "sniper",     label: "Sniper Rifle",     cost: 15,  damage: 50,  ammo: 5,  firerate: 45,  desc: "Piercing, distance scales dmg — 5 rds." },
   { id: "shotgun",    label: "AOE Shotgun",      cost: 15,  damage: 25,  ammo: 8,  firerate: 35,  desc: "Wide spread blast — 8 rounds." },
   { id: "rocket",     label: "Rocket Launcher",  cost: 18,  damage: 90,  ammo: 3,  firerate: 80,  desc: "Explosive AoE, auto-aims — 3 rds." },
-  { id: "missile",    label: "Missile Strike",   cost: 50,  damage: 200, ammo: 1,  firerate: 120, desc: "Screen-wide mushroom cloud — 1 round." },
+  { id: "missile",    label: "Missile Strike",   cost: 30,  damage: 200, ammo: 1,  firerate: 120, desc: "Screen-wide mushroom cloud — 1 round." },
 ];
 
 export const COLLECTIBLE_DEFS: Record<string, { label: string; desc: string; color: string; icon: string }> = {
