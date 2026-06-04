@@ -755,6 +755,7 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
 
   const charIndex = Number(sessionStorage.getItem("gz_char") || "0");
   const startStage = Number(sessionStorage.getItem("gz_stage") || "0");
+  const [deathCount, setDeathCount] = useState(() => Number(sessionStorage.getItem("gz_deaths") || "0"));
 
   const charName = CHARACTERS[charIndex].name.charAt(0).toUpperCase() + CHARACTERS[charIndex].name.slice(1).toLowerCase();
   const companions = CHARACTERS.filter((_, i) => i !== charIndex).map(c => c.name.charAt(0).toUpperCase() + c.name.slice(1).toLowerCase());
@@ -848,6 +849,9 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
 
   const onPlayerDie = useCallback(() => {
     if (phaseRef.current === "dead") return;
+    const newDeaths = Number(sessionStorage.getItem("gz_deaths") || "0") + 1;
+    sessionStorage.setItem("gz_deaths", String(newDeaths));
+    setDeathCount(newDeaths);
     setPhase("dead");
     phaseRef.current = "dead";
   }, []);
@@ -2114,22 +2118,49 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
               <text x="130" y="118" textAnchor="middle" fontFamily="serif" fontSize="9" fill="#9ca3af" opacity="0.5">killed since Oct 2023</text>
             </svg>
             <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 16, color: "#fbbf24" }}>SCORE: {score.toLocaleString()}</div>
-            <div style={{ display: "flex", gap: 12, marginTop: 8 }}>
+            {/* Lives indicator */}
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
+              <div style={{ display: "flex", gap: 8 }}>
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <span key={i} style={{ fontSize: 20, opacity: i < (5 - deathCount) ? 1 : 0.2 }}>❤️</span>
+                ))}
+              </div>
+              <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 9, color: deathCount >= 5 ? "#ef4444" : "#9ca3af" }}>
+                {deathCount >= 5 ? "NO LIVES LEFT — BACK TO STAGE 1" : `${5 - deathCount} ${5 - deathCount === 1 ? "LIFE" : "LIVES"} REMAINING`}
+              </div>
+            </div>
+            <div style={{ display: "flex", gap: 12, marginTop: 4 }}>
               <button
                 onClick={() => {
-                  stageIndexRef.current = stageIndex;
-                  setStageIndex(stageIndex);
+                  if (deathCount >= 5) {
+                    sessionStorage.setItem("gz_deaths", "0");
+                    sessionStorage.setItem("gz_stage", "0");
+                    sessionStorage.setItem("gz_coins", "0");
+                    setDeathCount(0);
+                    stageIndexRef.current = 0;
+                    setStageIndex(0);
+                    coinsRef.current = 0;
+                    setCoins(0);
+                    weaponInventoryRef.current = {};
+                    setWeaponInventory({});
+                  } else {
+                    stageIndexRef.current = stageIndex;
+                    setStageIndex(stageIndex);
+                  }
                   inventoryRef.current = [];
                   setInventory([]);
                   setPhase("story");
                   phaseRef.current = "story";
                 }}
-                style={{ background: "rgba(239,68,68,0.15)", border: "2px solid #ef4444", borderRadius: 4, padding: "12px 28px", cursor: "pointer", fontFamily: "'Press Start 2P', monospace", fontSize: 11, color: "#fff" }}
+                style={{ background: deathCount >= 5 ? "rgba(239,68,68,0.25)" : "rgba(239,68,68,0.15)", border: "2px solid #ef4444", borderRadius: 4, padding: "12px 28px", cursor: "pointer", fontFamily: "'Press Start 2P', monospace", fontSize: 11, color: "#fff" }}
               >
-                TRY AGAIN
+                {deathCount >= 5 ? "RESTART" : "TRY AGAIN"}
               </button>
               <button
-                onClick={() => navigate("/")}
+                onClick={() => {
+                  sessionStorage.setItem("gz_deaths", "0");
+                  navigate("/");
+                }}
                 style={{ background: "rgba(100,100,100,0.15)", border: "2px solid #6b7280", borderRadius: 4, padding: "12px 28px", cursor: "pointer", fontFamily: "'Press Start 2P', monospace", fontSize: 11, color: "#9ca3af" }}
               >
                 MENU
