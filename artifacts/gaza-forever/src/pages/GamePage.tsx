@@ -865,6 +865,7 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
     coinsRef.current += earned;
     gs.coins = coinsRef.current;
     setCoins(coinsRef.current);
+    sessionStorage.setItem("gz_coins", String(coinsRef.current));
     particlesRef.current.push({
       x: e.x + e.width / 2, y: e.y - e.height - 30, vx: 0.4, vy: -2.5,
       life: 52, maxLife: 52, color: "#fbbf24", text: `+${earned}c`, size: 12,
@@ -909,8 +910,9 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
   }, []);
 
   // ─── Coins + weapon shop state ───────────────────────────────────────────
-  const [coins, setCoins] = useState(0);
-  const coinsRef = useRef(0);
+  const savedCoins = Number(sessionStorage.getItem("gz_coins") || "0");
+  const [coins, setCoins] = useState(savedCoins);
+  const coinsRef = useRef(savedCoins);
   const [weaponInventory, setWeaponInventory] = useState<Record<string, number>>({});
   const weaponInventoryRef = useRef<Record<string, number>>({});
   const [activeWeapon, setActiveWeapon] = useState<string>("");
@@ -1571,6 +1573,7 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
                           const newInv = { ...weaponInventoryRef.current, [w.id]: (weaponInventoryRef.current[w.id] ?? 0) + w.ammo };
                           coinsRef.current = newCoins;
                           setCoins(newCoins);
+                          sessionStorage.setItem("gz_coins", String(newCoins));
                           const gs = gsRef.current;
                           if (gs) gs.coins = newCoins;
                           weaponInventoryRef.current = newInv;
