@@ -393,7 +393,9 @@ export function updateGame(gs: GameState, enemies: Enemy[], particles: Particle[
       e.attackCooldown--;
       const dist = Math.abs(p.x + p.width / 2 - (e.x + e.width / 2));
       const attackRange = e.width / 2 + p.width / 2 + 8;
-      if (dist < attackRange && e.attackCooldown <= 0 && e.state !== "hurt") {
+      // Only hit player if their feet are within the enemy's vertical body (not jumping over)
+      const yOverlap = p.y > e.y - e.height - 10;
+      if (dist < attackRange && yOverlap && e.attackCooldown <= 0 && e.state !== "hurt") {
         e.attackCooldown = 60 + Math.floor(Math.random() * 80);
         if (!p.buffs.shielded) {
           p.hp -= e.damage;
