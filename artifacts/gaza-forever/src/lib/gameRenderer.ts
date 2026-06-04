@@ -295,68 +295,52 @@ export function drawPlayer(ctx: CanvasRenderingContext2D, gs: GameState, frame: 
   // Folded keffiyeh cloth draped over the left shoulder
   const kSx = cx - 10;
   const kSy = shoulderY - 2;
+  // Shared polygon helper — covers shoulder + arm, drapes to upper chest only
+  function kPath() {
+    ctx.beginPath();
+    ctx.moveTo(kSx - 4, kSy - 1);      // left shoulder top
+    ctx.lineTo(kSx + 28, kSy);          // right (arm outer edge)
+    ctx.lineTo(kSx + 30, kSy + 7);     // right arm drape
+    ctx.lineTo(kSx + 22, kSy + 15);    // upper chest right
+    ctx.lineTo(kSx + 5,  kSy + 16);    // upper chest centre
+    ctx.lineTo(kSx - 4,  kSy + 10);    // upper chest left
+    ctx.closePath();
+  }
   // Main cloth body
   ctx.globalAlpha = 0.93;
   ctx.fillStyle = kCloth;
-  ctx.beginPath();
-  ctx.moveTo(kSx + 2, kSy);
-  ctx.lineTo(kSx + 22, kSy + 1);
-  ctx.lineTo(kSx + 24, kSy + 12);
-  ctx.lineTo(kSx + 18, kSy + 28);
-  ctx.lineTo(kSx + 7, kSy + 33);
-  ctx.lineTo(kSx - 2, kSy + 20);
-  ctx.lineTo(kSx - 3, kSy + 8);
-  ctx.closePath();
-  ctx.fill();
+  kPath(); ctx.fill();
   // Checkered grid (clipped to cloth shape)
   ctx.save();
-  ctx.beginPath();
-  ctx.moveTo(kSx + 2, kSy);
-  ctx.lineTo(kSx + 22, kSy + 1);
-  ctx.lineTo(kSx + 24, kSy + 12);
-  ctx.lineTo(kSx + 18, kSy + 28);
-  ctx.lineTo(kSx + 7, kSy + 33);
-  ctx.lineTo(kSx - 2, kSy + 20);
-  ctx.lineTo(kSx - 3, kSy + 8);
-  ctx.closePath();
-  ctx.clip();
+  kPath(); ctx.clip();
   ctx.globalAlpha = 0.16;
   ctx.strokeStyle = "#2a1a0a";
   ctx.lineWidth = 0.9;
-  for (let ky = 0; ky < 36; ky += 5) {
-    ctx.beginPath(); ctx.moveTo(kSx - 6, kSy + ky); ctx.lineTo(kSx + 28, kSy + ky); ctx.stroke();
+  for (let ky = 0; ky < 20; ky += 5) {
+    ctx.beginPath(); ctx.moveTo(kSx - 6, kSy + ky); ctx.lineTo(kSx + 34, kSy + ky); ctx.stroke();
   }
-  for (let kx2 = 0; kx2 < 32; kx2 += 5) {
-    ctx.beginPath(); ctx.moveTo(kSx - 4 + kx2, kSy - 4); ctx.lineTo(kSx - 4 + kx2, kSy + 36); ctx.stroke();
+  for (let kx2 = 0; kx2 < 38; kx2 += 5) {
+    ctx.beginPath(); ctx.moveTo(kSx - 6 + kx2, kSy - 4); ctx.lineTo(kSx - 6 + kx2, kSy + 20); ctx.stroke();
   }
   ctx.restore();
   // Character colour tint
   ctx.globalAlpha = 0.14;
   ctx.fillStyle = charDef.color;
-  ctx.beginPath();
-  ctx.moveTo(kSx + 2, kSy);
-  ctx.lineTo(kSx + 22, kSy + 1);
-  ctx.lineTo(kSx + 24, kSy + 12);
-  ctx.lineTo(kSx + 18, kSy + 28);
-  ctx.lineTo(kSx + 7, kSy + 33);
-  ctx.lineTo(kSx - 2, kSy + 20);
-  ctx.lineTo(kSx - 3, kSy + 8);
-  ctx.closePath();
-  ctx.fill();
-  // Fold crease
+  kPath(); ctx.fill();
+  // Fold crease across shoulder
   ctx.globalAlpha = 0.28;
   ctx.strokeStyle = "#988860";
   ctx.lineWidth = 1;
   ctx.lineCap = "round";
   ctx.beginPath();
-  ctx.moveTo(kSx + 1, kSy + 7);
-  ctx.quadraticCurveTo(kSx + 12, kSy + 10, kSx + 21, kSy + 6);
+  ctx.moveTo(kSx - 2, kSy + 5);
+  ctx.quadraticCurveTo(kSx + 13, kSy + 8, kSx + 26, kSy + 4);
   ctx.stroke();
-  // Fringe tassels at bottom edge
+  // Fringe tassels along lower edge
   ctx.lineWidth = 0.7;
   for (let fi = 0; fi < 6; fi++) {
-    const ffx = kSx + 3 + fi * (14 / 5);
-    ctx.beginPath(); ctx.moveTo(ffx, kSy + 30); ctx.lineTo(ffx - 1, kSy + 35); ctx.stroke();
+    const ffx = kSx + 2 + fi * (18 / 5);
+    ctx.beginPath(); ctx.moveTo(ffx, kSy + 13); ctx.lineTo(ffx - 1, kSy + 18); ctx.stroke();
   }
   ctx.globalAlpha = 1;
 
