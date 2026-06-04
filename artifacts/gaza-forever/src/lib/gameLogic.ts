@@ -1,5 +1,5 @@
 import type { GameState, Player, Enemy, Particle, Collectible, GameCallbacks } from "./gameTypes";
-import { CANVAS_W, FLOOR_Y, GRAVITY, CHARACTERS, ENEMY_DEFS, COLLECTIBLE_DEFS, STAGE_COLLECTIBLES } from "./gameConstants";
+import { CANVAS_W, CANVAS_H, FLOOR_Y, GRAVITY, CHARACTERS, ENEMY_DEFS, COLLECTIBLE_DEFS, STAGE_COLLECTIBLES } from "./gameConstants";
 
 export function createPlayer(charIndex = 0): Player {
   const c = CHARACTERS[charIndex];
@@ -690,46 +690,24 @@ export function updateGame(gs: GameState, enemies: Enemy[], particles: Particle[
       pr.trail.push({ x: pr.x, y: pr.y });
       if (pr.trail.length > 20) pr.trail.shift();
       pr.x += pr.vx; pr.y += pr.vy;
-      let missileHit = false;
-      for (const e of enemies) {
-        if (e.state === "dead") continue;
-        const hm = 32;
-        if (pr.x > e.x - hm && pr.x < e.x + e.width + hm && pr.y > e.y - e.height - hm && pr.y < e.y + hm) {
-          missileHit = true; break;
-        }
-      }
-      if (!missileHit && (pr.x < -20 || pr.x > CANVAS_W + 20 || pr.y >= FLOOR_Y || pr.y < -50)) missileHit = true;
-      if (missileHit) {
-        const ex = pr.x, ey = Math.min(pr.y, FLOOR_Y);
-        const blastR = 290;
+      // Explode at mid-screen
+      if (pr.y >= CANVAS_H / 2) {
+        const ex = CANVAS_W / 2;
+        const ey = CANVAS_H / 2;
+        // Kill ALL enemies on screen
         for (const t of enemies) {
           if (t.state === "dead") continue;
-          const tdx = t.x + t.width / 2 - ex; const tdy = t.y - t.height / 2 - ey;
-          if (Math.sqrt(tdx * tdx + tdy * tdy) < blastR) {
-            t.hp -= pr.damage; t.state = "hurt"; t.stateTimer = 30; t.vx += (tdx / (Math.abs(tdx) || 1)) * 14;
-            if (t.hp <= 0) {
-              t.state = "dead"; t.stateTimer = 0; callbacks.onEnemyDie(t, "missile");
-              gs.combo++; gs.comboTimer = 180; callbacks.onComboChange(gs.combo);
-              gs.score += 600 * gs.scoreMultiplier; callbacks.onScoreChange(gs.score);
-            }
-          }
+          t.hp = 0; t.state = "dead"; t.stateTimer = 0;
+          callbacks.onEnemyDie(t, "missile");
+          gs.combo++; gs.comboTimer = 200; callbacks.onComboChange(gs.combo);
+          gs.score += 400 * gs.scoreMultiplier; callbacks.onScoreChange(gs.score);
         }
-        // Mushroom cloud: ground hit kills ALL non-boss enemies
-        if (pr.y >= FLOOR_Y - 30) {
-          for (const mt of enemies) {
-            if (mt.state === "dead" || mt.isBoss) continue;
-            mt.hp = 0; mt.state = "dead"; mt.stateTimer = 0;
-            callbacks.onEnemyDie(mt, "missile");
-            gs.combo++; gs.comboTimer = 180; callbacks.onComboChange(gs.combo);
-            gs.score += 200 * gs.scoreMultiplier; callbacks.onScoreChange(gs.score);
-          }
+        gs.shake = Math.max(gs.shake, 50);
+        for (let j = 0; j < 80; j++) {
+          const col = j < 25 ? "#f97316" : j < 50 ? "#fbbf24" : j < 66 ? "#ef4444" : "#1c1917";
+          callbacks.onParticle({ x: ex + (Math.random() - 0.5) * 900, y: ey + (Math.random() - 0.5) * 120, vx: (Math.random() - 0.5) * 36, vy: -Math.random() * 28 - 4, life: 50 + Math.random() * 60, maxLife: 110, color: col, size: 12 + Math.random() * 26 });
         }
-        gs.shake = Math.max(gs.shake, 45);
-        for (let j = 0; j < 60; j++) {
-          const col = j < 20 ? "#f97316" : j < 38 ? "#fbbf24" : j < 52 ? "#ef4444" : "#1c1917";
-          callbacks.onParticle({ x: ex + (Math.random() - 0.5) * blastR * 0.7, y: ey + (Math.random() - 0.5) * 50, vx: (Math.random() - 0.5) * 30, vy: -Math.random() * 24 - 4, life: 45 + Math.random() * 55, maxLife: 100, color: col, size: 10 + Math.random() * 22 });
-        }
-        callbacks.onParticle({ x: ex, y: ey - 90, vx: 0, vy: -3, life: 80, maxLife: 80, color: "#ef4444", text: "💥 MISSILE!", size: 38 });
+        callbacks.onParticle({ x: ex, y: ey - 120, vx: 0, vy: -3, life: 90, maxLife: 90, color: "#ef4444", text: "💥 MISSILE!", size: 40 });
         pr.exploding = true; pr.explodeTimer = 70; pr.explodeX = ex; pr.explodeY = ey;
       }
       continue;
