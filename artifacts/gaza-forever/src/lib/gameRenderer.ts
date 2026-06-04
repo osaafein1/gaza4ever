@@ -1,4 +1,4 @@
-import type { GameState, Enemy, Particle, PowerUp, Collectible, Projectile, Summon } from "./gameTypes";
+import type { GameState, Enemy, Particle, PowerUp, Collectible, Projectile, Summon, Dog } from "./gameTypes";
 import { CANVAS_W, CANVAS_H, FLOOR_Y, CHARACTERS, COLLECTIBLE_DEFS, SHOP_WEAPONS } from "./gameConstants";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -404,6 +404,75 @@ export function drawPlayer(ctx: CanvasRenderingContext2D, gs: GameState, frame: 
       ctx.globalAlpha = 1;
     }
   }
+  // ─── DOGS ─────────────────────────────────────────────────────────────────
+  if (gs.dogs) {
+    for (const dog of gs.dogs) {
+      drawDog(ctx, dog);
+    }
+  }
+}
+
+function drawDog(ctx: CanvasRenderingContext2D, dog: Dog) {
+  const x = dog.x;
+  const fy = FLOOR_Y;
+  const hurt = dog.hurtTimer > 0;
+  const walk = dog.animTimer;
+  const legSwing = Math.sin(walk * 0.22) * 5;
+
+  ctx.save();
+  ctx.translate(x, fy);
+  if (!dog.facingRight) ctx.scale(-1, 1);
+
+  // Legs (behind body)
+  ctx.fillStyle = hurt ? "#b91c1c" : "#6b3a1f";
+  // Back legs
+  ctx.fillRect(8, -10, 8, 14 + Math.max(0, legSwing));
+  ctx.fillRect(17, -10, 8, 14 + Math.max(0, -legSwing));
+  // Front legs
+  ctx.fillRect(-20, -10, 8, 14 + Math.max(0, -legSwing));
+  ctx.fillRect(-11, -10, 8, 14 + Math.max(0, legSwing));
+
+  // Body
+  ctx.fillStyle = hurt ? "#ef4444" : "#92400e";
+  ctx.fillRect(-22, -30, 46, 22);
+
+  // Neck + head
+  ctx.fillRect(18, -40, 14, 14);
+  ctx.fillRect(20, -50, 20, 16);
+
+  // Ear
+  ctx.fillStyle = hurt ? "#dc2626" : "#57290f";
+  ctx.fillRect(20, -58, 9, 12);
+
+  // Snout
+  ctx.fillStyle = hurt ? "#b91c1c" : "#78350f";
+  ctx.fillRect(34, -46, 12, 9);
+
+  // Eye
+  ctx.fillStyle = "#fff";
+  ctx.fillRect(30, -49, 6, 5);
+  ctx.fillStyle = "#1c1917";
+  ctx.fillRect(32, -48, 3, 3);
+
+  // Tail (curled up)
+  ctx.fillStyle = hurt ? "#ef4444" : "#92400e";
+  ctx.fillRect(-26, -34, 7, 6);
+  ctx.fillRect(-30, -40, 7, 8);
+
+  ctx.restore();
+
+  // HP bar
+  const hpFrac = dog.hp / dog.maxHp;
+  const bx = x - 24;
+  const by = fy - 64;
+  ctx.fillStyle = "rgba(0,0,0,0.55)";
+  ctx.fillRect(bx - 1, by - 1, 50, 7);
+  ctx.fillStyle = hpFrac > 0.5 ? "#22c55e" : hpFrac > 0.25 ? "#f59e0b" : "#ef4444";
+  ctx.fillRect(bx, by, Math.round(48 * hpFrac), 5);
+  ctx.fillStyle = "#fff";
+  ctx.font = "bold 8px sans-serif";
+  ctx.textAlign = "center";
+  ctx.fillText("🐕", x, by - 2);
 }
 
 // ─── Enemies ─────────────────────────────────────────────────────────────────

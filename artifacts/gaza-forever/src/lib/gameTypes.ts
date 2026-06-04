@@ -78,6 +78,18 @@ export interface Summon {
   dir: number;
 }
 
+export interface Dog {
+  id: string;
+  x: number; y: number;
+  vx: number;
+  hp: number; maxHp: number;
+  damage: number;
+  attackCooldown: number;
+  animTimer: number;
+  facingRight: boolean;
+  hurtTimer: number;
+}
+
 export interface TrailPoint { x: number; y: number; }
 
 export interface Projectile {
@@ -138,6 +150,7 @@ export interface GameState {
   powerUps: PowerUp[];
   collectibles: Collectible[];
   summons: Summon[];
+  dogs: Dog[];
   projectiles: Projectile[];
   beam: Beam;
   keys: Record<string, boolean>;

@@ -14,7 +14,7 @@ import {
   drawPlayer, drawEnemy, drawParticle, drawPowerUp, drawCollectible,
   drawProjectile, drawProjectileWarnings, drawHUD,
 } from "../lib/gameRenderer";
-import type { GameState, Enemy, Particle, Summon } from "../lib/gameTypes";
+import type { GameState, Enemy, Particle, Summon, Dog } from "../lib/gameTypes";
 import { startMusic } from "../lib/music";
 
 type Phase = "story" | "playing" | "stage-clear" | "win" | "dead" | "hind-story" | "khalid-story" | "nasser-story";
@@ -706,6 +706,7 @@ function buildInitialState(charIndex: number, stageIndex: number): GameState {
     powerUps: [],
     collectibles: [],
     summons: [] as Summon[],
+    dogs: [] as Dog[],
     projectiles: [],
     beam: { active: false, x: 0, y: 0, progress: 0, facingRight: true },
     keys: {},
@@ -1225,16 +1226,6 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
         setPaused(nowOpen);
       }
 
-      // Switch character
-      if (e.code === "KeyC") {
-        const next = (p.activeChar + 1) % CHARACTERS.length;
-        const nextDef = CHARACTERS[next];
-        p.activeChar = next;
-        p.color = nextDef.color;
-        p.maxHp = nextDef.maxHp;
-        p.hp = Math.min(p.hp, p.maxHp);
-        p.charSwitchTimer = 80;
-      }
 
       // (Ally abilities removed — use shop weapons instead)
       const allyKeys: Record<string, number> = {};
@@ -1570,12 +1561,30 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
                         onClick={() => {
                           if (coins < w.cost) return;
                           const newCoins = coins - w.cost;
-                          const newInv = { ...weaponInventoryRef.current, [w.id]: (weaponInventoryRef.current[w.id] ?? 0) + w.ammo };
                           coinsRef.current = newCoins;
                           setCoins(newCoins);
                           sessionStorage.setItem("gz_coins", String(newCoins));
                           const gs = gsRef.current;
                           if (gs) gs.coins = newCoins;
+                          // Dog purchase: spawn a companion, don't add to weapon inventory
+                          if (w.id === "dog") {
+                            if (gs) {
+                              gs.dogs.push({
+                                id: String(Math.random()),
+                                x: gs.player.x - 70,
+                                y: FLOOR_Y,
+                                vx: 0,
+                                hp: 60, maxHp: 60,
+                                damage: 12,
+                                attackCooldown: 0,
+                                animTimer: 0,
+                                facingRight: true,
+                                hurtTimer: 0,
+                              } as Dog);
+                            }
+                            return;
+                          }
+                          const newInv = { ...weaponInventoryRef.current, [w.id]: (weaponInventoryRef.current[w.id] ?? 0) + w.ammo };
                           weaponInventoryRef.current = newInv;
                           setWeaponInventory({ ...newInv });
                           if (gs) gs.player.weaponAmmo = { ...newInv };

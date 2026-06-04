@@ -1,4 +1,4 @@
-import type { GameState, Player, Enemy, Particle, Collectible, GameCallbacks } from "./gameTypes";
+import type { GameState, Player, Enemy, Particle, Collectible, GameCallbacks, Dog } from "./gameTypes";
 import { CANVAS_W, CANVAS_H, FLOOR_Y, GRAVITY, CHARACTERS, ENEMY_DEFS, COLLECTIBLE_DEFS, STAGE_COLLECTIBLES } from "./gameConstants";
 
 export function createPlayer(charIndex = 0): Player {
@@ -696,13 +696,25 @@ export function updateGame(gs: GameState, enemies: Enemy[], particles: Particle[
       if (pr.y >= CANVAS_H / 2) {
         const ex = CANVAS_W / 2;
         const ey = CANVAS_H / 2;
-        // Kill ALL enemies on screen
+        // Kill ALL enemies on screen (bosses from stage 3+ are immune to insta-kill)
         for (const t of enemies) {
           if (t.state === "dead") continue;
-          t.hp = 0; t.state = "dead"; t.stateTimer = 0;
-          callbacks.onEnemyDie(t, "missile");
-          gs.combo++; gs.comboTimer = 200; callbacks.onComboChange(gs.combo);
-          gs.score += 400 * gs.scoreMultiplier; callbacks.onScoreChange(gs.score);
+          if (t.isBoss && t.type === "d9") {
+            // Final boss: half missile damage, cannot be killed by missile
+            t.hp = Math.max(1, t.hp - 100);
+            if (t.state !== "hurt") { t.state = "hurt"; t.stateTimer = 40; }
+            callbacks.onParticle({ x: t.x + t.width / 2, y: t.y - 60, vx: 0, vy: -2.5, life: 55, maxLife: 55, color: "#fbbf24", text: "½ DAMAGE!", size: 20 });
+          } else if (t.isBoss && (t.type === "bomb_plane_mini" || t.type === "bomb_plane_large")) {
+            // Stage 3-4 bosses: take missile damage but survive at 1 HP
+            t.hp = Math.max(1, t.hp - 200);
+            if (t.state !== "hurt") { t.state = "hurt"; t.stateTimer = 40; }
+            callbacks.onParticle({ x: t.x + t.width / 2, y: t.y - 60, vx: 0, vy: -2.5, life: 55, maxLife: 55, color: "#fbbf24", text: "IMMUNE!", size: 20 });
+          } else {
+            t.hp = 0; t.state = "dead"; t.stateTimer = 0;
+            callbacks.onEnemyDie(t, "missile");
+            gs.combo++; gs.comboTimer = 200; callbacks.onComboChange(gs.combo);
+            gs.score += 400 * gs.scoreMultiplier; callbacks.onScoreChange(gs.score);
+          }
         }
         gs.shake = Math.max(gs.shake, 50);
         for (let j = 0; j < 80; j++) {
@@ -754,6 +766,19 @@ export function updateGame(gs: GameState, enemies: Enemy[], particles: Particle[
           callbacks.onParticle({ x: p.x + p.width / 2, y: p.y - p.height / 2, vx: 0, vy: -2, life: 30, maxLife: 30, color: "#22d3ee", text: "BLOCKED!", size: 16 });
         }
       }
+      // Drone bombs also damage nearby ground enemies (friendly fire)
+      if (pr.type === "bomb") {
+        for (const fe of enemies) {
+          if (fe.state === "dead") continue;
+          const fex = fe.x + fe.width / 2; const fey = fe.y - fe.height / 2;
+          const ffdx = fex - ex; const ffdy = fey - ey;
+          if (Math.sqrt(ffdx * ffdx + ffdy * ffdy) < blastR) {
+            fe.hp -= pr.damage;
+            if (fe.state !== "hurt" && fe.state !== "dead") { fe.state = "hurt"; fe.stateTimer = 20; }
+            if (fe.hp <= 0) { fe.hp = 0; fe.state = "dead"; fe.stateTimer = 0; callbacks.onEnemyDie(fe, "bomb"); }
+          }
+        }
+      }
     };
 
     if (pr.y >= FLOOR_Y) { doExplode(pr.x, FLOOR_Y); continue; }
@@ -761,6 +786,54 @@ export function updateGame(gs: GameState, enemies: Enemy[], particles: Particle[
     const hitR = pr.type === "hellfire" ? 26 : 18;
     const pdx = p.x + p.width / 2 - pr.x; const pdy = p.y - p.height / 2 - pr.y;
     if (Math.sqrt(pdx * pdx + pdy * pdy) < hitR) { doExplode(pr.x, pr.y); continue; }
+  }
+
+  // ─── Dog companions ───────────────────────────────────────────────────────
+  if (gs.dogs) {
+    for (let di = gs.dogs.length - 1; di >= 0; di--) {
+      const dog: Dog = gs.dogs[di];
+      dog.animTimer++;
+      if (dog.hurtTimer > 0) dog.hurtTimer--;
+      if (dog.attackCooldown > 0) dog.attackCooldown--;
+      // Find nearest living enemy
+      let nearest: Enemy | null = null;
+      let nearDist = Infinity;
+      for (const e of enemies) {
+        if (e.state === "dead") continue;
+        const edx = Math.abs((e.x + e.width / 2) - dog.x);
+        if (edx < nearDist) { nearDist = edx; nearest = e; }
+      }
+      if (nearest) {
+        const tx = nearest.x + nearest.width / 2;
+        const dx = tx - dog.x;
+        const attackRange = nearest.width / 2 + 30;
+        if (Math.abs(dx) > attackRange) {
+          dog.vx = dx > 0 ? 2.8 : -2.8;
+          dog.facingRight = dx > 0;
+        } else {
+          dog.vx = 0;
+          if (dog.attackCooldown <= 0) {
+            dog.attackCooldown = 55;
+            nearest.hp -= dog.damage;
+            if (nearest.state !== "hurt" && nearest.state !== "dead") { nearest.state = "hurt"; nearest.stateTimer = 18; }
+            if (nearest.hp <= 0) {
+              nearest.hp = 0; nearest.state = "dead"; nearest.stateTimer = 0;
+              callbacks.onEnemyDie(nearest, "dog");
+            }
+          }
+        }
+      } else {
+        const dpx = p.x + p.width / 2 - dog.x;
+        dog.vx = Math.abs(dpx) > 70 ? (dpx > 0 ? 2.0 : -2.0) : 0;
+        dog.facingRight = dpx >= 0;
+      }
+      dog.x += dog.vx;
+      dog.x = Math.max(20, Math.min(CANVAS_W - 20, dog.x));
+      if (dog.hp <= 0) {
+        callbacks.onParticle({ x: dog.x, y: FLOOR_Y - 30, vx: 0, vy: -2.5, life: 50, maxLife: 50, color: "#ef4444", text: "DOG DOWN!", size: 16 });
+        gs.dogs.splice(di, 1);
+      }
+    }
   }
 
   for (let i = particles.length - 1; i >= 0; i--) {

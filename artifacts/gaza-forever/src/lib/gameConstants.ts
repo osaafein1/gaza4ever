@@ -81,6 +81,7 @@ export const STAGE_DEFS = [
 ];
 
 export const SHOP_WEAPONS = [
+  { id: "dog",        label: "War Dog",          cost: 3,   damage: 12,  ammo: 1,  firerate: 0,   desc: "Loyal companion — attacks enemies. Can die." },
   { id: "pistol",     label: "Pistol",          cost: 5,   damage: 25,  ammo: 20, firerate: 18,  desc: "Light sidearm — 20 rounds." },
   { id: "m16",        label: "M16 Rifle",        cost: 12,  damage: 20,  ammo: 30, firerate: 8,   desc: "Rapid semi-auto — 30 rounds." },
   { id: "grenade",    label: "Grenade",          cost: 8,   damage: 65,  ammo: 3,  firerate: 60,  desc: "Area explosion — 3 grenades." },
