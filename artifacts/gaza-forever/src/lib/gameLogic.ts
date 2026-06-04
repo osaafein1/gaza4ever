@@ -795,18 +795,27 @@ export function updateGame(gs: GameState, enemies: Enemy[], particles: Particle[
       dog.animTimer++;
       if (dog.hurtTimer > 0) dog.hurtTimer--;
       if (dog.attackCooldown > 0) dog.attackCooldown--;
-      // Find nearest living enemy
+      // Dog stays within a short leash ahead of the player
+      const leash = 110; // max px ahead of player the dog will wander
+      const pCenterX = p.x + p.width / 2;
+      const aheadDir = p.facingRight ? 1 : -1;
+      const leashTarget = pCenterX + aheadDir * 70; // ideal spot: 70px ahead
+      const leashMin = Math.min(pCenterX, leashTarget) - 20;
+      const leashMax = Math.max(pCenterX, leashTarget) + 20;
+
+      // Only attack enemies that are already within the leash zone
       let nearest: Enemy | null = null;
       let nearDist = Infinity;
       for (const e of enemies) {
         if (e.state === "dead") continue;
-        const edx = Math.abs((e.x + e.width / 2) - dog.x);
-        if (edx < nearDist) { nearDist = edx; nearest = e; }
+        const ecx = e.x + e.width / 2;
+        const edx = Math.abs(ecx - dog.x);
+        if (edx < leash && edx < nearDist) { nearDist = edx; nearest = e; }
       }
       if (nearest) {
         const tx = nearest.x + nearest.width / 2;
         const dx = tx - dog.x;
-        const attackRange = nearest.width / 2 + 30;
+        const attackRange = nearest.width / 2 + 28;
         if (Math.abs(dx) > attackRange) {
           dog.vx = dx > 0 ? 2.8 : -2.8;
           dog.facingRight = dx > 0;
@@ -823,9 +832,11 @@ export function updateGame(gs: GameState, enemies: Enemy[], particles: Particle[
           }
         }
       } else {
-        const dpx = p.x + p.width / 2 - dog.x;
-        dog.vx = Math.abs(dpx) > 70 ? (dpx > 0 ? 2.0 : -2.0) : 0;
-        dog.facingRight = dpx >= 0;
+        // No enemy nearby — drift to leash target, clamp within leash zone
+        const clamped = Math.max(leashMin, Math.min(leashMax, dog.x));
+        const dpx = clamped - dog.x;
+        dog.vx = Math.abs(dpx) > 10 ? (dpx > 0 ? 2.0 : -2.0) : 0;
+        dog.facingRight = aheadDir > 0;
       }
       dog.x += dog.vx;
       dog.x = Math.max(20, Math.min(CANVAS_W - 20, dog.x));

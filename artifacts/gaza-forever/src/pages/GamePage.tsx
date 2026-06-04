@@ -1574,7 +1574,7 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
                                 x: gs.player.x - 70,
                                 y: FLOOR_Y,
                                 vx: 0,
-                                hp: 60, maxHp: 60,
+                                hp: 180, maxHp: 180,
                                 damage: 12,
                                 attackCooldown: 0,
                                 animTimer: 0,
