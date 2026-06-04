@@ -1523,9 +1523,9 @@ export function drawHUD(ctx: CanvasRenderingContext2D, gs: GameState) {
   }
 
   // Controls reminder (bottom)
-  ctx.fillStyle = "rgba(0,0,0,0.5)";
-  ctx.fillRect(0, CANVAS_H - 18, CANVAS_W, 18);
-  ctx.fillStyle = "#6b7280";
-  ctx.font = "6.5px 'Press Start 2P', monospace"; ctx.textAlign = "center";
-  ctx.fillText("ARROWS/WASD:MOVE  SPACE/UP:JUMP  Z/J:PUNCH  X/K:THROW ROCK  F:FIRE WEAPON  B:SHOP  V:SUMMON  C:SWITCH CHAR", CANVAS_W / 2, CANVAS_H - 5);
+  ctx.fillStyle = "rgba(0,0,0,0.72)";
+  ctx.fillRect(0, CANVAS_H - 24, CANVAS_W, 24);
+  ctx.fillStyle = "#d1d5db";
+  ctx.font = "8px 'Press Start 2P', monospace"; ctx.textAlign = "center";
+  ctx.fillText("MOVE:ARROWS/WASD  JUMP:SPACE  ATTACK:Z  BLAST:X  ROCK:UP+Z  ROCKET:R  WEAPON:F  SHOP:B", CANVAS_W / 2, CANVAS_H - 8);
 }
