@@ -408,6 +408,16 @@ export function updateGame(gs: GameState, enemies: Enemy[], particles: Particle[
           callbacks.onParticle({ x: p.x + p.width / 2, y: p.y - p.height / 2, vx: 0, vy: -2, life: 30, maxLife: 30, color: "#22d3ee", text: "BLOCKED!", size: 16 });
         }
       }
+      // Enemy melee also damages dogs in range (severe: 3× damage)
+      if (gs.dogs && e.state !== "hurt") {
+        for (const dog of gs.dogs) {
+          const dogMeleeDist = Math.abs((e.x + e.width / 2) - dog.x);
+          if (dogMeleeDist < e.width / 2 + 30) {
+            dog.hp -= Math.round(e.damage * 3);
+            dog.hurtTimer = 25;
+          }
+        }
+      }
       // Soldiers and marksmen fire bullets every 6 seconds (360 frames)
       if ((e.type === "soldier" || e.type === "marksman" || e.type === "armored") && dist < 520 && e.state !== "hurt" && e.animTimer > 120 && e.animTimer % 360 === 0) {
         const dir = p.x + p.width / 2 > e.x + e.width / 2 ? 1 : -1;
@@ -615,6 +625,13 @@ export function updateGame(gs: GameState, enemies: Enemy[], particles: Particle[
           callbacks.onParticle({ x: p.x + p.width / 2, y: p.y - p.height / 2, vx: 0, vy: -2, life: 30, maxLife: 30, color: "#22d3ee", text: "BLOCKED!", size: 16 });
         }
       }
+      // Tank rocket also hits dogs (severe: 2.5× damage)
+      if (gs.dogs) {
+        for (const dog of gs.dogs) {
+          const dHit = pr.x > dog.x - 28 && pr.x < dog.x + 28 && pr.y > FLOOR_Y - 55 && pr.y < FLOOR_Y + 5;
+          if (dHit) { dog.hp -= Math.round(pr.damage * 2.5); dog.hurtTimer = 30; }
+        }
+      }
       if (pHit || pr.x < -30 || pr.x > CANVAS_W + 30) {
         const ex = pr.x, ey = pr.y;
         gs.shake = Math.max(gs.shake, 16);
@@ -642,6 +659,14 @@ export function updateGame(gs: GameState, enemies: Enemy[], particles: Particle[
         }
         gs.projectiles.splice(i, 1);
         continue;
+      }
+      // Soldier bullet also hits dogs (severe: 3× damage)
+      if (gs.dogs) {
+        for (let di = gs.dogs.length - 1; di >= 0; di--) {
+          const dog = gs.dogs[di];
+          const dHitSB = pr.x > dog.x - 26 && pr.x < dog.x + 26 && pr.y > FLOOR_Y - 55 && pr.y < FLOOR_Y + 5;
+          if (dHitSB) { dog.hp -= Math.round(pr.damage * 3); dog.hurtTimer = 25; gs.projectiles.splice(i, 1); break; }
+        }
       }
       if (pr.x < -40 || pr.x > CANVAS_W + 40) gs.projectiles.splice(i, 1);
       continue;
@@ -776,6 +801,16 @@ export function updateGame(gs: GameState, enemies: Enemy[], particles: Particle[
             fe.hp -= pr.damage;
             if (fe.state !== "hurt" && fe.state !== "dead") { fe.state = "hurt"; fe.stateTimer = 20; }
             if (fe.hp <= 0) { fe.hp = 0; fe.state = "dead"; fe.stateTimer = 0; callbacks.onEnemyDie(fe, "bomb"); }
+          }
+        }
+      }
+      // AoE explosions also hit dogs (severe: 2.5× damage)
+      if (gs.dogs) {
+        for (const dog of gs.dogs) {
+          const ddx = dog.x - ex; const ddy = FLOOR_Y - 25 - ey;
+          if (Math.sqrt(ddx * ddx + ddy * ddy) < blastR) {
+            dog.hp -= Math.round(pr.damage * 2.5);
+            dog.hurtTimer = 30;
           }
         }
       }
