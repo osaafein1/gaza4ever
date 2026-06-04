@@ -177,22 +177,22 @@ export default function MenuPage({ onMusicStart }: MenuPageProps) {
           </div>
 
           {/* Controls */}
-          <div style={{ background: "rgba(0,0,0,0.6)", border: "1px solid #292524", borderRadius: 4, padding: "8px 14px", marginBottom: 14, maxWidth: 520, width: "100%" }}>
-            <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 7.5, color: "#9ca3af", marginBottom: 6, textAlign: "center" }}>CONTROLS</div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "3px 12px" }}>
+          <div style={{ background: "rgba(0,0,0,0.75)", border: "2px solid #44403c", borderRadius: 6, padding: "12px 20px", marginBottom: 14, maxWidth: 540, width: "100%" }}>
+            <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 11, color: "#e5e7eb", marginBottom: 10, textAlign: "center", letterSpacing: 2 }}>CONTROLS</div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "7px 20px" }}>
               {[
-                ["ARROWS/WASD", "MOVE"],
-                ["SPACE", "JUMP"],
-                ["Z / J", "ATTACK"],
+                ["ARROWS / WASD", "MOVE"],
+                ["SPACE / W", "JUMP"],
+                ["Z / J", "MELEE ATTACK"],
                 ["X / K", "SPIRIT BLAST"],
+                ["UP + Z", "THROW ROCK"],
                 ["R", "ROCKET"],
-                ["UP+Z", "THROW ROCK"],
-                ["C", "SWITCH CHAR"],
-                ["1 / 2 / 3", "ALLY ABILITY"],
+                ["F", "FIRE WEAPON"],
+                ["B", "OPEN SHOP"],
               ].map(([key, action]) => (
-                <div key={key} style={{ display: "flex", gap: 6, alignItems: "center" }}>
-                  <span style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 7, color: "#fbbf24", whiteSpace: "nowrap" }}>{key}</span>
-                  <span style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 7, color: "#6b7280", whiteSpace: "nowrap" }}>— {action}</span>
+                <div key={key} style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                  <span style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 9, color: "#fbbf24", whiteSpace: "nowrap", minWidth: 90, textAlign: "right" }}>{key}</span>
+                  <span style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 9, color: "#d1d5db", whiteSpace: "nowrap" }}>— {action}</span>
                 </div>
               ))}
             </div>
