@@ -2119,8 +2119,8 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
             <div style={{ display: "flex", gap: 12, marginTop: 8 }}>
               <button
                 onClick={() => {
-                  stageIndexRef.current = startStage;
-                  setStageIndex(startStage);
+                  stageIndexRef.current = stageIndex;
+                  setStageIndex(stageIndex);
                   inventoryRef.current = [];
                   setInventory([]);
                   setPhase("story");
