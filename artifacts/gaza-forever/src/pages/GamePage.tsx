@@ -1686,13 +1686,9 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
         {phase === "story" && (
           <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.95)", display: "flex", flexDirection: "column", overflowY: "auto" }}>
             <FlagBar />
-            <div style={{ display: "flex", flex: 1, gap: 0 }}>
-              {/* Map */}
-              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "12px 16px", borderRight: "1px solid #292524", minWidth: 150 }}>
-                <GazaMap currentStage={stageIndex} />
-              </div>
-              {/* Story content */}
-              <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "20px 28px", gap: 12 }}>
+            <div style={{ display: "flex", flex: 1 }}>
+              {/* Story content — full width, centered */}
+              <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "20px 40px", gap: 12 }}>
                 <div style={{ textAlign: "center" }}>
                   <div style={{ fontFamily: "'Noto Sans Arabic', 'Arial', sans-serif", fontSize: 48, color: stageData2.color, textShadow: `0 0 28px ${stageData2.color}70`, lineHeight: 1.2, direction: "rtl", letterSpacing: 2 }}>
                     {STAGE_ARABIC[stageIndex]}
