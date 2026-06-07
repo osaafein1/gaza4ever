@@ -77,14 +77,9 @@ export default function MenuPage({ onMusicStart }: MenuPageProps) {
     >
       <FlagBar />
 
-      <div style={{ display: "flex", width: "100%", maxWidth: 960, padding: "8px 12px", gap: 16, flex: 1 }}>
-        {/* Left: Gaza Map */}
-        <div style={{ flexShrink: 0, display: "flex", flexDirection: "column", alignItems: "center", paddingTop: 8 }}>
-          <GazaMap currentStage={selectedStage} />
-        </div>
-
-        {/* Right: Content */}
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center" }}>
+      <div style={{ display: "flex", width: "100%", maxWidth: 960, padding: "8px 12px", flex: 1, justifyContent: "center" }}>
+        {/* Centered content */}
+        <div style={{ width: "100%", maxWidth: 580, display: "flex", flexDirection: "column", alignItems: "center" }}>
           {/* Title */}
           <div style={{ textAlign: "center", marginBottom: 10, marginTop: 4 }}>
             <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 10, color: "#dc2626", textShadow: "0 0 20px #dc262660", letterSpacing: 2, lineHeight: 1.6 }}>ESCAPE</div>
