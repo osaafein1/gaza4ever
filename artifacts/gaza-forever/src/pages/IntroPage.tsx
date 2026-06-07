@@ -256,8 +256,10 @@ export default function IntroPage({ onMusicStart }: IntroPageProps) {
           ref={containerRef}
           style={{
             position: "absolute",
-            left: "50%",
-            transform: "translateX(-50%) translateY(100vh)",
+            left: 0,
+            right: 0,
+            margin: "0 auto",
+            transform: "translateY(100vh)",
             width: "min(720px, 78vw)",
             display: "flex",
             flexDirection: "column",
