@@ -16,6 +16,7 @@ import {
 } from "../lib/gameRenderer";
 import type { GameState, Enemy, Particle, Summon, Dog } from "../lib/gameTypes";
 import { startMusic } from "../lib/music";
+import TouchControls from "../components/TouchControls";
 
 type Phase = "story" | "playing" | "stage-clear" | "win" | "dead" | "hind-story" | "khalid-story" | "nasser-story";
 
@@ -856,6 +857,10 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
     phaseRef.current = "dead";
   }, []);
 
+  // ─── Mobile detection ────────────────────────────────────────────────────
+  const isMobile = typeof window !== "undefined" &&
+    (navigator.maxTouchPoints > 0 || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent));
+
   const onEnemyDie = useCallback((e: Enemy, killedBy?: string) => {
     const gs = gsRef.current;
     if (!gs) return;
@@ -925,6 +930,133 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
   const [shopOpen, setShopOpen] = useState(false);
   const shopOpenRef = useRef(false);
 
+  // ─── Touch action callbacks (after state declarations) ───────────────────
+  const touchJump = useCallback(() => {
+    const gs = gsRef.current;
+    if (!gs || phaseRef.current !== "playing" || pausedRef.current) return;
+    const p = gs.player;
+    if (!p.isJumping) {
+      p.vy = -18;
+      p.isJumping = true;
+      p.canDoubleJump = true;
+    } else if (p.canDoubleJump) {
+      p.vy = -28;
+      p.canDoubleJump = false;
+    }
+  }, []);
+
+  const touchAttack = useCallback(() => {
+    const gs = gsRef.current;
+    if (!gs || phaseRef.current !== "playing" || pausedRef.current) return;
+    const p = gs.player;
+    if (!p.isAttacking) {
+      p.isAttacking = true;
+      p.attackTimer = 22;
+    }
+  }, []);
+
+  const touchBlast = useCallback(() => {
+    const gs = gsRef.current;
+    if (!gs || phaseRef.current !== "playing" || pausedRef.current) return;
+    const p = gs.player;
+    if (p.rockCooldown > 0) return;
+    p.rockCooldown = 120;
+    const vx = p.facingRight ? 12 : -12;
+    gs.projectiles.push({
+      id: String(Math.random()), type: "rock",
+      x: p.x + p.width / 2, y: p.y - p.height + 10,
+      vx, vy: -10,
+      targetX: p.x + vx * 20, targetY: FLOOR_Y,
+      damage: 45, trail: [], life: 220, maxLife: 220,
+      warned: true, warnTimer: 0, warnMaxTimer: 0,
+      exploding: false, explodeTimer: 0, explodeX: 0, explodeY: 0,
+    });
+  }, []);
+
+  const touchFireWeapon = useCallback(() => {
+    const gs = gsRef.current;
+    if (!gs || phaseRef.current !== "playing" || pausedRef.current) return;
+    const p = gs.player;
+    if (p.weaponCooldown > 0 || !p.activeWeapon) return;
+    const wDef = SHOP_WEAPONS.find(w => w.id === p.activeWeapon);
+    if (!wDef) return;
+    const curAmmo = p.weaponAmmo[p.activeWeapon] ?? 0;
+    if (curAmmo <= 0) return;
+    p.weaponAmmo[p.activeWeapon]--;
+    weaponInventoryRef.current = { ...p.weaponAmmo };
+    setWeaponInventory({ ...p.weaponAmmo });
+    p.weaponCooldown = wDef.firerate;
+    const launchX = p.x + p.width / 2;
+    const launchY = p.y - p.height / 2;
+    const dir = p.facingRight ? 1 : -1;
+    const aimUp = gs.keys["ArrowUp"] || gs.keys["KeyW"];
+    if (p.activeWeapon === "pistol" || p.activeWeapon === "m16" || p.activeWeapon === "machinegun") {
+      const bvx = aimUp ? dir * 14.14 : dir * 20;
+      const bvy = aimUp ? -14.14 : 0;
+      gs.projectiles.push({ id: String(Math.random()), type: "bullet", x: launchX, y: launchY, vx: bvx, vy: bvy, targetX: 0, targetY: 0, damage: wDef.damage, trail: [], life: 90, maxLife: 90, warned: true, warnTimer: 0, warnMaxTimer: 0, exploding: false, explodeTimer: 0, explodeX: 0, explodeY: 0, sourceWeapon: p.activeWeapon });
+    } else if (p.activeWeapon === "sniper") {
+      const svx = aimUp ? dir * 21.2 : dir * 30;
+      const svy = aimUp ? -21.2 : 0;
+      gs.projectiles.push({ id: String(Math.random()), type: "sniper_shot", x: launchX, y: launchY, vx: svx, vy: svy, targetX: launchX, targetY: 0, damage: wDef.damage, trail: [], life: 70, maxLife: 70, warned: true, warnTimer: 0, warnMaxTimer: 0, exploding: false, explodeTimer: 0, explodeX: 0, explodeY: 0, sourceWeapon: "sniper" });
+    } else if (p.activeWeapon === "shotgun") {
+      for (let sp = 0; sp < 6; sp++) {
+        let sgvx: number, sgvy: number;
+        if (aimUp) {
+          const angle = -Math.PI / 2 + (sp - 2.5) * (Math.PI / 7.5);
+          sgvx = Math.cos(angle) * 18;
+          sgvy = Math.sin(angle) * 18;
+        } else {
+          sgvx = dir * 18;
+          sgvy = (sp - 2.5) * 1.8;
+        }
+        gs.projectiles.push({ id: String(Math.random()), type: "bullet", x: launchX, y: launchY, vx: sgvx, vy: sgvy, targetX: 0, targetY: 0, damage: wDef.damage, trail: [], life: 55, maxLife: 55, warned: true, warnTimer: 0, warnMaxTimer: 0, exploding: false, explodeTimer: 0, explodeX: 0, explodeY: 0, sourceWeapon: "shotgun" });
+      }
+    } else if (p.activeWeapon === "missile") {
+      gs.projectiles.push({ id: String(Math.random()), type: "missile", x: 640, y: -80, vx: 0, vy: 16, targetX: 0, targetY: 0, damage: wDef.damage, trail: [], life: 500, maxLife: 500, warned: true, warnTimer: 0, warnMaxTimer: 0, exploding: false, explodeTimer: 0, explodeX: 0, explodeY: 0, sourceWeapon: "missile" });
+    } else if (p.activeWeapon === "grenade") {
+      const gvx = aimUp ? dir * 4 : dir * 10;
+      const gvy = aimUp ? -18 : -12;
+      gs.projectiles.push({ id: String(Math.random()), type: "grenade_player", x: launchX, y: launchY, vx: gvx, vy: gvy, targetX: 0, targetY: 0, damage: wDef.damage, trail: [], life: 220, maxLife: 220, warned: true, warnTimer: 0, warnMaxTimer: 0, exploding: false, explodeTimer: 0, explodeX: 0, explodeY: 0, sourceWeapon: "grenade" });
+    } else if (p.activeWeapon === "rocket") {
+      const AERIAL = ["drone", "apache", "warplane", "bomb_plane_mini", "bomb_plane_large"];
+      const aerials = gs.enemies.filter(en => AERIAL.includes(en.type) && en.state !== "dead");
+      const liveEnemies = gs.enemies.filter(en => en.state !== "dead");
+      const targets = aerials.length > 0 ? aerials : liveEnemies;
+      let aimVx = aimUp ? 0 : dir * 10;
+      let aimVy = -16;
+      if (targets.length > 0) {
+        const nearest = targets.reduce((best, en) => {
+          const d = Math.hypot(en.x + en.width / 2 - launchX, en.y - en.height / 2 - launchY);
+          const bd = Math.hypot(best.x + best.width / 2 - launchX, best.y - best.height / 2 - launchY);
+          return d < bd ? en : best;
+        });
+        const dx = nearest.x + nearest.width / 2 - launchX;
+        const dy = nearest.y - nearest.height / 2 - launchY;
+        const dist = Math.hypot(dx, dy) || 1;
+        aimVx = (dx / dist) * 16;
+        aimVy = (dy / dist) * 16;
+      }
+      gs.projectiles.push({ id: String(Math.random()), type: "rocket", x: launchX, y: launchY, vx: aimVx, vy: aimVy, targetX: 0, targetY: 0, damage: wDef.damage, trail: [], life: 280, maxLife: 280, warned: true, warnTimer: 0, warnMaxTimer: 0, exploding: false, explodeTimer: 0, explodeX: 0, explodeY: 0, sourceWeapon: "rocket" });
+    }
+    if ((p.weaponAmmo[p.activeWeapon] ?? 0) <= 0) {
+      delete p.weaponAmmo[p.activeWeapon];
+      delete weaponInventoryRef.current[p.activeWeapon];
+      p.activeWeapon = "";
+      activeWeaponRef.current = "";
+      setActiveWeapon("");
+      setWeaponInventory({ ...weaponInventoryRef.current });
+    }
+  }, [setWeaponInventory, setActiveWeapon]);
+
+  const touchShop = useCallback(() => {
+    if (phaseRef.current !== "playing") return;
+    const nowOpen = !shopOpenRef.current;
+    shopOpenRef.current = nowOpen;
+    setShopOpen(nowOpen);
+    pausedRef.current = nowOpen;
+    setPaused(nowOpen);
+  }, [setShopOpen, setPaused]);
+
   const [score, setScore] = useState(0);
   const [combo, setCombo] = useState(0);
   const [allyCD, setAllyCD] = useState<[number, number, number]>([0, 0, 0]);
@@ -934,6 +1066,49 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
   const showKhalidRef = useRef(startStage === 2);
   const [nasserPage, setNasserPage] = useState(0);
   const showNasserRef = useRef(startStage === 3);
+
+  const touchAdvance = useCallback(() => {
+    const ph = phaseRef.current;
+    if (ph === "story") {
+      setStoryLine((prev) => {
+        const lines = STORIES[stageIndexRef.current] || [];
+        if (prev < lines.length - 1) return prev + 1;
+        startStageGame(stageIndexRef.current);
+        return 0;
+      });
+    } else if (ph === "hind-story") {
+      setHindPage((prev) => {
+        if (prev < HIND_PAGES.length - 1) return prev + 1;
+        setPhase("story"); phaseRef.current = "story"; return 0;
+      });
+    } else if (ph === "khalid-story") {
+      setKhalidPage((prev) => {
+        if (prev < KHALID_PAGES.length - 1) return prev + 1;
+        setPhase("story"); phaseRef.current = "story"; return 0;
+      });
+    } else if (ph === "nasser-story") {
+      setNasserPage((prev) => {
+        if (prev < NASSER_PAGES.length - 1) return prev + 1;
+        setPhase("story"); phaseRef.current = "story"; return 0;
+      });
+    } else if (ph === "stage-clear") {
+      const next = stageIndexRef.current + 1;
+      if (next >= STAGE_DEFS.length) {
+        setPhase("win"); phaseRef.current = "win";
+      } else {
+        if (next === 1) showHindRef.current = true;
+        if (next === 2) showKhalidRef.current = true;
+        if (next === 3) showNasserRef.current = true;
+        stageIndexRef.current = next;
+        setStageIndex(next);
+        setStoryLine(0);
+        setPhase("story"); phaseRef.current = "story";
+      }
+    } else if (ph === "dead" || ph === "win") {
+      navigate("/");
+    }
+  }, [startStageGame, navigate, setStageIndex]);
+
   const [waveKills, setWaveKills] = useState(0);
   const [waveTarget, setWaveTarget] = useState(0);
   const [waveNum, setWaveNum] = useState(0);
@@ -1447,6 +1622,18 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
           style={{ display: "block", width: "100%", height: "100%", imageRendering: "pixelated" }}
         />
 
+        {/* Mobile touch controls */}
+        {isMobile && phase === "playing" && !paused && (
+          <TouchControls
+            gsRef={gsRef}
+            onJump={touchJump}
+            onAttack={touchAttack}
+            onBlast={touchBlast}
+            onFire={touchFireWeapon}
+            onShop={touchShop}
+          />
+        )}
+
         {/* Stage banner + pause/exit buttons */}
         {phase === "playing" && (
           <>
@@ -1684,7 +1871,7 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
 
         {/* Story screen */}
         {phase === "story" && (
-          <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.95)", display: "flex", flexDirection: "column", overflowY: "auto" }}>
+          <div onClick={isMobile ? touchAdvance : undefined} style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.95)", display: "flex", flexDirection: "column", overflowY: "auto", cursor: isMobile ? "pointer" : "default" }}>
             <FlagBar />
             <div style={{ display: "flex", flex: 1 }}>
               {/* Story content — full width, centered */}
@@ -1722,7 +1909,9 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
                 )}
 
                 <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 13, color: "#fbbf24", animation: "blink 1.1s step-end infinite" }}>
-                  {storyLine < storyLines.length - 1 ? "SPACE / ENTER  ▶  NEXT" : "SPACE / ENTER  ▶  BEGIN"}
+                  {storyLine < storyLines.length - 1
+                    ? (isMobile ? "TAP  ▶  NEXT" : "SPACE / ENTER  ▶  NEXT")
+                    : (isMobile ? "TAP  ▶  BEGIN" : "SPACE / ENTER  ▶  BEGIN")}
                 </div>
 
                 {/* Dot indicators */}
@@ -1743,7 +1932,7 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
           const isLast = hindPage === HIND_PAGES.length - 1;
           const isFirst = hindPage === 0;
           return (
-            <div style={{ position: "absolute", inset: 0, background: "#0a0505", display: "flex", flexDirection: "column", overflow: "hidden" }}>
+            <div onClick={isMobile ? touchAdvance : undefined} style={{ position: "absolute", inset: 0, background: "#0a0505", display: "flex", flexDirection: "column", overflow: "hidden", cursor: isMobile ? "pointer" : "default" }}>
               <FlagBar />
 
               {/* ── Portrait page ── */}
@@ -1815,7 +2004,7 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
           const isLast = khalidPage === KHALID_PAGES.length - 1;
           const isFirst = khalidPage === 0;
           return (
-            <div style={{ position: "absolute", inset: 0, background: "#030a03", display: "flex", flexDirection: "column", overflow: "hidden" }}>
+            <div onClick={isMobile ? touchAdvance : undefined} style={{ position: "absolute", inset: 0, background: "#030a03", display: "flex", flexDirection: "column", overflow: "hidden", cursor: isMobile ? "pointer" : "default" }}>
               <FlagBar />
 
               {/* ── Portrait page ── */}
@@ -1887,7 +2076,7 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
           const isLast = nasserPage === NASSER_PAGES.length - 1;
           const isFirst = nasserPage === 0;
           return (
-            <div style={{ position: "absolute", inset: 0, background: "#080404", display: "flex", flexDirection: "column", overflow: "hidden" }}>
+            <div onClick={isMobile ? touchAdvance : undefined} style={{ position: "absolute", inset: 0, background: "#080404", display: "flex", flexDirection: "column", overflow: "hidden", cursor: isMobile ? "pointer" : "default" }}>
               <FlagBar />
 
               {/* ── Hospital intro page (illustration left, text right) ── */}
@@ -1956,7 +2145,7 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
 
         {/* Stage clear screen */}
         {phase === "stage-clear" && (
-          <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.95)", display: "flex", flexDirection: "column" }}>
+          <div onClick={isMobile ? touchAdvance : undefined} style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.95)", display: "flex", flexDirection: "column", cursor: isMobile ? "pointer" : "default" }}>
             <FlagBar />
             <div style={{ flex: 1, display: "flex" }}>
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "12px 16px", borderRight: "1px solid #292524", minWidth: 150 }}>
@@ -2017,7 +2206,7 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
 
         {/* Win screen */}
         {phase === "win" && (
-          <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.97)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 14, padding: 40, overflowY: "auto" }}>
+          <div onClick={isMobile ? touchAdvance : undefined} style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.97)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 14, padding: 40, overflowY: "auto", cursor: isMobile ? "pointer" : "default" }}>
             <FlagBar />
             <GazaMap currentStage={4} />
             <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 20, color: "#22c55e", textShadow: "0 0 30px #22c55e", textAlign: "center", letterSpacing: 2 }}>YOU ESCAPED!</div>
@@ -2043,7 +2232,7 @@ export default function GamePage({ onMusicStart }: GamePageProps) {
 
         {/* Dead screen */}
         {phase === "dead" && (
-          <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.93)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 14 }}>
+          <div onClick={isMobile ? touchAdvance : undefined} style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.93)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 14, cursor: isMobile ? "pointer" : "default" }}>
             <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 28, color: "#ef4444", textShadow: "0 0 30px #ef4444" }}>YOU FELL</div>
             <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 12, color: "#9ca3af", textAlign: "center", maxWidth: 420, lineHeight: 2 }}>
               Gaza remembers. The fight goes on.
